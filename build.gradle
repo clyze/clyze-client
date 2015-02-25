@@ -1,0 +1,38 @@
+apply plugin: 'groovy'
+apply plugin: 'application'
+
+//applicationDefaultJvmArgs = ["-Xmx2048m"]
+sourceCompatibility = "1.6"
+targetCompatibility = "1.6"
+
+applicationName = 'client'
+mainClassName = 'doop.web.client.Main'
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+def jdoop = project('jdoop')
+
+dependencies {
+    compile jdoop,                                              // The jdoop core
+            "org.codehaus.groovy:groovy-all:2.3.3",             // Groovy
+            "commons-logging:commons-logging:1.1",              // Logging wrapper
+            "log4j:log4j:1.2.14",                               // Logging implementation
+            "commons-cli:commons-cli:1.2",                      // Command line processor
+            "org.apache.httpcomponents:httpclient:4.4",         // Used by the Rest client
+            "org.apache.httpcomponents:httpmime:4.4"            // Used by the Rest client
+}
+
+
+
+run {
+    //runs the Rest client
+    if(project.hasProperty("args")) {
+        args project.property("args").split()
+    }
+}
