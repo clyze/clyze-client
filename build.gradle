@@ -17,7 +17,7 @@ repositories {
 }
 
 //doop is the first sub-project
-def doop = subprojects[0]
+def doop = subprojects.first()
 
 dependencies {
     compile doop,                                               // The doop core

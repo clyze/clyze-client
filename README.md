@@ -2,6 +2,15 @@
 
 This is the readme file for the doop client - a command line application for contacting a doop server through its Restful web API.
 
+The client uses the doop Web API to:
+
+* list the analyses of a remote server,
+* get the information of a remote analysis,
+* post a new analysis to the remote server,
+* start a remote analysis,
+* stop a remote analysis,
+* query a completed remote analysis.
+
 ## Directory Structure
 
 The project contains the following directories:
@@ -35,7 +44,46 @@ To install the doop client, we need to extract the distribution zip or tarball i
 
 We can invoke the doop client by issuing:
 
-    $ INSTALL_DIR>./bin/client [OPTIONS]...
+    $ INSTALL_DIR>./bin/client -r [server:port] -c [command]
+
+The available commands are the following.
+
+### Ping
+Pings the remote server (validates that a connection is available).
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c ping
+
+### List
+Lists the analyses of the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c list
+
+### Get
+Gets the main information of an analysis of the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c get -id [analysis-id]
+
+### Post
+Posts a new analysis to the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c post -a context-insensitive -j [jar]
+
+Use the -h flag to see the available options for creating a new analysis.
+
+### Start
+Starts a analysis on the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c start -id [analysis-id]
+
+### Stop
+Stops the execution of an analysis running on the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c stop -id [analysis-id]
+
+### Query
+Queries the results of an analysis that has completed its execution on the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c query -id [analysis-id] -q [datalog query]
 
 ## Local Install
 
