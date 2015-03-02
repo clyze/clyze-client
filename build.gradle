@@ -16,10 +16,11 @@ repositories {
     mavenCentral()
 }
 
-def jdoop = project('jdoop')
+//doop is the first sub-project
+def doop = subprojects[0]
 
 dependencies {
-    compile jdoop,                                              // The jdoop core
+    compile doop,                                               // The doop core
             "org.codehaus.groovy:groovy-all:2.3.3",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation

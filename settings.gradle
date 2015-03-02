@@ -1,1 +1,1 @@
-includeFlat "jdoop"
+includeFlat System.getenv("DOOP_PROJECT") ?: "doop"
