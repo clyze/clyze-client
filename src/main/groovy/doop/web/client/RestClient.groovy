@@ -251,8 +251,55 @@ class RestClient {
     )
 
     /**
+     * Experimental - Search Maven Central and create doop.properties file(s) for the selected projects.
+     */
+    private static final RestCommand SEARCH_MAVEN = new RestCommand(
+        name:'mvnsearch',
+        description: 'Search Maven Central and create doop.properties files(s) for the selected projects.',
+        options:[
+            OptionBuilder.hasArg().withArgName('free text').withDescription('the search text').create('text')
+        ],
+        buildRequest: {String url, OptionAccessor cliOptions ->
+            if (cliOptions.text) {
+                String text = cliOptions.text
+                return new HttpGet("http://search.maven.org/solrsearch/select?q=$text&rows=20&wt=json")
+            }
+            else {
+                throw new RuntimeException("The text option is not specified")
+            }
+        },
+        onSuccess: { HttpEntity entity ->
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+
+            File dir = new File("mvn")
+            dir.mkdirs()
+
+            StringBuilder sb = new StringBuilder()
+            sb.append("total:").append(json.response.numFound).append("\n")
+            json.response.docs.eachWithIndex { doc, index ->
+
+                File propsFile = new File(dir, "${doc.g}_${doc.a}_${doc.latestVersion}.properties")
+                Properties props = new Properties()
+                props.setProperty("analysis", "context-insensitive")
+                props.setProperty("jars", "${doc.g}:${doc.a}:${doc.latestVersion}")
+                props.setProperty("allow_phantom", "true")
+
+                new FileWriter(propsFile).withWriter { Writer w ->
+                    props.store(w, null)
+                }
+
+                sb.append(index).append(".").
+                    append(doc.g).append(":").append(doc.a).append(":").append(doc.latestVersion).
+                    append(" -> ").append(propsFile).append("\n")
+            }
+            return sb.toString()
+        }
+
+    )
+
+    /**
      * The list of available commands.
      */
-    public static final List<RestCommand> COMMANDS = [PING, LIST, POST, GET, START, STOP, QUERY, DELETE]
+    public static final List<RestCommand> COMMANDS = [PING, LIST, POST, GET, START, STOP, QUERY, DELETE, SEARCH_MAVEN]
 
 }
