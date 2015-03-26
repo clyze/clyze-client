@@ -7,6 +7,7 @@ import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
 import org.apache.http.HttpEntity
+import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -17,13 +18,14 @@ import org.apache.http.entity.mime.content.StringBody
  *
  * The client can execute the following commands via the remote server:
  * <ul>
- *     <li>ping  - check connection with server.
- *     <li>list  - list the available analyses.
- *     <li>post  - create a new analysis.
- *     <li>get   - retrieves an analysis.
- *     <li>start - start an analysis.
- *     <li>stop  - stop an analysis.
- *     <li>query - query a complete analysis.
+ *     <li>ping   - check connection with server.
+ *     <li>list   - list the available analyses.
+ *     <li>post   - create a new analysis.
+ *     <li>get    - retrieves an analysis.
+ *     <li>start  - start an analysis.
+ *     <li>stop   - stop an analysis.
+ *     <li>query  - query a complete analysis.
+       <li>delete - delete an analysis.
  *
  * </ul>
  *
@@ -230,8 +232,27 @@ class RestClient {
     )
 
     /**
+     * Consumes the DELETE /analyses/[analysis-id] response.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     */
+    private static final RestCommand DELETE = new RestCommand(
+        name:'delete',
+        description: 'Delete the analysis from the remote server',
+        options:[ID],
+        buildRequest: {String url, OptionAccessor cliOptions ->
+            if (cliOptions.id) {
+                String id = cliOptions.id
+                return new HttpDelete("${url}/${id}")
+            }
+            else {
+                throw new RuntimeException("The id option is not specified")
+            }
+        }
+    )
+
+    /**
      * The list of available commands.
      */
-    public static final List<RestCommand> COMMANDS = [PING, LIST, POST, GET, START, STOP, QUERY]
+    public static final List<RestCommand> COMMANDS = [PING, LIST, POST, GET, START, STOP, QUERY, DELETE]
 
 }

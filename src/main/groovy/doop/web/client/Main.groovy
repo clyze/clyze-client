@@ -100,7 +100,7 @@ class Main {
             h(longOpt: 'help', "Display help and exit. Combine it with a command to see the command options.")
             r(longOpt: 'remote', "The remote doop server.", args:1, argName: "[hostname|ip]:[port]")
             c(longOpt: 'command', "The command to execute via the remote doop server. Available commands: \
-                                  ping, list, post, get, start, stop, query.", args:1, argName: "command")
+                                  ping, list, post, get, start, stop, query, delete.", args:1, argName: "command")
         }
 
         return cli

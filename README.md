@@ -9,7 +9,8 @@ The client uses the doop Web API to:
 * post a new analysis to the remote server,
 * start a remote analysis,
 * stop a remote analysis,
-* query a completed remote analysis.
+* query a completed remote analysis,
+* delete a remote analysis.
 
 ## Directory Structure
 
@@ -84,6 +85,11 @@ Stops the execution of an analysis running on the remote server.
 Queries the results of an analysis that has completed its execution on the remote server.
 
     $ INSTALL_DIR>./bin/client -r [server:port] -c query -id [analysis-id] -q [datalog query]
+
+### Delete
+Deletes an analysis from the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c delete -id [analysis-id]
 
 ## Local Install
 
