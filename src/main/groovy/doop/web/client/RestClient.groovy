@@ -286,6 +286,7 @@ class RestClient {
     private static final RestCommand SEARCH_MAVEN = new RestCommand(
         name:'mvnsearch',
         description: 'Search Maven Central and create doop.properties files(s) for the selected projects.',
+        authenticationRequired: false,
         options:[
             OptionBuilder.hasArg().withArgName('free text').withDescription('the search text').create('text')
         ],
