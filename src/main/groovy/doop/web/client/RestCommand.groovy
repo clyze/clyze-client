@@ -19,6 +19,7 @@ import org.apache.http.util.EntityUtils
 class RestCommand {
 
     public static final String BASE_PATH = "/jdoop/web/api/v1/"
+    public static final String HEADER_TOKEN = "X-DOOP-TOKEN"
 
     private static final Closure<String> DEFAULT_SUCCES = { HttpEntity entity ->
         return "OK"
@@ -47,8 +48,11 @@ class RestCommand {
     /** The Restful endpoint of the command (suffix to the {@code BASE_PATH}.*/
     String endPoint = "analyses"
 
+    /** Indication whether the command requires authentication */
+    boolean authenticationRequired = true
+
     /** A closure that creates HttpUriRequest objects.
-     * It accepts two paramters: (a) the url and (b) the OptionAccessor directly from the command line.
+     * It accepts two parameters: (a) the url and (b) the OptionAccessor directly from the command line.
      */
     Closure<HttpUriRequest> buildRequest = DEFAULT_REQUEST_BUILDER
 
@@ -67,6 +71,18 @@ class RestCommand {
         CloseableHttpClient client = HttpClients.createDefault()
         try {
             HttpUriRequest request = buildRequest.call(url, cliOptions)
+            if (authenticationRequired) {
+                String token = Authenticator.getUserToken()
+                if (!token) {
+                    //Ask for username and password
+                    RestClient.COMMANDS.login.execute(host, port, null)
+                    token = Authenticator.getUserToken()
+                }
+
+                //send the token with the request
+                request.addHeader(HEADER_TOKEN, token)
+            }
+
             logger.debug "Executing request: ${request.getRequestLine()}"
             ResponseHandler<String> handler = new RestResponse(command:this)
             return client.execute(request, handler)

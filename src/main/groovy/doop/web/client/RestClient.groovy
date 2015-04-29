@@ -7,12 +7,16 @@ import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
 import org.apache.http.HttpEntity
+import org.apache.http.NameValuePair
+import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
+import org.apache.http.message.BasicNameValuePair
+
 /**
  * A client for a remote doop server.
  *
@@ -39,21 +43,47 @@ class RestClient {
 
     private static final String processAnalysisData(def analysisData) {
 
-        String result = """Analysis ID: ${analysisData.id}
-   Name: ${analysisData.name}
-   Jars: ${analysisData.jars.join(",")}
-   Status: ${analysisData.state}
-"""
-        return result
+        return """\
+               Analysis ID: ${analysisData.id}
+               Name: ${analysisData.name}
+               Jars: ${analysisData.jars.join(", ")}
+               Status: ${analysisData.state}""".stripIndent()
     }
 
     /**
-     * Consumes the GET /analyses response, ignoring the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysesResource}
+     * Logins the user via posting to /authenticate endpoint.
+     */
+    private static final RestCommand LOGIN = new RestCommand(
+        name: 'login',
+        description: 'login to the remote server',
+        endPoint: 'authenticate',
+        authenticationRequired: false,
+        buildRequest: { String url, OptionAccessor cliOptions ->
+            Map<String, String> credentials = Authenticator.askForCredentials()
+            HttpPost post = new HttpPost(url)
+            List<NameValuePair> params = new ArrayList<>(2)
+            params.add(new BasicNameValuePair("username", credentials.username))
+            params.add(new BasicNameValuePair("password", credentials.password))
+            post.setEntity(new UrlEncodedFormEntity(params))
+            return post
+        },
+        onSuccess: { HttpEntity entity ->
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+            Authenticator.setUserToken(json.token)
+            return "Logged in, token updated."
+        }
+    )
+
+
+    /**
+     * Consumes the GET /ping response, ignoring the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.Ping}
      */
     private static final RestCommand PING = new RestCommand(
         name: 'ping',
-        description: "Pings the remote server"
+        description: "Pings the remote server",
+        endPoint: "ping",
+        authenticationRequired: false
     )
 
     /**
@@ -298,8 +328,19 @@ class RestClient {
     )
 
     /**
-     * The list of available commands.
+     * The map of available commands.
      */
-    public static final List<RestCommand> COMMANDS = [PING, LIST, POST, GET, START, STOP, QUERY, DELETE, SEARCH_MAVEN]
+    public static final Map<String, RestCommand> COMMANDS = [
+        login    : LOGIN,
+        ping     : PING,
+        list     : LIST,
+        post     : POST,
+        get      : GET,
+        start    : START,
+        stop     : STOP,
+        query    : QUERY,
+        delete   : DELETE,
+        mvnsearch: SEARCH_MAVEN
+    ]
 
 }

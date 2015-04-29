@@ -34,7 +34,7 @@ class Main {
 
             if (cli.c) {
                 cmd = cli.c
-                command = RestClient.COMMANDS.find { it.name == cmd.toLowerCase()}
+                command = RestClient.COMMANDS.get(cmd.toLowerCase())
                 if (!command) {
                     throw new RuntimeException("The value of the command option is invalid: $cmd")
                 }
@@ -80,6 +80,8 @@ class Main {
                     cli = builder.parse(args)
                 }
 
+                //Initialize the Authenticator before executing the command
+                Authenticator.init()
                 println command.execute(host, port, cli)
             }
 
@@ -100,7 +102,7 @@ class Main {
             h(longOpt: 'help', "Display help and exit. Combine it with a command to see the command options.")
             r(longOpt: 'remote', "The remote doop server.", args:1, argName: "[hostname|ip]:[port]")
             c(longOpt: 'command', "The command to execute via the remote doop server. Available commands: \
-                                  ping, list, post, get, start, stop, query, delete.", args:1, argName: "command")
+                                  ${RestClient.COMMANDS.keySet().join(', ')}.", args:1, argName: "command")
         }
 
         return cli
