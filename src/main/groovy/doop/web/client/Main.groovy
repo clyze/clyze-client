@@ -3,6 +3,8 @@ import doop.core.AnalysisOption
 import doop.core.Doop
 import doop.core.Helper
 import org.apache.commons.cli.Option
+import org.apache.log4j.Logger
+
 /**
  * The entry point for the jdoop Restful client (@see doop.web.client.RestClient).
  *
@@ -18,14 +20,12 @@ class Main {
 
         try {
 
-            //initialize logging (required to avoid log4j warning messages)
             Helper.initConsoleLogging("WARN")
 
             CliBuilder builder = createCliBuilder()
             OptionAccessor cli = builder.parse(args)
             String cmd
             RestCommand command
-
 
             if (!cli || !args) {
                 builder.usage()
@@ -75,19 +75,27 @@ class Main {
                 }
 
                 if (command.options) {
+
                     command.options.each { Option option -> builder << option }
                     //reparse the args
                     cli = builder.parse(args)
+                    println cli
+
                 }
 
-                //Initialize the Authenticator before executing the command
                 Authenticator.init()
                 println command.execute(host, port, cli)
+
+            }
+            else {
+                builder.usage()
+                return
             }
 
         } catch (e) {
             println e.getMessage()
-            println Helper.stackTraceToString(e)
+            if (Logger.getRootLogger().isDebugEnabled())
+                println Helper.stackTraceToString(e)
             System.exit(-1)
         }
     }

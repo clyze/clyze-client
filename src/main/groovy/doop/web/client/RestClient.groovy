@@ -1,5 +1,6 @@
 package doop.web.client
 
+import doop.CommandLineAnalysisFactory
 import doop.core.AnalysisOption
 import doop.core.Doop
 import doop.core.Helper
@@ -12,16 +13,17 @@ import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.FileBody
-import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
+import org.apache.log4j.Logger
 
 /**
  * A client for a remote doop server.
  *
  * The client can execute the following commands via the remote server:
  * <ul>
+ *     <li>login  - authenticate user.
  *     <li>ping   - check connection with server.
  *     <li>list   - list the available analyses.
  *     <li>post   - create a new analysis.
@@ -29,9 +31,10 @@ import org.apache.http.message.BasicNameValuePair
  *     <li>start  - start an analysis.
  *     <li>stop   - stop an analysis.
  *     <li>query  - query a complete analysis.
-       <li>delete - delete an analysis.
- *
+ *     <li>delete - delete an analysis.
  * </ul>
+ *
+ * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
  *
  * @author: Kostas Saidis (saiko@di.uoa.gr)
  * Date: 11/2/2015
@@ -41,12 +44,12 @@ class RestClient {
     private static final Option ID = OptionBuilder.hasArg().withArgName('id').
                                                    withDescription('the analysis id').create('id')
 
-    private static final String processAnalysisData(def analysisData) {
+    private static final String processAnalysisData(Integer index, def analysisData) {
 
         return """\
-               Analysis ID: ${analysisData.id}
-               Name: ${analysisData.name}
-               Jars: ${analysisData.jars.join(", ")}
+               ${index? "($index)":""} ${analysisData.id}
+               Name  : ${analysisData.name}
+               Jars  : ${analysisData.jars.join(", ")}
                Status: ${analysisData.state}""".stripIndent()
     }
 
@@ -95,7 +98,9 @@ class RestClient {
         description: "Lists the analyses of the remote server",
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return json.list.collect{ processAnalysisData(it) }.join("\n")
+            return doop.web.client.Helper.collectWithIndex(json.list) { def data, int i ->
+                processAnalysisData(i, data)
+            }.join("\n")
         }
     )
 
@@ -108,62 +113,62 @@ class RestClient {
         description: "Posts a new analysis to the remote server",
         options: [
                 OptionBuilder.withLongOpt('analysis').hasArg().withArgName('name').
-                        withDescription('The name of the analysis').create('a'),
+                        withDescription(CommandLineAnalysisFactory.ANALYSIS).create('a'),
                 OptionBuilder.withLongOpt('jar').hasArgs(Option.UNLIMITED_VALUES).withArgName('jar').
-                        withDescription("The jar files to analyze").withValueSeparator(',' as char).create('j')
+                        withDescription(CommandLineAnalysisFactory.JAR).withValueSeparator(',' as char).create('j'),
+                OptionBuilder.withLongOpt('identifier').hasArg().withArgName('identifier').
+                        withDescription(CommandLineAnalysisFactory.USER_SUPPLIED_ID).create('id'),
+                OptionBuilder.withLongOpt('properties').hasArg().withArgName('properties').
+                        withDescription(CommandLineAnalysisFactory.PROPS).create('p'),
         ] + Helper.convertAnalysisOptionsToCliOptions(Doop.ANALYSIS_OPTIONS.findAll { it.webUI }),
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        buildRequest: {String url, OptionAccessor cli ->
 
-            //Get the name of the analysis (short option: a)
-            String name = cliOptions.a
-            //Get the jars of the analysis (short option: j)
-            List<String> jars = cliOptions.js
+            String name, id
+            List<String> jars
+            Map<String, AnalysisOption> options
 
-            if (name) {
-                if (jars) {
-                    //TODO: We currently send only the first jar, treating it as a local file
-                    File jar = Helper.checkFileOrThrowException(jars[0], "The jar option is invalid: ${jars[0]}")
-                    HttpPost post = new HttpPost(url)
-                    MultipartEntityBuilder builder = MultipartEntityBuilder.create().
-                                                                            addPart("jars", new FileBody(jar)).
-                                                                            addPart("name", new StringBody(name))
+            if (cli.p) {
+                //load the analysis options from the property file
+                String file = cli.p
+                Properties props = Helper.loadProperties(file)
 
-                    /*
-                     Iterate through the other cliOptions and add them to the multipart body.
-                     TODO: Deal with options that accept files
-                     */
-                    Doop.ANALYSIS_OPTIONS.findAll { it.webUI && it.isFile }.each { AnalysisOption option ->
-                        String cliOptionName = option.name
-                        def optionValue = cliOptions[(cliOptionName)]
-                        if (optionValue) {
-                            if (option.argName) { //Only true-ish values are of interest (false or null values are ignored)
-                                //if the cl option has an arg, the value of this arg defines the value of the respective
-                                // analysis option
-                                builder.addPart(cliOptionName, new StringBody(optionValue as String))
-                            }
-                            else {
-                                //the cl option has no arg and thus it is a boolean flag, toggling the default value of
-                                // the respective analysis option
-                                def value = !option.value
-                                builder.addPart(cliOptionName, new StringBody(value as String))
-                            }
-                        }
-                    }
-                    HttpEntity entity = builder.build()
-                    post.setEntity(entity)
-                    return post
-                }
-                else {
-                    throw new RuntimeException("The jar option is not specified")
-                }
+                Helper.checkMandatoryProps(props)
+
+                //Get the name of the analysis
+                name = props.getProperty("analysis")
+                //Get the jars of the analysis
+                jars = props.getProperty("jar").split(",").collect { String s-> s.trim() }
+                //Get the optional id of the analysis
+                id = props.getProperty("id")
+
+                options = Doop.createOptionsFromProperties(props) {AnalysisOption option -> option.webUI }
             }
             else {
-                throw new RuntimeException("The name option is not specified")
+
+                Helper.checkMandatoryArgs(cli)
+
+                //Get the name of the analysis
+                name = cli.a ?: null
+                //Get the jars of the analysis
+                jars = cli.js ?: null
+                //Get the optional id of the analysis
+                id = cli.id ?: null
+
+                options = Doop.createOptionsFromCLI(cli) { AnalysisOption option -> option.webUI }
             }
+
+            //create the HttpPost
+            HttpPost post = new HttpPost(url)
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+            doop.web.client.Helper.buildPostRequest(id, name, options, jars, builder)
+            HttpEntity entity = builder.build()
+            Logger.getRootLogger().debug entity
+            post.setEntity(entity)
+            return post
         },
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return "Analysis posted. ID: ${json.id}"
+            return "Analysis posted: ${json.id}"
         }
     )
 
@@ -186,12 +191,12 @@ class RestClient {
         },
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return processAnalysisData(json.analysis)
+            return processAnalysisData(null, json.analysis)
         }
     )
 
     /**
-     * Consumes the GET /analyses/[analysis-id]?status=start response, printing the result.
+     * Consumes the PUT /analyses/[analysis-id]?status=start response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
      */
     private static final RestCommand START = new RestCommand(
@@ -201,7 +206,7 @@ class RestClient {
         buildRequest: {String url, OptionAccessor cliOptions ->
             if (cliOptions.id) {
                 String id = cliOptions.id
-                return new HttpGet("${url}/${id}?status=start")
+                return new HttpPut("${url}/${id}?status=start")
             }
             else {
                 throw new RuntimeException("The id option is not specified")
@@ -210,7 +215,7 @@ class RestClient {
     )
 
     /**
-     * Consumes the GET /analyses/[analysis-id]?status=stop response, printing the result.
+     * Consumes the PUT /analyses/[analysis-id]?status=stop response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
      */
     private static final RestCommand STOP = new RestCommand(
@@ -220,7 +225,7 @@ class RestClient {
         buildRequest: {String url, OptionAccessor cliOptions ->
             if (cliOptions.id) {
                 String id = cliOptions.id
-                return new HttpGet("${url}/${id}?status=stop")
+                return new HttpPut("${url}/${id}?status=stop")
             }
             else {
                 throw new RuntimeException("The id option is not specified")

@@ -5,9 +5,11 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.http.HttpEntity
 import org.apache.http.client.ResponseHandler
+import org.apache.http.client.config.RequestConfig
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.util.EntityUtils
 /**
@@ -68,7 +70,9 @@ class RestCommand {
 
     String execute(String host, int port, OptionAccessor cliOptions) {
         String url = "http://${host}:${port}${BASE_PATH}${endPoint}"
-        CloseableHttpClient client = HttpClients.createDefault()
+        def hourInMillis = 1000 * 60 * 60
+        RequestConfig config = RequestConfig.custom().setSocketTimeout(hourInMillis).build()
+        CloseableHttpClient client = HttpClientBuilder.create().setDefaultRequestConfig(config).build()
         try {
             HttpUriRequest request = buildRequest.call(url, cliOptions)
             if (authenticationRequired) {

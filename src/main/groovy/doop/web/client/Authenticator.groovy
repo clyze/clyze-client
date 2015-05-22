@@ -12,12 +12,14 @@ class Authenticator {
 
     //TODO: Unsafe, yet convenient for the time being
     static void init(){
+        String userHome = System.getProperty("user.home")
+        String fileName = "${userHome}/.jdoop-client"
         try {
-            String userHome = System.getProperty("user.home")
-            token = new File("${userHome}/.jdoop-client").text.trim()
+            File f = Helper.checkFileOrThrowException(fileName, "File invalid: $fileName")
+            token = f.text.trim()
         }
-        catch(e) {
-            Logger.getRootLogger().error(e.getMessage(),e )
+        catch(any) {
+            Logger.getRootLogger().debug(any.getMessage())
         }
     }
 
