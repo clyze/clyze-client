@@ -21,7 +21,7 @@ import org.apache.http.util.EntityUtils
 class RestCommand {
 
     public static final String BASE_PATH = "/jdoop/web/api/v1/"
-    public static final String HEADER_TOKEN = "X-DOOP-TOKEN"
+    public static final String HEADER_TOKEN = "x-doop-token"
 
     private static final Closure<String> DEFAULT_SUCCES = { HttpEntity entity ->
         return "OK"

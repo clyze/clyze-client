@@ -162,7 +162,6 @@ class RestClient {
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
             doop.web.client.Helper.buildPostRequest(id, name, options, jars, builder)
             HttpEntity entity = builder.build()
-            Logger.getRootLogger().debug entity
             post.setEntity(entity)
             return post
         },
