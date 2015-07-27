@@ -130,22 +130,31 @@ class RestClient {
             if (cli.p) {
                 //load the analysis options from the property file
                 String file = cli.p
+                File f = Helper.checkFileOrThrowException(file, "Not a valid file: $file")
+                File propsBaseDir = f.getParentFile()
                 Properties props = Helper.loadProperties(file)
 
-                Helper.checkMandatoryProps(props)
-
                 //Get the name of the analysis
-                name = props.getProperty("analysis")
-                //Get the jars of the analysis
-                jars = props.getProperty("jar").split(",").collect { String s-> s.trim() }
-                //Get the optional id of the analysis
-                id = props.getProperty("id")
+                name = cli.a ?: props.getProperty("analysis")
 
-                options = Doop.createOptionsFromProperties(props) {AnalysisOption option -> option.webUI }
+                //Get the jars of the analysis. If there are no jars in the CLI, we get them from the properties.
+                jars = cli.js
+                if (!jars) {
+                    jars = props.getProperty("jar").split().collect { String s -> s.trim() }
+                    //The jars, if relative, are being resolved via the propsBaseDir
+                    jars = jars.collect { String jar ->
+                        File jarFile = new File(jar)
+                        return jarFile.isAbsolute() ? jar : new File(propsBaseDir, jar).getCanonicalFile().getAbsolutePath()
+                    }
+                }
+
+                //Get the optional id of the analysis
+                id = cli.id ?: props.getProperty("id")
+
+                options = Doop.overrideDefaultOptionsWithProperties(props) {AnalysisOption option -> option.webUI }
+                Doop.overrideOptionsWithCLI(options, cli) {AnalysisOption option -> option.webUI }
             }
             else {
-
-                Helper.checkMandatoryArgs(cli)
 
                 //Get the name of the analysis
                 name = cli.a ?: null
@@ -154,7 +163,7 @@ class RestClient {
                 //Get the optional id of the analysis
                 id = cli.id ?: null
 
-                options = Doop.createOptionsFromCLI(cli) { AnalysisOption option -> option.webUI }
+                options = Doop.overrideDefaultOptionsWithCLI(cli) { AnalysisOption option -> option.webUI }
             }
 
             //create the HttpPost
