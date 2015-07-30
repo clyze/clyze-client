@@ -1,9 +1,13 @@
 apply plugin: 'groovy'
 apply plugin: 'application'
+apply plugin: 'ivy-publish'
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
 //sourceCompatibility = "1.7"
 //targetCompatibility = "1.7"
+
+project.group = "doop"
+project.version = 1.0
 
 applicationName = 'client'
 mainClassName = 'doop.web.client.Main'
@@ -14,13 +18,13 @@ task wrapper(type: Wrapper) {
 
 repositories {
     mavenCentral()
+    ivy {
+        url "../ivy-repo"
+    }
 }
 
-//doop is the first sub-project
-def doop = subprojects.first()
-
 dependencies {
-    compile doop,                                               // The doop core
+    compile "doop:doop:1.0",                                    // The doop core
             "org.codehaus.groovy:groovy-all:2.3.10",            // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
@@ -29,11 +33,28 @@ dependencies {
             "org.apache.httpcomponents:httpmime:4.4"            // Used by the Rest client
 }
 
-
-
 run {
     //runs the Rest client
     if(project.hasProperty("args")) {
         args project.property("args").split()
+    }
+}
+
+publishing {
+    repositories {
+        ivy {
+            name "local-ivy-repo"
+            url "../ivy-repo"
+        }
+    }
+
+    publications {
+
+        client(IvyPublication) {
+            organisation "$group"
+            module "doop-client"
+            revision "$version"
+            from components.java
+        }
     }
 }
