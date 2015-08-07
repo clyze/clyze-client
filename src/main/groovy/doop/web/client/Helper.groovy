@@ -1,6 +1,7 @@
 package doop.web.client
 
 import doop.core.AnalysisOption
+import doop.core.Doop
 import doop.input.*
 import groovy.transform.TypeChecked
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -73,5 +74,22 @@ class Helper {
     static List collectWithIndex(def collection, Closure closure) {
         int i = 1
         return collection.collect { closure.call(it, i++) }
+    }
+
+    /**
+     * Creates a map of the default web analysis options.
+     * This method could have been placed in the doop-gradle-plugin project, but it is placed here for two reasons:
+     * (a) to allow it to be reused by all doop build plugins
+     * (b) to avoid exposing doop as a direct dependency for the doop build plugins
+     * @return a Map containing the options' ids and values.
+     */
+    static Map<String, Object> createDefaultOptions(){
+        Map<String, Object> opts = new HashMap<>()
+        Doop.createDefaultAnalysisOptions().values().findAll { AnalysisOption option ->
+            option.webUI
+        }.each { AnalysisOption option ->
+            opts.put option.id.toLowerCase(), option.value
+        }
+        return opts
     }
 }
