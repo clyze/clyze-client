@@ -28,9 +28,11 @@ class Helper {
         }
     }
 
-
-    static void buildPostRequest(String id, String name, Map<String, AnalysisOption> options, List<String> jars,
-                                 MultipartEntityBuilder builder) {
+    static void buildPostRequest(MultipartEntityBuilder builder,
+                                 String id,
+                                 String name,
+                                 List<String> jars,
+                                 Closure optionProcessor) {
 
         if (!name) throw new RuntimeException("The name option is not specified")
         if (!jars) throw new RuntimeException("The jar option is not specified")
@@ -53,21 +55,7 @@ class Helper {
         //add the id
         if (id) builder.addPart("id", new StringBody(id))
 
-        //add the options
-        options.each { Map.Entry<String, AnalysisOption> entry ->
-            String optionName = entry.getKey()
-            AnalysisOption option = entry.getValue()
-            if (option.value) {
-                if (optionName == "DYNAMIC") {
-                    List<String> dynamicFiles = option.value as List<String>
-                    addFilesToMultiPart("DYNAMIC", dynamicFiles, builder)
-                } else if (option.isFile) {
-                    addFilesToMultiPart(optionName, [option.value as String], builder)
-                } else {
-                    builder.addPart(optionName, new StringBody(option.value as String))
-                }
-            }
-        }
+        optionProcessor.call()
     }
 
 

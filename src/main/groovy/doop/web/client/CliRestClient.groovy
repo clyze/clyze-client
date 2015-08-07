@@ -14,12 +14,13 @@ import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
-import org.apache.log4j.Logger
 
 /**
- * A client for a remote doop server.
+ * A command line client for a remote doop server.
  *
  * The client can execute the following commands via the remote server:
  * <ul>
@@ -39,10 +40,30 @@ import org.apache.log4j.Logger
  * @author: Kostas Saidis (saiko@di.uoa.gr)
  * Date: 11/2/2015
  */
-class RestClient {
+class CliRestClient {
 
     private static final Option ID = OptionBuilder.hasArg().withArgName('id').
                                                    withDescription('the analysis id').create('id')
+
+    private static final Closure<String> DEFAULT_SUCCES = { HttpEntity entity ->
+        return "OK"
+    }
+
+    private static final Closure<HttpUriRequest> DEFAULT_REQUEST_BUILDER = { String url ->
+        return new HttpGet(url)
+    }
+
+    private static final Closure<Void> DEFAULT_AUTHENTICATOR = { String host, int port, HttpUriRequest request ->
+        String token = Authenticator.getUserToken()
+        if (!token) {
+            //Ask for username and password
+            COMMANDS.login.execute(host, port)
+            token = Authenticator.getUserToken()
+        }
+
+        //send the token with the request
+        request.addHeader(RestCommandBase.HEADER_TOKEN, token)
+    }
 
     private static final String processAnalysisData(Integer index, def analysisData) {
 
@@ -56,12 +77,12 @@ class RestClient {
     /**
      * Logins the user via posting to /authenticate endpoint.
      */
-    private static final RestCommand LOGIN = new RestCommand(
+    private static final CliRestCommand LOGIN = new CliRestCommand(
         name: 'login',
         description: 'login to the remote server',
         endPoint: 'authenticate',
         authenticationRequired: false,
-        buildRequest: { String url, OptionAccessor cliOptions ->
+        requestBuilder: { String url ->
             Map<String, String> credentials = Authenticator.askForCredentials()
             HttpPost post = new HttpPost(url)
             List<NameValuePair> params = new ArrayList<>(2)
@@ -82,20 +103,25 @@ class RestClient {
      * Consumes the GET /ping response, ignoring the result.
      * {@see doop.web.restlet.App, doop.web.restlet.Ping}
      */
-    private static final RestCommand PING = new RestCommand(
+    private static final CliRestCommand PING = new CliRestCommand(
         name: 'ping',
         description: "Pings the remote server",
         endPoint: "ping",
-        authenticationRequired: false
+        authenticationRequired: false,
+        requestBuilder: DEFAULT_REQUEST_BUILDER,
+        onSuccess: DEFAULT_SUCCES
     )
 
     /**
      * Consumes the GET /analyses response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysesResource}
      */
-    private static final RestCommand LIST = new RestCommand(
+    private static final CliRestCommand LIST = new CliRestCommand(
         name: 'list',
         description: "Lists the analyses of the remote server",
+        endPoint: "analyses",
+        requestBuilder: DEFAULT_REQUEST_BUILDER,
+        authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
             return doop.web.client.Helper.collectWithIndex(json.list) { def data, int i ->
@@ -108,9 +134,10 @@ class RestClient {
      * Posts to the /analyses endpoint, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysesResource}
      */
-    private static final RestCommand POST = new RestCommand(
+    private static final CliRestCommand POST = new CliRestCommand(
         name: 'post',
         description: "Posts a new analysis to the remote server",
+        endPoint: "analyses",
         options: [
                 OptionBuilder.withLongOpt('analysis').hasArg().withArgName('name').
                         withDescription(CommandLineAnalysisFactory.ANALYSIS).create('a'),
@@ -121,24 +148,24 @@ class RestClient {
                 OptionBuilder.withLongOpt('properties').hasArg().withArgName('properties').
                         withDescription(CommandLineAnalysisFactory.PROPS).create('p'),
         ] + Helper.convertAnalysisOptionsToCliOptions(Doop.ANALYSIS_OPTIONS.findAll { it.webUI }),
-        buildRequest: {String url, OptionAccessor cli ->
+        requestBuilder: {String url ->
 
             String name, id
             List<String> jars
             Map<String, AnalysisOption> options
 
-            if (cli.p) {
+            if (cliOptions.p) {
                 //load the analysis options from the property file
-                String file = cli.p
+                String file = cliOptions.p
                 File f = Helper.checkFileOrThrowException(file, "Not a valid file: $file")
                 File propsBaseDir = f.getParentFile()
                 Properties props = Helper.loadProperties(file)
 
                 //Get the name of the analysis
-                name = cli.a ?: props.getProperty("analysis")
+                name = cliOptions.a ?: props.getProperty("analysis")
 
                 //Get the jars of the analysis. If there are no jars in the CLI, we get them from the properties.
-                jars = cli.js
+                jars = cliOptions.js
                 if (!jars) {
                     jars = props.getProperty("jar").split().collect { String s -> s.trim() }
                     //The jars, if relative, are being resolved via the propsBaseDir
@@ -149,31 +176,47 @@ class RestClient {
                 }
 
                 //Get the optional id of the analysis
-                id = cli.id ?: props.getProperty("id")
+                id = cliOptions.id ?: props.getProperty("id")
 
                 options = Doop.overrideDefaultOptionsWithProperties(props) {AnalysisOption option -> option.webUI }
-                Doop.overrideOptionsWithCLI(options, cli) {AnalysisOption option -> option.webUI }
+                Doop.overrideOptionsWithCLI(options, cliOptions) {AnalysisOption option -> option.webUI }
             }
             else {
 
                 //Get the name of the analysis
-                name = cli.a ?: null
+                name = cliOptions.a ?: null
                 //Get the jars of the analysis
-                jars = cli.js ?: null
+                jars = cliOptions.js ?: null
                 //Get the optional id of the analysis
-                id = cli.id ?: null
+                id = cliOptions.id ?: null
 
-                options = Doop.overrideDefaultOptionsWithCLI(cli) { AnalysisOption option -> option.webUI }
+                options = Doop.overrideDefaultOptionsWithCLI(cliOptions) { AnalysisOption option -> option.webUI }
             }
 
             //create the HttpPost
             HttpPost post = new HttpPost(url)
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-            doop.web.client.Helper.buildPostRequest(id, name, options, jars, builder)
+            doop.web.client.Helper.buildPostRequest(builder, id, name, jars) {
+                options.each { Map.Entry<String, AnalysisOption> entry ->
+                    String optionName = entry.getKey()
+                    AnalysisOption option = entry.getValue()
+                    if (option.value) {
+                        if (optionName == "DYNAMIC") {
+                            List<String> dynamicFiles = option.value as List<String>
+                            doop.web.client.Helper.addFilesToMultiPart("DYNAMIC", dynamicFiles, builder)
+                        } else if (option.isFile) {
+                            doop.web.client.Helper.addFilesToMultiPart(optionName, [option.value as String], builder)
+                        } else {
+                            builder.addPart(optionName, new StringBody(option.value as String))
+                        }
+                    }
+                }
+            }
             HttpEntity entity = builder.build()
             post.setEntity(entity)
             return post
         },
+        authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
             return "Analysis posted: ${json.id}"
@@ -184,11 +227,12 @@ class RestClient {
      * Consumes the GET /analyses/[analysis-id] response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
      */
-    private static final RestCommand GET = new RestCommand(
+    private static final CliRestCommand GET = new CliRestCommand(
         name: 'get',
         description: "Gets the analysis from the remote server",
+        endPoint: "analyses",
         options:[ID],
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
                 return new HttpGet("${url}/${id}")
@@ -197,6 +241,7 @@ class RestClient {
                 throw new RuntimeException("The id option is not specified")
             }
         },
+        authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
             return processAnalysisData(null, json.analysis)
@@ -207,11 +252,12 @@ class RestClient {
      * Consumes the PUT /analyses/[analysis-id]?status=start response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
      */
-    private static final RestCommand START = new RestCommand(
+    private static final CliRestCommand START = new CliRestCommand(
         name:'start',
         description: "Starts an analysis on the remote server",
+        endPoint: "analyses",
         options:[ID],
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
                 return new HttpPut("${url}/${id}?status=start")
@@ -219,18 +265,21 @@ class RestClient {
             else {
                 throw new RuntimeException("The id option is not specified")
             }
-        }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
     )
 
     /**
      * Consumes the PUT /analyses/[analysis-id]?status=stop response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
      */
-    private static final RestCommand STOP = new RestCommand(
+    private static final CliRestCommand STOP = new CliRestCommand(
         name: 'stop',
         description: "Stops an analysis running on the remote server",
+        endPoint: "analyses",
         options:[ID],
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
                 return new HttpPut("${url}/${id}?status=stop")
@@ -238,21 +287,24 @@ class RestClient {
             else {
                 throw new RuntimeException("The id option is not specified")
             }
-        }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
     )
 
     /**
      * Consumes the GET /analyses/[analysis-id]/query response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.QueryAnalysisResource}
      */
-    private static final RestCommand QUERY = new RestCommand(
+    private static final CliRestCommand QUERY = new CliRestCommand(
         name: 'query',
         description: "Queries an analysis that has completed on the remote server",
+        endPoint: "analyses",
         options:[
-                ID,
-                OptionBuilder.hasArg().withArgName('query').withDescription('the query to execute').create('q')
+            ID,
+            OptionBuilder.hasArg().withArgName('query').withDescription('the query to execute').create('q')
         ],
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
                 if (cliOptions.q) {
@@ -268,6 +320,7 @@ class RestClient {
                 throw new RuntimeException("The id option is not specified")
             }
         },
+        authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
             return json.result.join("\n")
@@ -278,11 +331,12 @@ class RestClient {
      * Consumes the DELETE /analyses/[analysis-id] response.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
      */
-    private static final RestCommand DELETE = new RestCommand(
+    private static final CliRestCommand DELETE = new CliRestCommand(
         name:'delete',
         description: 'Delete the analysis from the remote server',
+        endPoint: "analyses",
         options:[ID],
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
                 return new HttpDelete("${url}/${id}")
@@ -290,20 +344,22 @@ class RestClient {
             else {
                 throw new RuntimeException("The id option is not specified")
             }
-        }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
     )
 
     /**
      * Experimental - Search Maven Central and create doop.properties file(s) for the selected projects.
      */
-    private static final RestCommand SEARCH_MAVEN = new RestCommand(
+    private static final CliRestCommand SEARCH_MAVEN = new CliRestCommand(
         name:'mvnsearch',
         description: 'Search Maven Central and create doop.properties files(s) for the selected projects.',
         authenticationRequired: false,
         options:[
             OptionBuilder.hasArg().withArgName('free text').withDescription('the search text').create('text')
         ],
-        buildRequest: {String url, OptionAccessor cliOptions ->
+        requestBuilder: {String url ->
             if (cliOptions.text) {
                 String text = cliOptions.text
                 return new HttpGet("http://search.maven.org/solrsearch/select?q=$text&rows=20&wt=json")
@@ -344,7 +400,7 @@ class RestClient {
     /**
      * The map of available commands.
      */
-    public static final Map<String, RestCommand> COMMANDS = [
+    public static final Map<String, CliRestCommand> COMMANDS = [
         login    : LOGIN,
         ping     : PING,
         list     : LIST,
@@ -356,5 +412,4 @@ class RestClient {
         delete   : DELETE,
         mvnsearch: SEARCH_MAVEN
     ]
-
 }
