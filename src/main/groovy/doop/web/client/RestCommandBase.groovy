@@ -27,12 +27,6 @@ class RestCommandBase<T> implements ResponseHandler<T> {
 
     protected Log logger = LogFactory.getLog(getClass())
 
-    /** The name of the command */
-    String name
-
-    /** The description of the command */
-    String description
-
     /** The Restful endpoint of the command (suffix to the {@code BASE_PATH}.*/
     String endPoint
 
@@ -86,7 +80,7 @@ class RestCommandBase<T> implements ResponseHandler<T> {
             if (authenticationRequired) {
                 if (! authenticator) throw new RuntimeException("No authenticator for the command")
                 authenticator.delegate = this
-                authenticator.call(host, port)
+                authenticator.call(host, port, request)
             }
 
             logger.debug "Executing request: ${request.getRequestLine()}"

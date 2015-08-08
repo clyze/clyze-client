@@ -79,8 +79,6 @@ class Main {
                     command.options.each { Option option -> builder << option }
                     //reparse the args
                     cli = builder.parse(args)
-                    println cli
-
                 }
 
                 Authenticator.init()

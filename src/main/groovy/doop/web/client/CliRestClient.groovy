@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
+import org.apache.log4j.Logger
 
 /**
  * A command line client for a remote doop server.
@@ -196,16 +197,32 @@ class CliRestClient {
             //create the HttpPost
             HttpPost post = new HttpPost(url)
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-            doop.web.client.Helper.buildPostRequest(builder, id, name, jars) {
+            doop.web.client.Helper.buildPostRequest(builder, id, name) {
+
+                if (!jars) throw new RuntimeException("The jar option is not specified")
+
+                //add the jars
+                jars.each{ String jar ->
+                    try {
+                        doop.web.client.Helper.addFilesToMultiPart("jar", doop.web.client.Helper.resolveFiles([jar]), builder)
+                    }
+                    catch(e) {
+                        //jar is not a local file
+                        Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
+                        builder.addPart("jar", new StringBody(jar))
+                    }
+                }
+
+                //add the options
                 options.each { Map.Entry<String, AnalysisOption> entry ->
                     String optionName = entry.getKey()
                     AnalysisOption option = entry.getValue()
                     if (option.value) {
                         if (optionName == "DYNAMIC") {
                             List<String> dynamicFiles = option.value as List<String>
-                            doop.web.client.Helper.addFilesToMultiPart("DYNAMIC", dynamicFiles, builder)
+                            doop.web.client.Helper.addFilesToMultiPart("DYNAMIC", doop.web.client.Helper.resolveFiles(dynamicFiles), builder)
                         } else if (option.isFile) {
-                            doop.web.client.Helper.addFilesToMultiPart(optionName, [option.value as String], builder)
+                            doop.web.client.Helper.addFilesToMultiPart(optionName, doop.web.client.Helper.resolveFiles([option.value as String]), builder)
                         } else {
                             builder.addPart(optionName, new StringBody(option.value as String))
                         }

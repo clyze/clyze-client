@@ -15,7 +15,7 @@ import org.apache.log4j.Logger
 @TypeChecked
 class Helper {
 
-    static void addFilesToMultiPart(String name, List<String> files, MultipartEntityBuilder builder) {
+    static List<File> resolveFiles(List<String> files) {
         if (files) {
             InputResolutionContext ctx = new DefaultInputResolutionContext(new ChainResolver(
                 new FileResolver(),
@@ -23,39 +23,31 @@ class Helper {
             ))
             ctx.add(files)
             ctx.resolve()
-            List<File> localFiles = ctx.getAll()
-            localFiles.each { File f -> builder.addPart(name, new FileBody(f)) }
+            return ctx.getAll()
         }
+        else {
+            return []
+        }
+    }
+
+    static void addFilesToMultiPart(String name, Collection<File> files, MultipartEntityBuilder builder) {
+        files?.each { File f -> builder.addPart(name, new FileBody(f)) }
     }
 
     static void buildPostRequest(MultipartEntityBuilder builder,
                                  String id,
                                  String name,
-                                 List<String> jars,
-                                 Closure optionProcessor) {
+                                 Closure jarAndOptionProcessor) {
 
         if (!name) throw new RuntimeException("The name option is not specified")
-        if (!jars) throw new RuntimeException("The jar option is not specified")
 
         //add the name
         builder.addPart("name", new StringBody(name))
 
-        //add the jars
-        jars.each{ String jar ->
-            try {
-                addFilesToMultiPart("jar", [jar], builder)
-            }
-            catch(e) {
-                //jar is not a local file
-                Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
-                builder.addPart("jar", new StringBody(jar))
-            }
-        }
-
         //add the id
         if (id) builder.addPart("id", new StringBody(id))
 
-        optionProcessor.call()
+        jarAndOptionProcessor.call()
     }
 
 

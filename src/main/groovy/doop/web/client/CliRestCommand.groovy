@@ -19,6 +19,12 @@ import org.apache.http.util.EntityUtils
  */
 class CliRestCommand extends RestCommandBase<String>{
 
+    /** The name of the command */
+    String name
+
+    /** The description of the command */
+    String description
+
     /** The command line options supported by the command */
     List<Option> options = []
 
