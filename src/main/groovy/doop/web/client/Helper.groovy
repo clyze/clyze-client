@@ -72,4 +72,12 @@ class Helper {
         }
         return opts
     }
+
+    /**
+     * Indicates whether the analysis option indicated by the given id is a file option.
+     */
+    static boolean isFileOption(String id) {
+        AnalysisOption option  = Doop.ANALYSIS_OPTIONS.find {AnalysisOption option -> option.id.toLowerCase() == id}
+        return option ? option.isFile : false
+    }
 }
