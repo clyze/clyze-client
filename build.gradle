@@ -6,7 +6,7 @@ apply plugin: 'ivy-publish'
 //sourceCompatibility = "1.7"
 //targetCompatibility = "1.7"
 
-project.group = "doop"
+project.group = "plast-lab"
 project.version = 1.0
 
 applicationName = 'client'
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile "doop:doop:1.0",                                    // The doop core
+    compile "plast-lab:doop:1.0",                               // The doop core
             "org.codehaus.groovy:groovy-all:2.3.10",            // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
