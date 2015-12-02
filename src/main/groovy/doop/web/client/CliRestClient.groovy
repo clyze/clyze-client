@@ -310,6 +310,29 @@ class CliRestClient {
     )
 
     /**
+     * Consumes the PUT /analyses/[analysis-id]?status=post_process response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     * TODO: This offers a convenience for testing,
+     */
+    private static final CliRestCommand POST_PROCESS = new CliRestCommand(
+        name: 'post_process',
+        description: "Post processes an analysis on the remote server",
+        endPoint: "analyses",
+        options:[ID],
+        requestBuilder: {String url ->
+            if (cliOptions.id) {
+                String id = cliOptions.id
+                return new HttpPut("${url}/${id}?status=post_process")
+            }
+            else {
+                throw new RuntimeException("The id option is not specified")
+            }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
+    )
+
+    /**
      * Consumes the GET /analyses/[analysis-id]/query response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.QueryAnalysisResource}
      */
@@ -319,14 +342,20 @@ class CliRestClient {
         endPoint: "analyses",
         options:[
             ID,
-            OptionBuilder.hasArg().withArgName('query').withDescription('the query to execute').create('q')
+            OptionBuilder.hasArg().withArgName('query').withDescription('the query to execute').create('q'),
+            OptionBuilder.hasArg().withArgName('printOpt').withDescription('the printOpt of the query').create('p'),
         ],
         requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
                 if (cliOptions.q) {
                     String query = cliOptions.q
-                    return new HttpGet("${url}/${id}/query?query=${query}")
+                    String printOpt = cliOptions.p
+                    String getUrl = "${url}/${id}/query?query=${query}"
+                    if (printOpt) {
+                        getUrl += "&printOpt=${printOpt}"
+                    }
+                    return new HttpGet(getUrl)
                 }
                 else {
                     throw new RuntimeException("The query option is not specified")
@@ -418,15 +447,16 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        login    : LOGIN,
-        ping     : PING,
-        list     : LIST,
-        post     : POST,
-        get      : GET,
-        start    : START,
-        stop     : STOP,
-        query    : QUERY,
-        delete   : DELETE,
-        mvnsearch: SEARCH_MAVEN
+        login       : LOGIN,
+        ping        : PING,
+        list        : LIST,
+        post        : POST,
+        get         : GET,
+        start       : START,
+        stop        : STOP,
+        post_process: POST_PROCESS,
+        query       : QUERY,
+        delete      : DELETE,
+        mvnsearch   : SEARCH_MAVEN
     ]
 }
