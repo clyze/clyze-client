@@ -312,7 +312,7 @@ class CliRestClient {
     /**
      * Consumes the PUT /analyses/[analysis-id]?status=post_process response, printing the result.
      * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
-     * TODO: This offers a convenience for testing,
+     * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand POST_PROCESS = new CliRestCommand(
         name: 'post_process',
@@ -323,6 +323,41 @@ class CliRestClient {
             if (cliOptions.id) {
                 String id = cliOptions.id
                 return new HttpPut("${url}/${id}?status=post_process")
+            }
+            else {
+                throw new RuntimeException("The id option is not specified")
+            }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
+    )
+
+    /**
+     * Consumes the POST /analyses/[analysis-id]/jcPluginMetadata response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.UploadJCPluginMetdataResource}
+     * TODO: This offers a convenience for testing
+     */
+    private static final CliRestCommand JC_PLUGIN_METADATA = new CliRestCommand(
+        name: 'jcplugin',
+        description: "Upload the jcplugin metadata zip file",
+        endPoint: "analyses",
+        options:[
+            ID,
+            OptionBuilder.hasArg().withArgName('jcplugin metadata zip file').
+                    withDescription('Upload the jc plugin metadata zip file').create('zip'),
+        ],
+        requestBuilder: {String url ->
+            if (cliOptions.id && cliOptions.zip) {
+                String id = cliOptions.id
+                String zip = cliOptions.zip
+                File zipFile = Helper.checkFileOrThrowException(zip as String, "Not a valid file: $zip")
+
+                HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+                doop.web.client.Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
+                post.setEntity(builder.build())
+                
+                return post
             }
             else {
                 throw new RuntimeException("The id option is not specified")
@@ -447,16 +482,8 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        login       : LOGIN,
-        ping        : PING,
-        list        : LIST,
-        post        : POST,
-        get         : GET,
-        start       : START,
-        stop        : STOP,
-        post_process: POST_PROCESS,
-        query       : QUERY,
-        delete      : DELETE,
-        mvnsearch   : SEARCH_MAVEN
-    ]
+        LOGIN, PING, LIST, POST, GET, START, STOP, POST_PROCESS, JC_PLUGIN_METADATA, QUERY, DELETE, SEARCH_MAVEN
+    ].collectEntries {
+        [(it.name):it]
+    }
 }
