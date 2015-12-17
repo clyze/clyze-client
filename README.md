@@ -9,7 +9,9 @@ The client uses the doop Web API to:
 * post a new analysis to the remote server,
 * start a remote analysis,
 * stop a remote analysis,
-* (re)run the post processor of the remote analysis ,
+* (re)run the post processor of the remote analysis,
+* reset (cleanup) a remote analysis,
+* restart a remote analysis,
 * query a remote analysis,
 * delete a remote analysis.
 
@@ -24,13 +26,13 @@ It also contains the gradle build files (build.gradle and settings.gradle) and t
 
 ## Building the client
 
-Building the refers to generating the runtime/distribution artifacts of the client.
+Building the project refers to generating the runtime/distribution artifacts of the client.
 
 To do so, we issue the following:
 
     $ ./gradlew distZip
 
-This builds the project and creates the doop client distibution zip in the build/distributions directory.
+This builds the project and creates the doop client distribution zip in the build/distributions directory.
 
 We can also issue the following:
 
@@ -87,6 +89,16 @@ Runs (or re-runs) the post processor of an analysis.
 
     $ INSTALL_DIR>./bin/client -r [server:port] -c post_process -id [analysis-id]
 
+### Reset
+Resets (cleans-up) an analysis running on the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c reset -id [analysis-id]
+    
+### Restart
+Restarts an analysis running on the remote server.
+
+    $ INSTALL_DIR>./bin/client -r [server:port] -c restart -id [analysis-id]    
+
 ### Query
 Queries the results of an analysis that has completed its execution on the remote server.
 
@@ -101,9 +113,10 @@ Deletes an analysis from the remote server.
 
 Instead of generating the zip or tarball, we can instruct Gradle to install the doop client directly in our working directory:
 
-    $ ./gradlew installApp
+    $ ./gradlew installDist
 
-This will create a build/install directory, containing all the doop client runtime files (similar to generating the zip or tarball and extracting its files to the build/install directory).
+This will create a build/install directory, containing all the doop client runtime files 
+(similar to generating the zip or tarball and extracting its files to the build/install directory).
 
 Then we can switch to this directory and invoke the client from there.
 

@@ -266,8 +266,8 @@ class CliRestClient {
     )
 
     /**
-     * Consumes the PUT /analyses/[analysis-id]?status=start response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     * Consumes the PUT /analyses/[analysis-id]/action/start response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
      */
     private static final CliRestCommand START = new CliRestCommand(
         name:'start',
@@ -277,7 +277,7 @@ class CliRestClient {
         requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
-                return new HttpPut("${url}/${id}?status=start")
+                return new HttpPut("${url}/${id}/action/start")
             }
             else {
                 throw new RuntimeException("The id option is not specified")
@@ -288,8 +288,8 @@ class CliRestClient {
     )
 
     /**
-     * Consumes the PUT /analyses/[analysis-id]?status=stop response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     * Consumes the PUT /analyses/[analysis-id]/action/stop response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
      */
     private static final CliRestCommand STOP = new CliRestCommand(
         name: 'stop',
@@ -299,7 +299,7 @@ class CliRestClient {
         requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
-                return new HttpPut("${url}/${id}?status=stop")
+                return new HttpPut("${url}/${id}/action/stop")
             }
             else {
                 throw new RuntimeException("The id option is not specified")
@@ -310,8 +310,8 @@ class CliRestClient {
     )
 
     /**
-     * Consumes the PUT /analyses/[analysis-id]?status=post_process response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     * Consumes the PUT /analyses/[analysis-id]/action/post_process response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand POST_PROCESS = new CliRestCommand(
@@ -322,7 +322,53 @@ class CliRestClient {
         requestBuilder: {String url ->
             if (cliOptions.id) {
                 String id = cliOptions.id
-                return new HttpPut("${url}/${id}?status=post_process")
+                return new HttpPut("${url}/${id}/action/post_process")
+            }
+            else {
+                throw new RuntimeException("The id option is not specified")
+            }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
+    )
+
+    /**
+     * Consumes the PUT /analyses/[analysis-id]/action/reset response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * TODO: This offers a convenience for testing
+     */
+    private static final CliRestCommand RESET = new CliRestCommand(
+        name: 'reset',
+        description: "Resets an analysis on the remote server",
+        endPoint: "analyses",
+        options:[ID],
+        requestBuilder: {String url ->
+            if (cliOptions.id) {
+                String id = cliOptions.id
+                return new HttpPut("${url}/${id}/action/reset")
+            }
+            else {
+                throw new RuntimeException("The id option is not specified")
+            }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: DEFAULT_SUCCES
+    )
+
+    /**
+     * Consumes the PUT /analyses/[analysis-id]/action/restart response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * TODO: This offers a convenience for testing
+     */
+    private static final CliRestCommand RESTART = new CliRestCommand(
+        name: 'restart',
+        description: "Restarts an analysis on the remote server",
+        endPoint: "analyses",
+        options:[ID],
+        requestBuilder: {String url ->
+            if (cliOptions.id) {
+                String id = cliOptions.id
+                return new HttpPut("${url}/${id}/action/restart")
             }
             else {
                 throw new RuntimeException("The id option is not specified")
@@ -368,8 +414,8 @@ class CliRestClient {
     )
 
     /**
-     * Consumes the GET /analyses/[analysis-id]/query response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.QueryAnalysisResource}
+     * Consumes the GET /analyses/[analysis-id]/query/datalog response, printing the result.
+     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteDatalogQueryResource}
      */
     private static final CliRestCommand QUERY = new CliRestCommand(
         name: 'query',
@@ -377,7 +423,7 @@ class CliRestClient {
         endPoint: "analyses",
         options:[
             ID,
-            OptionBuilder.hasArg().withArgName('query').withDescription('the query to execute').create('q'),
+            OptionBuilder.hasArg().withArgName('query').withDescription('the datalog query to execute').create('q'),
             OptionBuilder.hasArg().withArgName('printOpt').withDescription('the printOpt of the query').create('p'),
         ],
         requestBuilder: {String url ->
@@ -482,7 +528,7 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        LOGIN, PING, LIST, POST, GET, START, STOP, POST_PROCESS, JC_PLUGIN_METADATA, QUERY, DELETE, SEARCH_MAVEN
+        LOGIN, PING, LIST, POST, GET, START, STOP, POST_PROCESS, RESET, RESTART, JC_PLUGIN_METADATA, QUERY, DELETE, SEARCH_MAVEN
     ].collectEntries {
         [(it.name):it]
     }
