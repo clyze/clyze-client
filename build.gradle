@@ -6,14 +6,14 @@ apply plugin: 'ivy-publish'
 //sourceCompatibility = "1.7"
 //targetCompatibility = "1.7"
 
-project.group = "plast-lab"
+project.group = "org.clyze"
 project.version = 1.0
 
 applicationName = 'client'
 mainClassName = 'doop.web.client.Main'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.4'
+    gradleVersion = '2.14'
 }
 
 repositories {
@@ -24,8 +24,8 @@ repositories {
 }
 
 dependencies {
-    compile "plast-lab:doop:1.0",                               // The doop core
-            "org.codehaus.groovy:groovy-all:2.3.10",            // Groovy
+    compile "org.clyze:doop:1.0",                               // The doop core
+            "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
             "commons-cli:commons-cli:1.2",                      // Command line processor
