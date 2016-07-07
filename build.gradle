@@ -10,7 +10,7 @@ project.group = "org.clyze"
 project.version = 1.0
 
 applicationName = 'client'
-mainClassName = 'doop.web.client.Main'
+mainClassName = 'org.clyze.doop.web.client.Main'
 
 task wrapper(type: Wrapper) {
     gradleVersion = '2.14'

@@ -1,4 +1,4 @@
-package doop.web.client
+package org.clyze.doop.web.client
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory

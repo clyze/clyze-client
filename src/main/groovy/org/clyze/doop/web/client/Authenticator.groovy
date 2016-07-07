@@ -1,6 +1,6 @@
-package doop.web.client
+package org.clyze.doop.web.client
 
-import doop.core.Helper
+import org.clyze.doop.core.Helper
 import org.apache.log4j.Logger
 
 /**

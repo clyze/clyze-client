@@ -1,7 +1,8 @@
-package doop.web.client
-import doop.core.AnalysisOption
-import doop.core.Doop
-import doop.core.Helper
+package org.clyze.doop.web.client
+
+import org.clyze.doop.core.AnalysisOption
+import org.clyze.doop.core.Doop
+import org.clyze.doop.core.Helper
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 

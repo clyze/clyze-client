@@ -1,13 +1,12 @@
-package doop.web.client
+package org.clyze.doop.web.client
 
-import doop.core.AnalysisOption
-import doop.core.Doop
-import doop.input.*
+import org.clyze.doop.core.AnalysisOption
+import org.clyze.doop.core.Doop
+import org.clyze.doop.input.*
 import groovy.transform.TypeChecked
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
-import org.apache.log4j.Logger
 
 /**
  * Created by saiko on 20/5/2015.

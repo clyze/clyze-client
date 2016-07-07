@@ -1,9 +1,9 @@
-package doop.web.client
+package org.clyze.doop.web.client
 
-import doop.CommandLineAnalysisFactory
-import doop.core.AnalysisOption
-import doop.core.Doop
-import doop.core.Helper
+import org.clyze.doop.CommandLineAnalysisFactory
+import org.clyze.doop.core.AnalysisOption
+import org.clyze.doop.core.Doop
+import org.clyze.doop.core.Helper
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
@@ -125,7 +125,7 @@ class CliRestClient {
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return doop.web.client.Helper.collectWithIndex(json.list) { def data, int i ->
+            return org.clyze.doop.web.client.Helper.collectWithIndex(json.list) { def data, int i ->
                 processAnalysisData(i, data)
             }.join("\n")
         }
@@ -197,14 +197,14 @@ class CliRestClient {
             //create the HttpPost
             HttpPost post = new HttpPost(url)
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-            doop.web.client.Helper.buildPostRequest(builder, id, name) {
+            org.clyze.doop.web.client.Helper.buildPostRequest(builder, id, name) {
 
                 if (!jars) throw new RuntimeException("The jar option is not specified")
 
                 //add the jars
                 jars.each{ String jar ->
                     try {
-                        doop.web.client.Helper.addFilesToMultiPart("jar", doop.web.client.Helper.resolveFiles([jar]), builder)
+                        org.clyze.doop.web.client.Helper.addFilesToMultiPart("jar", org.clyze.doop.web.client.Helper.resolveFiles([jar]), builder)
                     }
                     catch(e) {
                         //jar is not a local file
@@ -220,9 +220,9 @@ class CliRestClient {
                     if (option.value) {
                         if (optionName == "DYNAMIC") {
                             List<String> dynamicFiles = option.value as List<String>
-                            doop.web.client.Helper.addFilesToMultiPart("DYNAMIC", doop.web.client.Helper.resolveFiles(dynamicFiles), builder)
+                            org.clyze.doop.web.client.Helper.addFilesToMultiPart("DYNAMIC", org.clyze.doop.web.client.Helper.resolveFiles(dynamicFiles), builder)
                         } else if (option.isFile) {
-                            doop.web.client.Helper.addFilesToMultiPart(optionName, doop.web.client.Helper.resolveFiles([option.value as String]), builder)
+                            org.clyze.doop.web.client.Helper.addFilesToMultiPart(optionName, org.clyze.doop.web.client.Helper.resolveFiles([option.value as String]), builder)
                         } else {
                             builder.addPart(optionName, new StringBody(option.value as String))
                         }
@@ -400,7 +400,7 @@ class CliRestClient {
 
                 HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-                doop.web.client.Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
+                org.clyze.doop.web.client.Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
                 post.setEntity(builder.build())
                 
                 return post

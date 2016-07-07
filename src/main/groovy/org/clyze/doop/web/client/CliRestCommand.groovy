@@ -1,16 +1,7 @@
-package doop.web.client
+package org.clyze.doop.web.client
 
 import org.apache.commons.cli.Option
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import org.apache.http.HttpEntity
-import org.apache.http.client.ResponseHandler
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpUriRequest
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClientBuilder
-import org.apache.http.util.EntityUtils
+
 /**
  * A Rest Client command.
  *
