@@ -1,13 +1,23 @@
+buildscript {
+    repositories {
+	    jcenter()
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
+    }
+}
+
 apply plugin: 'groovy'
 apply plugin: 'application'
-apply plugin: 'ivy-publish'
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
 //sourceCompatibility = "1.7"
 //targetCompatibility = "1.7"
 
 project.group = "org.clyze"
-project.version = 1.0
+project.version ='1.0-SNAPSHOT'
 
 applicationName = 'client'
 mainClassName = 'org.clyze.doop.web.client.Main'
@@ -18,14 +28,16 @@ task wrapper(type: Wrapper) {
 
 repositories {
     mavenCentral()
-    ivy {
-        url "../ivy-repo"
-    }
 }
 
+configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+
 dependencies {
-    compile "org.clyze:doop:1.0",                               // The doop core
-            "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
+    compile ("org.clyze:doop-nexgen:1.0-SNAPSHOT") {            // The doop core
+        changing = true
+    }
+
+    compile "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
             "commons-cli:commons-cli:1.2",                      // Command line processor
@@ -41,20 +53,35 @@ run {
 }
 
 publishing {
-    repositories {
-        ivy {
-            name "local-ivy-repo"
-            url "../ivy-repo"
-        }
-    }
-
     publications {
-
-        client(IvyPublication) {
-            organisation "$group"
-            module "doop-client"
-            revision "$version"
+        mavenJava(MavenPublication) {
             from components.java
         }
     }
 }
+
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"
+    publish {
+        repository {
+            repoKey = 'libs-snapshot-local'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+
+        }
+        defaults {
+            publications 'mavenJava'
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'libs-snapshot'
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = true
+        }
+    }
+}
+
+
