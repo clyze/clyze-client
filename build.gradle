@@ -1,20 +1,10 @@
-buildscript {
-    repositories {
-	    jcenter()
-    }
-    dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
-    }
-}
-
 apply plugin: 'groovy'
 apply plugin: 'application'
-apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
-//sourceCompatibility = "1.7"
-//targetCompatibility = "1.7"
+sourceCompatibility = "1.7"
+targetCompatibility = "1.7"
 
 project.group = "org.clyze"
 project.version ='1.0-SNAPSHOT'
@@ -28,6 +18,15 @@ task wrapper(type: Wrapper) {
 
 repositories {
     mavenCentral()
+
+    maven {
+        credentials {
+            username artifactory_user
+            password artifactory_password
+        }
+
+        url "${artifactory_contextUrl}/libs-snapshot"
+    }
 }
 
 configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -58,30 +57,17 @@ publishing {
             from components.java
         }
     }
-}
 
-artifactory {
-    contextUrl = "${artifactory_contextUrl}"
-    publish {
-        repository {
-            repoKey = 'libs-snapshot-local'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-            maven = true
+    repositories {
+        maven {
+            credentials {
+                username artifactory_user
+                password artifactory_password
+            }
 
-        }
-        defaults {
-            publications 'mavenJava'
-        }
-    }
-    resolve {
-        repository {
-            repoKey = 'libs-snapshot'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-            maven = true
+            url version.endsWith("-SNAPSHOT") ?
+                "${artifactory_contextUrl}/libs-snapshot-local" :
+                "${artifactory_contextUrl}/libs-release-local"
         }
     }
 }
-
-
