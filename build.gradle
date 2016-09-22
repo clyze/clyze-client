@@ -3,8 +3,8 @@ apply plugin: 'application'
 apply plugin: 'maven-publish'
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
-sourceCompatibility = "1.7"
-targetCompatibility = "1.7"
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
 
 project.group = "org.clyze"
 project.version ='1.0-SNAPSHOT'
@@ -13,7 +13,7 @@ applicationName = 'client'
 mainClassName = 'org.clyze.doop.web.client.Main'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.14'
+    gradleVersion = '3.1'
 }
 
 repositories {
