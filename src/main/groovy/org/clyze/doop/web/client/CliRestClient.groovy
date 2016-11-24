@@ -179,8 +179,7 @@ class CliRestClient {
                 //Get the optional id of the analysis
                 id = cliOptions.id ?: props.getProperty("id")
 
-                options = Doop.overrideDefaultOptionsWithProperties(props) {AnalysisOption option -> option.webUI }
-                Doop.overrideOptionsWithCLI(options, cliOptions) {AnalysisOption option -> option.webUI }
+                options = Doop.overrideDefaultOptionsWithPropertiesAndCLI(props, cliOptions) {AnalysisOption option -> option.webUI }
             }
             else {
 
