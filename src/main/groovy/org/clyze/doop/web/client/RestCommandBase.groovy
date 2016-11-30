@@ -17,7 +17,7 @@ import org.apache.http.util.EntityUtils
  */
 class RestCommandBase<T> implements ResponseHandler<T> {
 
-    public static final String BASE_PATH = "/jdoop/web/api/v1/"
+    public static final String BASE_PATH = "/clue/api/v1/"
     public static final String HEADER_TOKEN = "x-doop-token"
 
     public static final Closure<String> DEFAULT_ERROR = { int statusCode, HttpEntity entity ->
