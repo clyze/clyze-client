@@ -1,6 +1,6 @@
 package org.clyze.doop.web.client
 
-import org.clyze.doop.core.Helper
+import org.clyze.doop.system.FileOps
 import org.apache.log4j.Logger
 
 /**
@@ -31,7 +31,7 @@ class Authenticator {
         Authenticator.token = token
         try {
             String userHome = System.getProperty("user.home")
-            Helper.writeToFile(new File("${userHome}/.jdoop-client"), token)
+            FileOps.writeToFile(new File("${userHome}/.jdoop-client"), token)
         }
         catch(e) {
             Logger.getRootLogger().error(e.getMessage(), e)

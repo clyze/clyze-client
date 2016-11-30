@@ -142,8 +142,8 @@ class CliRestClient {
         options: [
                 OptionBuilder.withLongOpt('analysis').hasArg().withArgName('name').
                         withDescription(CommandLineAnalysisFactory.ANALYSIS).create('a'),
-                OptionBuilder.withLongOpt('jar').hasArgs(Option.UNLIMITED_VALUES).withArgName('jar').
-                        withDescription(CommandLineAnalysisFactory.JAR).withValueSeparator(',' as char).create('j'),
+                OptionBuilder.withLongOpt('input').hasArgs(Option.UNLIMITED_VALUES).withArgName('input').
+                        withDescription(CommandLineAnalysisFactory.INPUTS).withValueSeparator(',' as char).create('i'),
                 OptionBuilder.withLongOpt('identifier').hasArg().withArgName('identifier').
                         withDescription(CommandLineAnalysisFactory.USER_SUPPLIED_ID).create('id'),
                 OptionBuilder.withLongOpt('properties').hasArg().withArgName('properties').
