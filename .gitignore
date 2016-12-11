@@ -1,9 +1,9 @@
 #doop client ingore list
 
 #gradle dirs
-^.gradle
-^build/
+/.gradle
+/build/
 
 #intellij idea files
-^.idea
-^jdoop-client.iml
+/.idea
+/jdoop-client.iml
