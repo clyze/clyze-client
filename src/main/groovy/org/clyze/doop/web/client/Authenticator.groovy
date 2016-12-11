@@ -15,7 +15,7 @@ class Authenticator {
         String userHome = System.getProperty("user.home")
         String fileName = "${userHome}/.jdoop-client"
         try {
-            File f = Helper.checkFileOrThrowException(fileName, "File invalid: $fileName")
+            File f = FileOps.findFileOrThrow(fileName, "File invalid: $fileName")
             token = f.text.trim()
         }
         catch(any) {

@@ -32,7 +32,7 @@ repositories {
 configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 
 dependencies {
-    compile ("org.clyze:doop-nexgen:1.0-SNAPSHOT") {            // The doop core
+    compile ("org.clyze:doop:1.0-SNAPSHOT") {                   // The doop core
         changing = true
     }
 

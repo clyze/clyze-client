@@ -4,6 +4,7 @@ import org.clyze.doop.CommandLineAnalysisFactory
 import org.clyze.doop.core.AnalysisOption
 import org.clyze.doop.core.Doop
 import org.clyze.doop.core.Helper
+import org.clyze.doop.system.FileOps
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
@@ -71,7 +72,7 @@ class CliRestClient {
         return """\
                ${index? "($index)":""} ${analysisData.id}
                Name  : ${analysisData.name}
-               Jars  : ${analysisData.jars.join(", ")}
+               Inputs: ${analysisData.inputs.join(", ")}
                Status: ${analysisData.state}""".stripIndent()
     }
 
@@ -142,7 +143,7 @@ class CliRestClient {
         options: [
                 OptionBuilder.withLongOpt('analysis').hasArg().withArgName('name').
                         withDescription(CommandLineAnalysisFactory.ANALYSIS).create('a'),
-                OptionBuilder.withLongOpt('input').hasArgs(Option.UNLIMITED_VALUES).withArgName('input').
+                OptionBuilder.withLongOpt('inputFiles').hasArgs(Option.UNLIMITED_VALUES).withArgName('inputFiles').
                         withDescription(CommandLineAnalysisFactory.INPUTS).withValueSeparator(',' as char).create('i'),
                 OptionBuilder.withLongOpt('identifier').hasArg().withArgName('identifier').
                         withDescription(CommandLineAnalysisFactory.USER_SUPPLIED_ID).create('id'),
@@ -152,25 +153,25 @@ class CliRestClient {
         requestBuilder: {String url ->
 
             String name, id
-            List<String> jars
+            List<String> inputs
             Map<String, AnalysisOption> options
 
             if (cliOptions.p) {
                 //load the analysis options from the property file
                 String file = cliOptions.p
-                File f = Helper.checkFileOrThrowException(file, "Not a valid file: $file")
+                File f = FileOps.findFileOrThrow(file, "Not a valid file: $file")
                 File propsBaseDir = f.getParentFile()
                 Properties props = Helper.loadProperties(file)
 
                 //Get the name of the analysis
                 name = cliOptions.a ?: props.getProperty("analysis")
 
-                //Get the jars of the analysis. If there are no jars in the CLI, we get them from the properties.
-                jars = cliOptions.js
-                if (!jars) {
-                    jars = props.getProperty("jar").split().collect { String s -> s.trim() }
-                    //The jars, if relative, are being resolved via the propsBaseDir
-                    jars = jars.collect { String jar ->
+                //Get the inputs of the analysis. If there are no inputs in the CLI, we get them from the properties.
+                inputs = cliOptions.is
+                if (!inputs) {
+                    inputs = props.getProperty("inputFiles").split().collect { String s -> s.trim() }
+                    //The inputs, if relative, are being resolved via the propsBaseDir
+                    inputs = inputs.collect { String jar ->
                         File jarFile = new File(jar)
                         return jarFile.isAbsolute() ? jar : new File(propsBaseDir, jar).getCanonicalFile().getAbsolutePath()
                     }
@@ -185,30 +186,32 @@ class CliRestClient {
 
                 //Get the name of the analysis
                 name = cliOptions.a ?: null
-                //Get the jars of the analysis
-                jars = cliOptions.js ?: null
+                //Get the inputs of the analysis
+                inputs = cliOptions.is ?: null
                 //Get the optional id of the analysis
                 id = cliOptions.id ?: null
 
                 options = Doop.overrideDefaultOptionsWithCLI(cliOptions) { AnalysisOption option -> option.webUI }
             }
 
+            options = options.findAll { it.value.webUI }
+
             //create the HttpPost
             HttpPost post = new HttpPost(url)
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
             org.clyze.doop.web.client.Helper.buildPostRequest(builder, id, name) {
 
-                if (!jars) throw new RuntimeException("The jar option is not specified")
+                if (!inputs) throw new RuntimeException("No input files are specified")
 
-                //add the jars
-                jars.each{ String jar ->
+                //add the inputs
+                inputs.each{ String jar ->
                     try {
-                        org.clyze.doop.web.client.Helper.addFilesToMultiPart("jar", org.clyze.doop.web.client.Helper.resolveFiles([jar]), builder)
+                        org.clyze.doop.web.client.Helper.addFilesToMultiPart("inputFiles", org.clyze.doop.web.client.Helper.resolveFiles([jar]), builder)
                     }
                     catch(e) {
                         //jar is not a local file
                         Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
-                        builder.addPart("jar", new StringBody(jar))
+                        builder.addPart("inputFiles", new StringBody(jar))
                     }
                 }
 
@@ -395,7 +398,7 @@ class CliRestClient {
             if (cliOptions.id && cliOptions.zip) {
                 String id = cliOptions.id
                 String zip = cliOptions.zip
-                File zipFile = Helper.checkFileOrThrowException(zip as String, "Not a valid file: $zip")
+                File zipFile = FileOps.findFileOrThrow(zip as String, "Not a valid file: $zip")
 
                 HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
@@ -507,7 +510,7 @@ class CliRestClient {
                 File propsFile = new File(dir, "${doc.g}_${doc.a}_${doc.latestVersion}.properties")
                 Properties props = new Properties()
                 props.setProperty("analysis", "context-insensitive")
-                props.setProperty("jars", "${doc.g}:${doc.a}:${doc.latestVersion}")
+                props.setProperty("inputFiles", "${doc.g}:${doc.a}:${doc.latestVersion}")
                 props.setProperty("allow_phantom", "true")
 
                 new FileWriter(propsFile).withWriter { Writer w ->
