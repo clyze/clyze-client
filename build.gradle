@@ -1,6 +1,8 @@
-apply plugin: 'groovy'
-apply plugin: 'application'
-apply plugin: 'maven-publish'
+plugins {
+    id 'groovy'
+    id 'application'
+    id 'maven-publish'
+}
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
 sourceCompatibility = "1.8"
