@@ -2,6 +2,7 @@ plugins {
     id 'groovy'
     id 'application'
     id 'maven-publish'
+    id 'net.researchgate.release' version '2.4.0' 
 }
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
@@ -9,9 +10,8 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 project.group = "org.clyze"
-project.version ='1.0-SNAPSHOT'
 
-applicationName = 'client'
+applicationName = project.name
 mainClassName = 'org.clyze.doop.web.client.Main'
 
 task wrapper(type: Wrapper) {
@@ -19,6 +19,9 @@ task wrapper(type: Wrapper) {
 }
 
 repositories {
+
+    mavenLocal()
+
     mavenCentral()
 
     maven {
@@ -27,18 +30,16 @@ repositories {
             password artifactory_password
         }
 
-        url "${artifactory_contextUrl}/libs-snapshot"
+        url "${artifactory_contextUrl}/plast"
     }
 }
 
-configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+//This is required only for the SNAPSHOT dependencies
+//configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 
 dependencies {
-    compile ("org.clyze:doop:1.0-SNAPSHOT") {                   // The doop core
-        changing = true
-    }
-
-    compile "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
+    compile "org.clyze:doop:3.0.+",                             // The doop core
+            "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
             "commons-cli:commons-cli:1.2",                      // Command line processor
@@ -73,3 +74,11 @@ publishing {
         }
     }
 }
+
+release {
+    failOnCommitNeeded = false
+    failOnPublishNeeded = false
+    failOnUnversionedFiles = false
+    failOnUpdateNeeded = false
+}
+afterReleaseBuild.dependsOn publish
