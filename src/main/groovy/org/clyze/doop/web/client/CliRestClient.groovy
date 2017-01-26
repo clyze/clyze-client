@@ -1,7 +1,7 @@
 package org.clyze.doop.web.client
 
 import org.clyze.doop.CommandLineAnalysisFactory
-import org.clyze.doop.core.AnalysisOption
+import org.clyze.analysis.AnalysisOption
 import org.clyze.doop.core.Doop
 import org.clyze.doop.core.Helper
 import org.clyze.doop.system.FileOps
@@ -72,7 +72,7 @@ class CliRestClient {
         return """\
                ${index? "($index)":""} ${analysisData.id}
                Name  : ${analysisData.name}
-               Inputs: ${analysisData.inputs.join(", ")}
+               iNPUTs: ${analysisData.inputs.join(", ")}
                Status: ${analysisData.state}""".stripIndent()
     }
 
