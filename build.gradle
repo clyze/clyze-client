@@ -20,8 +20,6 @@ task wrapper(type: Wrapper) {
 
 repositories {
 
-    mavenLocal()
-
     mavenCentral()
 
     maven {
@@ -38,7 +36,7 @@ repositories {
 //configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 
 dependencies {
-    compile "org.clyze:doop:3.0.+",                             // The doop core
+    compile "org.clyze:doop:2.9.+",                             // The doop core
             "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
@@ -76,9 +74,7 @@ publishing {
 }
 
 release {
-    failOnCommitNeeded = false
-    failOnPublishNeeded = false
-    failOnUnversionedFiles = false
-    failOnUpdateNeeded = false
+    //use the defaults, see https://github.com/researchgate/gradle-release
 }
+
 afterReleaseBuild.dependsOn publish
