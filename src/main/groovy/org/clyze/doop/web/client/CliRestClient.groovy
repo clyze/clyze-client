@@ -73,7 +73,7 @@ class CliRestClient {
         return """\
                ${index? "($index)":""} ${analysisData.id}
                Name  : ${analysisData.name}
-               iNPUTs: ${analysisData.inputs.join(", ")}
+               Inputs: ${analysisData.inputs.join(", ")}
                Status: ${analysisData.state}""".stripIndent()
     }
 
