@@ -2,6 +2,7 @@ package org.clyze.doop.web.client
 
 import org.clyze.doop.CommandLineAnalysisFactory
 import org.clyze.analysis.AnalysisOption
+import org.clyze.analysis.AnalysisFamilies
 import org.clyze.doop.core.Doop
 import org.clyze.doop.core.Helper
 import org.clyze.doop.system.FileOps
@@ -149,7 +150,7 @@ class CliRestClient {
                         withDescription(CommandLineAnalysisFactory.USER_SUPPLIED_ID).create('id'),
                 OptionBuilder.withLongOpt('properties').hasArg().withArgName('properties').
                         withDescription(CommandLineAnalysisFactory.PROPS).create('p'),
-        ] + Helper.convertAnalysisOptionsToCliOptions(Doop.ANALYSIS_OPTIONS.findAll { it.webUI }),
+        ] + Helper.convertAnalysisOptionsToCliOptions(AnalysisFamilies.supportedOptionsOf('doop').findAll { it.webUI }),
         requestBuilder: {String url ->
 
             String name, id

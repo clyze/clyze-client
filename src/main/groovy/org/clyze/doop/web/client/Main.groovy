@@ -1,7 +1,7 @@
 package org.clyze.doop.web.client
 
-import org.clyze.analysis.AnalysisOption
-import org.clyze.doop.core.Doop
+import org.clyze.analysis.*
+import org.clyze.doop.core.DoopAnalysisFamily
 import org.clyze.doop.core.Helper
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
@@ -20,6 +20,10 @@ class Main {
     static void main(String[] args) {
 
         try {
+
+            if (!AnalysisFamilies.isRegistered('doop')) {
+                AnalysisFamilies.register(new DoopAnalysisFamily())
+            }
 
             Helper.initConsoleLogging("WARN")
 
@@ -116,7 +120,7 @@ class Main {
     }
 
     private static final void extendCliBuilderForCreateCommand(CliBuilder cli) {
-        List<AnalysisOption> clientOptions = Doop.ANALYSIS_OPTIONS.findAll { AnalysisOption option ->
+        List<AnalysisOption> clientOptions = AnalysisFamilies.supportedOptionsOf('doop').findAll { AnalysisOption option ->
             option.webUI //all options with webUI property
         }
         Helper.addAnalysisOptionsToCliBuilder(clientOptions, cli)

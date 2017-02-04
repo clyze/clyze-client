@@ -1,6 +1,7 @@
 package org.clyze.doop.web.client
 
 import org.clyze.analysis.AnalysisOption
+import org.clyze.analysis.AnalysisFamilies
 import org.clyze.doop.core.*
 import org.clyze.doop.input.*
 import groovy.transform.TypeChecked
@@ -73,10 +74,10 @@ class Helper {
     }
 
     /**
-     * Indicates whether the analysis option indicated by the given id is a file option.
+     * Returns true if the analysis option indicated by the given id is a file option.
      */
     static boolean isFileOption(String id) {    
-        AnalysisOption option  = Doop.createDefaultAnalysisOptions().values().find {AnalysisOption option -> option.id == id}
+        AnalysisOption option  = AnalysisFamilies.supportedOptionsOf('doop').find {AnalysisOption option -> option.id == id}
         return option ? option.isFile : false
     }
 }
