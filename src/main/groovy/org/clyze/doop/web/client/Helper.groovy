@@ -1,7 +1,7 @@
 package org.clyze.doop.web.client
 
 import org.clyze.analysis.AnalysisOption
-import org.clyze.doop.core.Doop
+import org.clyze.doop.core.*
 import org.clyze.doop.input.*
 import groovy.transform.TypeChecked
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -75,8 +75,8 @@ class Helper {
     /**
      * Indicates whether the analysis option indicated by the given id is a file option.
      */
-    static boolean isFileOption(String id) {
-        AnalysisOption option  = Doop.ANALYSIS_OPTIONS.find {AnalysisOption option -> option.id == id}
+    static boolean isFileOption(String id) {    
+        AnalysisOption option  = Doop.createDefaultAnalysisOptions().values().find {AnalysisOption option -> option.id == id}
         return option ? option.isFile : false
     }
 }
