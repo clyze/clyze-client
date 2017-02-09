@@ -77,6 +77,10 @@ class Helper {
      * Returns true if the analysis option indicated by the given id is a file option.
      */
     static boolean isFileOption(String id) {    
+        //Quick fix - the life-cycle of analysis families needs discussion
+        if (!AnalysisFamilies.isRegistered('doop')) {
+            AnalysisFamilies.register(new DoopAnalysisFamily())
+        }
         AnalysisOption option  = AnalysisFamilies.supportedOptionsOf('doop').find {AnalysisOption option -> option.id == id}
         return option ? option.isFile : false
     }
