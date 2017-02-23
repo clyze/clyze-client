@@ -34,8 +34,9 @@ repositories {
     }
 }
 
-//This is required only for the SNAPSHOT dependencies
-//configurations.compile.resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
+}
 
 dependencies {
     //We should be cautious to declare clue-common as a direct dependency when it is used directly
