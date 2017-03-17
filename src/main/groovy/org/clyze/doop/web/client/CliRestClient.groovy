@@ -27,15 +27,16 @@ import org.apache.log4j.Logger
  *
  * The client can execute the following commands via the remote server:
  * <ul>
- *     <li>login  - authenticate user.
- *     <li>ping   - check connection with server.
- *     <li>list   - list the available analyses.
- *     <li>post   - create a new analysis.
- *     <li>get    - retrieves an analysis.
- *     <li>start  - start an analysis.
- *     <li>stop   - stop an analysis.
- *     <li>query  - query a complete analysis.
- *     <li>delete - delete an analysis.
+ *     <li>login        - authenticate user.
+ *     <li>ping         - check connection with server.
+ *     <li>list         - list the available analyses.
+ *     <li>post_doop    - create a new doop analysis.
+ *     <li>post_cclyzer - create a new cclyzer analysis.
+ *     <li>get          - retrieves an analysis.
+ *     <li>start        - start an analysis.
+ *     <li>stop         - stop an analysis.
+ *     <li>query        - query a complete analysis.
+ *     <li>delete       - delete an analysis.
  * </ul>
  *
  * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
@@ -72,6 +73,7 @@ class CliRestClient {
 
         return """\
                ${index? "($index)":""} ${analysisData.id}
+               Family: ${analysisData.family}
                Name  : ${analysisData.name}
                Inputs: ${analysisData.inputs.join(", ")}
                Status: ${analysisData.state}""".stripIndent()
@@ -134,13 +136,13 @@ class CliRestClient {
     )
 
     /**
-     * Posts to the /analyses endpoint, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysesResource}
+     * Posts to the /family/doop endpoint, printing the result.
+     * {@see doop.web.restlet.WebApp, doop.web.restlet.api.CreateAnalysisResource}
      */
-    private static final CliRestCommand POST = new CliRestCommand(
-        name: 'post',
-        description: "Posts a new analysis to the remote server",
-        endPoint: "analyses",
+    private static final CliRestCommand POST_DOOP = new CliRestCommand(
+        name: 'post_doop',
+        description: "Posts a new doop analysis to the remote server",
+        endPoint: "family/doop",
         options: [
                 OptionBuilder.withLongOpt('analysis').hasArg().withArgName('name').
                         withDescription(CommandLineAnalysisFactory.ANALYSIS).create('a'),
@@ -242,6 +244,27 @@ class CliRestClient {
             return "Analysis posted: ${json.id}"
         }
     )
+
+
+    /**
+     * Posts to the /family/cclyzer endpoint, printing the result.
+     * {@see doop.web.restlet.WebApp, doop.web.restlet.api.CreateAnalysisResource}
+     */
+    private static final CliRestCommand POST_CCLYZER = new CliRestCommand(
+        name: 'post_cclyzer',
+        description: "Posts a new cclyzer analysis to the remote server",
+        endPoint: "family/cclyzer",
+        options: [],
+        requestBuilder: {String url ->
+            throw new RuntimeException("Not supported yet")
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: { HttpEntity entity ->
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+            return "Analysis posted: ${json.id}"
+        }
+    )
+
 
     /**
      * Consumes the GET /analyses/[analysis-id] response, printing the result.
@@ -531,7 +554,7 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        LOGIN, PING, LIST, POST, GET, START, STOP, POST_PROCESS, RESET, RESTART, JC_PLUGIN_METADATA, QUERY, DELETE, SEARCH_MAVEN
+        PING, LOGIN, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, JC_PLUGIN_METADATA, QUERY, DELETE, SEARCH_MAVEN
     ].collectEntries {
         [(it.name):it]
     }
