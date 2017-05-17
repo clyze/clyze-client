@@ -1,4 +1,4 @@
-package org.clyze.doop.web.client
+package org.clyze.client.web
 
 import org.clyze.analysis.AnalysisOption
 import org.clyze.analysis.AnalysisFamilies
@@ -9,9 +9,6 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 
-/**
- * Created by saiko on 20/5/2015.
- */
 @TypeChecked
 class Helper {
 

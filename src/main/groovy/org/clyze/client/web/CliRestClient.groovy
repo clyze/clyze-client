@@ -1,4 +1,4 @@
-package org.clyze.doop.web.client
+package org.clyze.client.web
 
 import org.clyze.doop.CommandLineAnalysisFactory
 import org.clyze.analysis.AnalysisOption
@@ -40,9 +40,6 @@ import org.apache.log4j.Logger
  * </ul>
  *
  * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
- *
- * @author: Kostas Saidis (saiko@di.uoa.gr)
- * Date: 11/2/2015
  */
 class CliRestClient {
 
@@ -106,7 +103,7 @@ class CliRestClient {
 
     /**
      * Consumes the GET /ping response, ignoring the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.Ping}
+     * {@see server.web.restlet.App, server.web.restlet.Ping}
      */
     private static final CliRestCommand PING = new CliRestCommand(
         name: 'ping',
@@ -119,7 +116,7 @@ class CliRestClient {
 
     /**
      * Consumes the GET /analyses response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysesResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.AnalysesResource}
      */
     private static final CliRestCommand LIST = new CliRestCommand(
         name: 'list',
@@ -129,7 +126,7 @@ class CliRestClient {
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return org.clyze.doop.web.client.Helper.collectWithIndex(json.list) { def data, int i ->
+            return org.clyze.client.web.Helper.collectWithIndex(json.list) { def data, int i ->
                 processAnalysisData(i, data)
             }.join("\n")
         }
@@ -137,7 +134,7 @@ class CliRestClient {
 
     /**
      * Posts to the /family/doop endpoint, printing the result.
-     * {@see doop.web.restlet.WebApp, doop.web.restlet.api.CreateAnalysisResource}
+     * {@see server.web.restlet.WebApp, server.web.restlet.api.CreateAnalysisResource}
      */
     private static final CliRestCommand POST_DOOP = new CliRestCommand(
         name: 'post_doop',
@@ -202,14 +199,14 @@ class CliRestClient {
             //create the HttpPost
             HttpPost post = new HttpPost(url)
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-            org.clyze.doop.web.client.Helper.buildPostRequest(builder, id, name) {
+            org.clyze.client.web.Helper.buildPostRequest(builder, id, name) {
 
                 if (!inputs) throw new RuntimeException("No input files are specified")
 
                 //add the inputs
                 inputs.each{ String jar ->
                     try {
-                        org.clyze.doop.web.client.Helper.addFilesToMultiPart("inputFiles", org.clyze.doop.web.client.Helper.resolveFiles([jar]), builder)
+                        org.clyze.client.web.Helper.addFilesToMultiPart("inputFiles", org.clyze.client.web.Helper.resolveFiles([jar]), builder)
                     }
                     catch(e) {
                         //jar is not a local file
@@ -225,9 +222,9 @@ class CliRestClient {
                     if (option.value) {
                         if (optionName == "DYNAMIC") {
                             List<String> dynamicFiles = option.value as List<String>
-                            org.clyze.doop.web.client.Helper.addFilesToMultiPart("DYNAMIC", org.clyze.doop.web.client.Helper.resolveFiles(dynamicFiles), builder)
+                            org.clyze.client.web.Helper.addFilesToMultiPart("DYNAMIC", org.clyze.client.web.Helper.resolveFiles(dynamicFiles), builder)
                         } else if (option.isFile) {
-                            org.clyze.doop.web.client.Helper.addFilesToMultiPart(optionName, org.clyze.doop.web.client.Helper.resolveFiles([option.value as String]), builder)
+                            org.clyze.client.web.Helper.addFilesToMultiPart(optionName, org.clyze.client.web.Helper.resolveFiles([option.value as String]), builder)
                         } else {
                             builder.addPart(optionName, new StringBody(option.value as String))
                         }
@@ -248,7 +245,7 @@ class CliRestClient {
 
     /**
      * Posts to the /family/cclyzer endpoint, printing the result.
-     * {@see doop.web.restlet.WebApp, doop.web.restlet.api.CreateAnalysisResource}
+     * {@see server.web.restlet.WebApp, server.web.restlet.api.CreateAnalysisResource}
      */
     private static final CliRestCommand POST_CCLYZER = new CliRestCommand(
         name: 'post_cclyzer',
@@ -268,7 +265,7 @@ class CliRestClient {
 
     /**
      * Consumes the GET /analyses/[analysis-id] response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.AnalysisResource}
      */
     private static final CliRestCommand GET = new CliRestCommand(
         name: 'get',
@@ -293,7 +290,7 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/start response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      */
     private static final CliRestCommand START = new CliRestCommand(
         name:'start',
@@ -315,7 +312,7 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/stop response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      */
     private static final CliRestCommand STOP = new CliRestCommand(
         name: 'stop',
@@ -337,7 +334,7 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/post_process response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand POST_PROCESS = new CliRestCommand(
@@ -360,7 +357,7 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/reset response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand RESET = new CliRestCommand(
@@ -383,7 +380,7 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/restart response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteAnalysisActionResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand RESTART = new CliRestCommand(
@@ -406,7 +403,7 @@ class CliRestClient {
 
     /**
      * Consumes the POST /analyses/[analysis-id]/jcPluginMetadata response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.UploadJCPluginMetdataResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.UploadJCPluginMetdataResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand JC_PLUGIN_METADATA = new CliRestCommand(
@@ -426,7 +423,7 @@ class CliRestClient {
 
                 HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-                org.clyze.doop.web.client.Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
+                org.clyze.client.web.Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
                 post.setEntity(builder.build())
                 
                 return post
@@ -441,7 +438,7 @@ class CliRestClient {
 
     /**
      * Consumes the GET /analyses/[analysis-id]/query/datalog response, printing the result.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.ExecuteDatalogQueryResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteDatalogQueryResource}
      */
     private static final CliRestCommand QUERY = new CliRestCommand(
         name: 'query',
@@ -482,7 +479,7 @@ class CliRestClient {
 
     /**
      * Consumes the DELETE /analyses/[analysis-id] response.
-     * {@see doop.web.restlet.App, doop.web.restlet.api.AnalysisResource}
+     * {@see server.web.restlet.App, server.web.restlet.api.AnalysisResource}
      */
     private static final CliRestCommand DELETE = new CliRestCommand(
         name:'delete',

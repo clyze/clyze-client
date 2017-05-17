@@ -1,12 +1,9 @@
-package org.clyze.doop.web.client
+package org.clyze.client.web
 
 import org.apache.commons.cli.Option
 
 /**
  * A Rest Client command.
- *
- * @author: Kostas Saidis (saiko@di.uoa.gr)
- * Date: 12/2/2015
  */
 class CliRestCommand extends RestCommandBase<String>{
 

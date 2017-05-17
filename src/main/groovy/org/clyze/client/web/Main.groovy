@@ -1,4 +1,4 @@
-package org.clyze.doop.web.client
+package org.clyze.client.web
 
 import org.clyze.analysis.*
 import org.clyze.doop.core.DoopAnalysisFamily
@@ -6,12 +6,6 @@ import org.clyze.doop.core.Helper
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 
-/**
- * The entry point for the jdoop Restful client (@see doop.web.client.RestClient).
- *
- * @author: Kostas Saidis (saiko@di.uoa.gr)
- * Date: 27/11/2014
- */
 class Main {
 
     /**

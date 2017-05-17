@@ -1,11 +1,8 @@
-package org.clyze.doop.web.client
+package org.clyze.client.web
 
 import org.clyze.doop.system.FileOps
 import org.apache.log4j.Logger
 
-/**
- * Created by saiko on 29/4/2015.
- */
 class Authenticator {
 
     private static String token

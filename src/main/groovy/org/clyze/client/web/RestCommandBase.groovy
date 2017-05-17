@@ -1,4 +1,4 @@
-package org.clyze.doop.web.client
+package org.clyze.client.web
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -12,9 +12,6 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.util.EntityUtils
 
-/**
- * Created by saiko on 7/8/2015.
- */
 class RestCommandBase<T> implements ResponseHandler<T> {
 
     public static final String BASE_PATH = "/clue/api/v1/"
