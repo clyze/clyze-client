@@ -1,15 +1,25 @@
 package org.clyze.client.web
 
+//import groovy.transform.TypeChecked
+import groovy.json.JsonSlurper
+
 import org.clyze.analysis.AnalysisOption
 import org.clyze.analysis.AnalysisFamilies
 import org.clyze.doop.core.*
 import org.clyze.doop.input.*
-import groovy.transform.TypeChecked
+import org.apache.http.HttpEntity
+import org.apache.http.NameValuePair
+import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
+import org.apache.http.entity.mime.content.FileBody
+import org.apache.http.message.BasicNameValuePair
 
-@TypeChecked
+
+//@TypeChecked
 class Helper {
 
     static List<File> resolveFiles(List<String> files) {
@@ -81,4 +91,118 @@ class Helper {
         AnalysisOption option  = AnalysisFamilies.supportedOptionsOf('doop').find {AnalysisOption option -> option.id == id}
         return option ? option.isFile : false
     }
+
+
+    /**
+     * Creates the default login command (that returns the token when executed).
+     */
+    static RestCommandBase<String> createLoginCommand(String username, String password) {
+        return new RestCommandBase<String>(
+            endPoint: "authenticate",
+            authenticationRequired: false,
+            requestBuilder: { String url ->
+                HttpPost post = new HttpPost(url)
+                List<NameValuePair> params = new ArrayList<>(2)
+                params.add(new BasicNameValuePair("username", username))
+                params.add(new BasicNameValuePair("password", password))
+                post.setEntity(new UrlEncodedFormEntity(params))
+                return post
+            },
+            onSuccess: { HttpEntity entity ->
+                def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+                return json.token
+            }
+        )
+    }
+
+
+    /**
+     * Creates a post doop analysis command (without authenticator) that returns the id of the newly created doop analysis.
+     */
+    static RestCommandBase<String> createPostDoopAnalysisCommand(String analysisName,
+                                                                 String projectName,
+                                                                 String projectVersion,
+                                                                 Set<File> inputFiles,
+                                                                 File sources, 
+                                                                 File jcPluginMetadata,
+                                                                 File hprof,
+                                                                 Map<String, Object> options) {
+        return new RestCommandBase<String>(
+            endPoint: "family/doop",
+            requestBuilder: { String url ->
+                HttpPost post = new HttpPost(url)
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+                //submit a null id for the analysis to make the server generate one automatically
+                Helper.buildPostRequest(builder, null, analysisName) {
+
+                    //process the project name and version
+                    builder.addPart("projectName", new StringBody(projectName))
+                    builder.addPart("projectVersion", new StringBody(projectVersion))
+
+                    //process the jars                    
+                    println "Submitting input files: ${inputFiles}"
+                    Helper.addFilesToMultiPart("inputFiles", inputFiles.toList(), builder)
+
+                    //process the sources
+                    println "Submitting sources: ${sources}"
+                    Helper.addFilesToMultiPart("sources", [sources], builder)
+
+                    //process the jcPluginMetadata
+                    println "Submitting jcplugin metadata: ${jcPluginMetadata}"
+                    Helper.addFilesToMultiPart("jcPluginMetadata", [jcPluginMetadata], builder)
+
+                    //process the HPROF file
+                    if (hprof != null) {
+                        println "Submitting HPROF: ${hprof}"
+                        Helper.addFilesToMultiPart("ANALYZE_MEMORY_DUMP", [hprof], builder)
+                    }
+
+                    //process the options                    
+                    println "Submitting options: ${options}"
+                    options.each { Map.Entry<String, Object> entry ->
+                        String optionId = entry.getKey().toUpperCase()
+                        Object value = entry.getValue()
+                        if (value) {
+                            if (optionId == "DYNAMIC") {
+                                List<File> dynamicFiles = (value as List<String>).each { String file ->
+                                    return new File(file)
+                                }
+
+                                Helper.addFilesToMultiPart("DYNAMIC", dynamicFiles, builder)
+                            }
+                            else if (Helper.isFileOption(optionId)) {
+                                Helper.addFilesToMultiPart(optionId, [new File(value)], builder)
+                            }
+                            else {
+                                builder.addPart(optionId, new StringBody(value as String))
+                            }
+                        }
+                    }
+                }
+                HttpEntity entity = builder.build()
+                post.setEntity(entity)
+                return post
+            },
+            onSuccess: { HttpEntity entity ->
+                def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+                return json.id
+            }            
+        )
+    }
+
+
+    /**
+     * Creates a start analysis command (without authenticator and onSuccess handlers).
+     */
+    static RestCommandBase<Void> createStartCommand(String id) {
+        return new RestCommandBase<Void>(
+            endPoint: "analyses",
+            requestBuilder: {String url ->
+                return new HttpPut("${url}/${id}/action/start")
+            }
+        )
+    }
+
+
+
 }
