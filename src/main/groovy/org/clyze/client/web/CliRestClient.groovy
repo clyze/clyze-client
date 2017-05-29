@@ -5,7 +5,6 @@ import org.clyze.analysis.AnalysisOption
 import org.clyze.analysis.AnalysisFamilies
 import org.clyze.doop.core.Doop
 import org.clyze.utils.FileOps
-import org.clyze.utils.Helper
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
@@ -126,7 +125,7 @@ class CliRestClient {
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return org.clyze.client.web.Helper.collectWithIndex(json.list) { def data, int i ->
+            return Helper.collectWithIndex(json.list) { def data, int i ->
                 processAnalysisData(i, data)
             }.join("\n")
         }
@@ -141,16 +140,10 @@ class CliRestClient {
         description: "Posts a new doop analysis to the remote server",
         endPoint: "family/doop",
         options: [
-                OptionBuilder.withLongOpt('analysis').hasArg().withArgName('name').
-                        withDescription(CommandLineAnalysisFactory.ANALYSIS).create('a'),
-                OptionBuilder.withLongOpt('inputFiles').hasArgs(Option.UNLIMITED_VALUES).withArgName('inputFiles').
-                        withDescription(CommandLineAnalysisFactory.INPUTS).withValueSeparator(',' as char).create('i'),
-                OptionBuilder.withLongOpt('identifier').hasArg().withArgName('identifier').
-                        withDescription(CommandLineAnalysisFactory.USER_SUPPLIED_ID).create('id'),
                 OptionBuilder.withLongOpt('properties').hasArg().withArgName('properties').
                         withDescription(CommandLineAnalysisFactory.PROPS).create('p'),
-        ] + Helper.convertAnalysisOptionsToCliOptions(AnalysisFamilies.supportedOptionsOf('doop').findAll { it.webUI }),
-        requestBuilder: {String url ->
+        ] + CommandLineAnalysisFactory.convertAnalysisOptionsToCliOptions(AnalysisFamilies.supportedOptionsOf('doop').findAll { it.webUI }),
+        requestBuilder: { String url ->
 
             String name, id
             List<String> inputs
@@ -169,7 +162,7 @@ class CliRestClient {
                 //Get the inputs of the analysis. If there are no inputs in the CLI, we get them from the properties.
                 inputs = cliOptions.is
                 if (!inputs) {
-                    inputs = props.getProperty("inputFiles").split().collect { String s -> s.trim() }
+                    inputs = props.getProperty("INPUTS").split().collect { String s -> s.trim() }
                     //The inputs, if relative, are being resolved via the propsBaseDir
                     inputs = inputs.collect { String jar ->
                         File jarFile = new File(jar)
@@ -206,12 +199,12 @@ class CliRestClient {
                 //add the inputs
                 inputs.each{ String jar ->
                     try {
-                        org.clyze.client.web.Helper.addFilesToMultiPart("inputFiles", org.clyze.client.web.Helper.resolveFiles([jar]), builder)
+                        Helper.addFilesToMultiPart("INPUTS", Helper.resolveFiles([jar]), builder)
                     }
                     catch(e) {
                         //jar is not a local file
                         Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
-                        builder.addPart("inputFiles", new StringBody(jar))
+                        builder.addPart("INPUTS", new StringBody(jar))
                     }
                 }
 
@@ -222,9 +215,9 @@ class CliRestClient {
                     if (option.value) {
                         if (optionName == "DYNAMIC") {
                             List<String> dynamicFiles = option.value as List<String>
-                            org.clyze.client.web.Helper.addFilesToMultiPart("DYNAMIC", org.clyze.client.web.Helper.resolveFiles(dynamicFiles), builder)
+                            Helper.addFilesToMultiPart("DYNAMIC", Helper.resolveFiles(dynamicFiles), builder)
                         } else if (option.isFile) {
-                            org.clyze.client.web.Helper.addFilesToMultiPart(optionName, org.clyze.client.web.Helper.resolveFiles([option.value as String]), builder)
+                            Helper.addFilesToMultiPart(optionName, Helper.resolveFiles([option.value as String]), builder)
                         } else {
                             builder.addPart(optionName, new StringBody(option.value as String))
                         }
@@ -423,7 +416,7 @@ class CliRestClient {
 
                 HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-                org.clyze.client.web.Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
+                Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
                 post.setEntity(builder.build())
                 
                 return post
@@ -531,7 +524,7 @@ class CliRestClient {
                 File propsFile = new File(dir, "${doc.g}_${doc.a}_${doc.latestVersion}.properties")
                 Properties props = new Properties()
                 props.setProperty("analysis", "context-insensitive")
-                props.setProperty("inputFiles", "${doc.g}:${doc.a}:${doc.latestVersion}")
+                props.setProperty("INPUTS", "${doc.g}:${doc.a}:${doc.latestVersion}")
                 props.setProperty("allow_phantom", "true")
 
                 new FileWriter(propsFile).withWriter { Writer w ->

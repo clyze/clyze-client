@@ -3,6 +3,7 @@ package org.clyze.client.web
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 import org.clyze.analysis.*
+import org.clyze.doop.CommandLineAnalysisFactory
 import org.clyze.doop.core.DoopAnalysisFamily
 import org.clyze.utils.Helper
 
@@ -117,6 +118,6 @@ class Main {
         List<AnalysisOption> clientOptions = AnalysisFamilies.supportedOptionsOf('doop').findAll { AnalysisOption option ->
             option.webUI //all options with webUI property
         }
-        Helper.addAnalysisOptionsToCliBuilder(clientOptions, cli)
+        CommandAnalysisFactory.addAnalysisOptionsToCliBuilder(clientOptions, cli)
     }
 }

@@ -122,7 +122,7 @@ class Helper {
     static RestCommandBase<String> createPostDoopAnalysisCommand(String analysisName,
                                                                  String projectName,
                                                                  String projectVersion,
-                                                                 Set<File> inputFiles,
+                                                                 List<File> inputFiles,
                                                                  File sources, 
                                                                  File jcPluginMetadata,
                                                                  File hprof,
@@ -133,7 +133,7 @@ class Helper {
                 HttpPost post = new HttpPost(url)
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
                 //submit a null id for the analysis to make the server generate one automatically
-                Helper.buildPostRequest(builder, null, analysisName) {
+                buildPostRequest(builder, null, analysisName) {
 
                     //process the project name and version
                     builder.addPart("projectName", new StringBody(projectName))
@@ -141,7 +141,7 @@ class Helper {
 
                     //process the jars                    
                     println "Submitting input files: ${inputFiles}"
-                    Helper.addFilesToMultiPart("inputFiles", inputFiles.toList(), builder)
+                    Helper.addFilesToMultiPart("INPUTS", inputFiles, builder)
 
                     //process the sources
                     println "Submitting sources: ${sources}"
@@ -160,14 +160,13 @@ class Helper {
                     //process the options                    
                     println "Submitting options: ${options}"
                     options.each { Map.Entry<String, Object> entry ->
-                        String optionId = entry.getKey().toUpperCase()
-                        Object value = entry.getValue()
+                        String optionId = entry.key.toUpperCase()
+                        def value = entry.value
                         if (value) {
                             if (optionId == "DYNAMIC") {
                                 List<File> dynamicFiles = (value as List<String>).each { String file ->
                                     return new File(file)
                                 }
-
                                 Helper.addFilesToMultiPart("DYNAMIC", dynamicFiles, builder)
                             }
                             else if (Helper.isFileOption(optionId)) {
@@ -202,7 +201,4 @@ class Helper {
             }
         )
     }
-
-
-
 }
