@@ -1,6 +1,6 @@
 package org.clyze.client.web
 
-import org.clyze.doop.system.FileOps
+import org.clyze.utils.FileOps
 import org.apache.log4j.Logger
 
 class Authenticator {

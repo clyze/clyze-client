@@ -1,10 +1,10 @@
 package org.clyze.client.web
 
-import org.clyze.analysis.*
-import org.clyze.doop.core.DoopAnalysisFamily
-import org.clyze.doop.core.Helper
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
+import org.clyze.analysis.*
+import org.clyze.doop.core.DoopAnalysisFamily
+import org.clyze.utils.Helper
 
 class Main {
 

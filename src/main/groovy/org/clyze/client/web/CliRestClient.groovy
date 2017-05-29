@@ -4,8 +4,8 @@ import org.clyze.doop.CommandLineAnalysisFactory
 import org.clyze.analysis.AnalysisOption
 import org.clyze.analysis.AnalysisFamilies
 import org.clyze.doop.core.Doop
-import org.clyze.doop.core.Helper
-import org.clyze.doop.system.FileOps
+import org.clyze.utils.FileOps
+import org.clyze.utils.Helper
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
