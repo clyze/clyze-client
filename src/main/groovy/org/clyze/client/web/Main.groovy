@@ -118,6 +118,6 @@ class Main {
         List<AnalysisOption> clientOptions = AnalysisFamilies.supportedOptionsOf('doop').findAll { AnalysisOption option ->
             option.webUI //all options with webUI property
         }
-        CommandAnalysisFactory.addAnalysisOptionsToCliBuilder(clientOptions, cli)
+        CommandLineAnalysisFactory.addAnalysisOptionsToCliBuilder(clientOptions, cli)
     }
 }
