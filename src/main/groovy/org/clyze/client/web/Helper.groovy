@@ -119,10 +119,8 @@ class Helper {
     /**
      * Creates a post doop analysis command (without authenticator) that returns the id of the newly created doop analysis.
      */
-    static RestCommandBase<String> createPostDoopAnalysisCommand(String analysisName,
-                                                                 String projectName,
+    static RestCommandBase<String> createPostDoopAnalysisCommand(String projectName,
                                                                  String projectVersion,
-                                                                 List<File> inputFiles,
                                                                  File sources, 
                                                                  File jcPluginMetadata,
                                                                  File hprof,
@@ -133,15 +131,11 @@ class Helper {
                 HttpPost post = new HttpPost(url)
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
                 //submit a null id for the analysis to make the server generate one automatically
-                buildPostRequest(builder, null, analysisName) {
+                buildPostRequest(builder, null, options.analysis) {
 
                     //process the project name and version
                     builder.addPart("projectName", new StringBody(projectName))
                     builder.addPart("projectVersion", new StringBody(projectVersion))
-
-                    //process the jars                    
-                    println "Submitting input files: ${inputFiles}"
-                    Helper.addFilesToMultiPart("INPUTS", inputFiles, builder)
 
                     //process the sources
                     println "Submitting sources: ${sources}"
@@ -163,11 +157,8 @@ class Helper {
                         String optionId = entry.key.toUpperCase()
                         def value = entry.value
                         if (value) {
-                            if (optionId == "DYNAMIC") {
-                                List<File> dynamicFiles = (value as List<String>).each { String file ->
-                                    return new File(file)
-                                }
-                                Helper.addFilesToMultiPart("DYNAMIC", dynamicFiles, builder)
+                            if (optionId == "INPUTS" || optionId == "DYNAMIC") {
+                                Helper.addFilesToMultiPart(optionId, value, builder)
                             }
                             else if (Helper.isFileOption(optionId)) {
                                 Helper.addFilesToMultiPart(optionId, [new File(value)], builder)
