@@ -17,7 +17,7 @@ class Main {
         try {
 
             if (!AnalysisFamilies.isRegistered('doop')) {
-                AnalysisFamilies.register(new DoopAnalysisFamily())
+                AnalysisFamilies.register(DoopAnalysisFamily.instance)
             }
 
             Helper.initConsoleLogging("WARN")
