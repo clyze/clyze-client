@@ -117,8 +117,11 @@ class Helper {
     /**
      * Creates a post doop analysis command (without authenticator) that returns the id of the newly created doop analysis.
      */
-    static RestCommandBase<String> createPostDoopAnalysisCommand(String projectName,
+    static RestCommandBase<String> createPostDoopAnalysisCommand(String orgName,
+                                                                 String projectName,
                                                                  String projectVersion,
+                                                                 String rating,
+                                                                 String ratingCount,
                                                                  File sources,
                                                                  File jcPluginMetadata,
                                                                  File hprof,
@@ -131,9 +134,12 @@ class Helper {
                 //submit a null id for the analysis to make the server generate one automatically
                 buildPostRequest(builder, null, options.analysis) {
 
-                    //process the project name and version
-                    builder.addPart("projectName", new StringBody(projectName))
-                    builder.addPart("projectVersion", new StringBody(projectVersion))
+                    //process the org, project name and version as well as rating info
+                    if (orgName) builder.addPart("orgName", new StringBody(orgName))
+                    if (projectName) builder.addPart("projectName", new StringBody(projectName))
+                    if (projectVersion) builder.addPart("projectVersion", new StringBody(projectVersion))
+                    if (rating) builder.addPart("rating", new StringBody(rating))
+                    if (ratingCount) builder.addPart("ratingCount", new StringBody(ratingCount))
 
                     //process the sources
                     println "Submitting sources: ${sources}"
