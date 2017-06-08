@@ -188,38 +188,41 @@ class CliRestClient {
             }
 
             options = options.findAll { it.value.webUI }
+            options["INPUTS"].value = inputs
 
             //create the HttpPost
             HttpPost post = new HttpPost(url)
             MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-            org.clyze.client.web.Helper.buildPostRequest(builder, id, name) {
+            Helper.buildPostRequest(builder, id, name) {
 
                 if (!inputs) throw new RuntimeException("No input files are specified")
 
-                //add the inputs
-                inputs.each{ String jar ->
-                    try {
-                        Helper.addFilesToMultiPart("INPUTS", Helper.resolveFiles([jar]), builder)
-                    }
-                    catch(e) {
-                        //jar is not a local file
-                        Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
-                        builder.addPart("INPUTS", new StringBody(jar))
-                    }
-                }
-
-                //add the options
+                //process the options
+                println "Submitting options: ${options}"
                 options.each { Map.Entry<String, AnalysisOption> entry ->
-                    String optionName = entry.getKey()
-                    AnalysisOption option = entry.getValue()
+                    String optionId = entry.key.toUpperCase()
+                    AnalysisOption option = entry.value
                     if (option.value) {
-                        if (optionName == "DYNAMIC") {
-                            List<String> dynamicFiles = option.value as List<String>
-                            Helper.addFilesToMultiPart("DYNAMIC", Helper.resolveFiles(dynamicFiles), builder)
-                        } else if (option.isFile) {
-                            Helper.addFilesToMultiPart(optionName, Helper.resolveFiles([option.value as String]), builder)
-                        } else {
-                            builder.addPart(optionName, new StringBody(option.value as String))
+                        if (optionId == "INPUTS") {
+                            option.value.each { String jar ->
+                                try {
+                                    Helper.addFilesToMultiPart(optionId, [new File(jar)], builder)
+                                }
+                                catch(e) {
+                                    //jar is not a local file
+                                    Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
+                                    builder.addPart("INPUTS", new StringBody(jar))
+                                }
+                            }
+                        }
+                        else if (optionId == "DYNAMIC") {
+                            Helper.addFilesToMultiPart(optionId, [new File(option.value)], builder)
+                        }
+                        else if (Helper.isFileOption(optionId)) {
+                            Helper.addFilesToMultiPart(optionId, [new File(option.value)], builder)
+                        }
+                        else {
+                            builder.addPart(optionId, new StringBody(option.value as String))
                         }
                     }
                 }
@@ -418,7 +421,7 @@ class CliRestClient {
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
                 Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
                 post.setEntity(builder.build())
-                
+
                 return post
             }
             else {

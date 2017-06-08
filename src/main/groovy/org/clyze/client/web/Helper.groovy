@@ -12,12 +12,10 @@ import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.message.BasicNameValuePair
-
 
 //@TypeChecked
 class Helper {
@@ -83,7 +81,7 @@ class Helper {
     /**
      * Returns true if the analysis option indicated by the given id is a file option.
      */
-    static boolean isFileOption(String id) {    
+    static boolean isFileOption(String id) {
         //Quick fix - the life-cycle of analysis families needs discussion
         if (!AnalysisFamilies.isRegistered('doop')) {
             AnalysisFamilies.register(DoopAnalysisFamily.instance)
@@ -121,7 +119,7 @@ class Helper {
      */
     static RestCommandBase<String> createPostDoopAnalysisCommand(String projectName,
                                                                  String projectVersion,
-                                                                 File sources, 
+                                                                 File sources,
                                                                  File jcPluginMetadata,
                                                                  File hprof,
                                                                  Map<String, Object> options) {
@@ -139,29 +137,29 @@ class Helper {
 
                     //process the sources
                     println "Submitting sources: ${sources}"
-                    Helper.addFilesToMultiPart("sources", [sources], builder)
+                    addFilesToMultiPart("sources", [sources], builder)
 
                     //process the jcPluginMetadata
                     println "Submitting jcplugin metadata: ${jcPluginMetadata}"
-                    Helper.addFilesToMultiPart("jcPluginMetadata", [jcPluginMetadata], builder)
+                    addFilesToMultiPart("jcPluginMetadata", [jcPluginMetadata], builder)
 
                     //process the HPROF file
                     if (hprof != null) {
                         println "Submitting HPROF: ${hprof}"
-                        Helper.addFilesToMultiPart("ANALYZE_MEMORY_DUMP", [hprof], builder)
+                        addFilesToMultiPart("ANALYZE_MEMORY_DUMP", [hprof], builder)
                     }
 
-                    //process the options                    
+                    //process the options
                     println "Submitting options: ${options}"
                     options.each { Map.Entry<String, Object> entry ->
                         String optionId = entry.key.toUpperCase()
                         def value = entry.value
                         if (value) {
                             if (optionId == "INPUTS" || optionId == "DYNAMIC") {
-                                Helper.addFilesToMultiPart(optionId, value, builder)
+                                addFilesToMultiPart(optionId, value, builder)
                             }
-                            else if (Helper.isFileOption(optionId)) {
-                                Helper.addFilesToMultiPart(optionId, [new File(value)], builder)
+                            else if (isFileOption(optionId)) {
+                                addFilesToMultiPart(optionId, [new File(value)], builder)
                             }
                             else {
                                 builder.addPart(optionId, new StringBody(value as String))
@@ -176,10 +174,9 @@ class Helper {
             onSuccess: { HttpEntity entity ->
                 def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
                 return json.id
-            }            
+            }
         )
     }
-
 
     /**
      * Creates a start analysis command (without authenticator and onSuccess handlers).
