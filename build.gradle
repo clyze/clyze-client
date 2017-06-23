@@ -44,8 +44,8 @@ configurations.all {
 
 dependencies {
     //We should be cautious to declare clue-common as a direct dependency when it is used directly
-    compile "org.clyze:clue-common:1.20.+",                     // Clue common
-            "org.clyze:doop:2.18.+",                            // The doop core
+    compile "org.clyze:clue-common:2.0.+",                      // Clue common
+            "org.clyze:doop:3.0.+",                             // The doop core
             "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
