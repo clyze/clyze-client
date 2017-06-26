@@ -42,6 +42,8 @@ import org.apache.log4j.Logger
  */
 class CliRestClient {
 
+    private static final int DEFAULT_LIST_SIZE = 20
+
     private static final Option ID = OptionBuilder.hasArg().withArgName('id').
                                                    withDescription('the analysis id').create('id')
 
@@ -67,12 +69,22 @@ class CliRestClient {
 
     private static final String processAnalysisData(Integer index, def analysisData) {
 
+        String head = """${index == null ? "" : "$index."} ${analysisData.projectName}"""
+        String sep  = ""
+        head.length().times { sep += "#" }
+
         return """\
-               ${index? "($index)":""} ${analysisData.id}
-               Family: ${analysisData.family}
-               Name  : ${analysisData.name}
-               Inputs: ${analysisData.inputs.join(", ")}
-               Status: ${analysisData.state}""".stripIndent()
+               ${sep}               
+               ${head}               
+               ${sep}                              
+               Org    : ${analysisData.orgName}
+               Project: ${analysisData.projectName}
+               Version: ${analysisData.projectVersion}
+               ID     : ${analysisData.id}
+               Family : ${analysisData.family}
+               Name   : ${analysisData.name}               
+               Inputs : ${analysisData.inputs.join(", ")}
+               Status : ${analysisData.state}""".stripIndent()
     }
 
     /**
@@ -121,12 +133,45 @@ class CliRestClient {
         name: 'list',
         description: "Lists the analyses of the remote server",
         endPoint: "analyses",
-        requestBuilder: DEFAULT_REQUEST_BUILDER,
+        options: [
+            OptionBuilder.withLongOpt('start').hasArg().withArgName('start-position').
+                          withDescription('The start position of the list (default 0)').                          
+                          create('s'),
+            OptionBuilder.withLongOpt('limit').hasArg().withArgName('number-of-results').
+                          withDescription("The size of the list (default ${DEFAULT_LIST_SIZE})").
+                          create('l')  
+
+        ],
+        requestBuilder: { String url ->
+            Integer start = 0
+            Integer count = DEFAULT_LIST_SIZE
+
+            if (cliOptions.s) {
+                try {
+                    start = cliOptions.s as Integer
+                }
+                catch (all) {
+                    Logger.getRootLogger().warn("Option start (${cliOptions.s}) is not valid, using default ($start).")
+                }                
+            }
+
+            if (cliOptions.l) {
+                try {
+                    count = cliOptions.l as Integer
+                }
+                catch (all) {
+                    Logger.getRootLogger().warn("Option count (${cliOptions.l}) is not valid, using default ($count).")
+                }
+            }
+
+            return new HttpGet("${url}?_start=${start}&_count=${count}")
+        },
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
-            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return Helper.collectWithIndex(json.list) { def data, int i ->
-                processAnalysisData(i, data)
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")                
+            int start = json.start as Integer
+            return "Start: ${json.start}, count: ${json.list?.size()?:0} of ${json.hits} total results.\n" + json.list?.collect {
+                processAnalysisData(start++, it)
             }.join("\n")
         }
     )
