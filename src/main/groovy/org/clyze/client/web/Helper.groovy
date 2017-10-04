@@ -162,7 +162,7 @@ class Helper {
 
         String autoLoginToken = null
 
-        RestCommandBase<String> postAnalysis = Helper.createPostDoopAnalysisCommand(
+        RestCommandBase<String> postAnalysis = createPostDoopAnalysisCommand(
             ps.orgName,
             ps.projectName,
             ps.projectVersion,
@@ -314,7 +314,7 @@ class Helper {
      * Creates a start analysis command (with authenticator).
      */
     private static RestCommandBase<Void> createStartCommandAuth(String id, Closure authenticator) {
-        RestCommandBase<Void> command = Helper.createStartCommand(id)
+        RestCommandBase<Void> command = createStartCommand(id)
         command.authenticator = authenticator
         return command
     }
