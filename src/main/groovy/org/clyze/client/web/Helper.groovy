@@ -175,7 +175,7 @@ class Helper {
         )
         postAnalysis.authenticator = authenticator
 
-        String postedId = postAnalysis.execute(ps.host, ps.port)
+        String postedId = postAnalysis.execute(ps.host, ps.port).replaceAll("\\+", "%2b")
         println "The analysis has been submitted successfully: $postedId."
 
         RestCommandBase<String> createAutoLoginToken = createAutoLoginTokenCommand(authenticator)
