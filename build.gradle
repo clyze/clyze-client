@@ -46,7 +46,7 @@ def doopVersion = "3.1.+"
 
 dependencies {
     //We should be cautious to declare clue-common as a direct dependency when it is used directly
-    compile "org.clyze:clue-common:2.0.+",                      // Clue common
+    compile "org.clyze:clue-common:2.1.+",                      // Clue common
             "org.clyze:doop:$doopVersion",                      // The doop core
             "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
