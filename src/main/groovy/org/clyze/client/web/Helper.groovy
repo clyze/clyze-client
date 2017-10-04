@@ -12,10 +12,13 @@ import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
+import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.message.BasicNameValuePair
+
+import java.awt.Desktop
 
 //@TypeChecked
 class Helper {
@@ -113,6 +116,93 @@ class Helper {
         )
     }
 
+    /**
+     * Post an analysis (represented by argument 'ps') to the
+     * server. If flag 'cache' is set, the analysis is also cached to
+     * be replayed later.
+     */
+    public static void postAndStartAnalysis(PostState ps, boolean cache) {
+
+        // Optionally save the data to be posted to the server, so
+        // that they can be reused in the future.
+        if (cache) {
+            String tmpDir = java.nio.file.Files.createTempDirectory("").toString()
+            println "Caching output to ${tmpDir}"
+
+            def copyToTmp = { File f ->
+                File newFile = new File("${tmpDir}/${f.name}")
+                newFile << f.bytes
+                newFile
+            }
+
+            // Replace all files with their copies.
+            ps.options.inputs = ps.options.inputs.collect { copyToTmp(it) }
+            if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources)          }
+            if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata) }
+            if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.sources)          }
+
+            // Save remaining information.
+            String tmpFileName = "${tmpDir}/analysis.json"
+            println "Writing ${tmpFileName}..."
+            new File(tmpFileName) << ps.toJson()
+            println "Analysis submission data saved in ${tmpDir}"
+        }
+
+        println "Connecting to server at ${ps.host}:${ps.port}"
+        String token = createLoginCommand(ps.username, ps.password).execute(ps.host, ps.port)
+
+        println "Submitting ${ps.projectName} version ${ps.projectVersion} for ${ps.options.analysis} analysis"
+
+        def authenticator = {String h, int p, HttpUriRequest request ->
+            //send the token with the request
+            request.addHeader(RestCommandBase.HEADER_TOKEN, token)
+        }
+
+        String autoLoginToken = null
+
+        RestCommandBase<String> postAnalysis = Helper.createPostDoopAnalysisCommand(
+            ps.orgName,
+            ps.projectName,
+            ps.projectVersion,
+            null, //rating
+            null, //ratingCount
+            ps.sources,
+            ps.jcPluginMetadata,
+            ps.hprof,
+            ps.options
+        )
+        postAnalysis.authenticator = authenticator
+
+        String postedId = postAnalysis.execute(ps.host, ps.port)
+        println "The analysis has been submitted successfully: $postedId."
+
+        RestCommandBase<String> createAutoLoginToken = createAutoLoginTokenCommand(authenticator)
+        try {
+            autoLoginToken = createAutoLoginToken.execute(ps.host, ps.port)
+        }
+        catch(Exception e) {
+            println "Autologin failed: ${e.getMessage()}"
+        }
+
+        String analysisPageURL = createAnalysisPageURL(ps.host, ps.port, postedId, autoLoginToken)
+
+        RestCommandBase<Void> start = createStartCommandAuth(postedId, authenticator)
+        start.onSuccess = { HttpEntity ent ->
+
+            if (autoLoginToken) {
+                println "Sit back and relax while we analyze your code..."
+                try {
+                    openBrowser(analysisPageURL)
+                } catch(Exception e) {
+                    println "Analysis has been posted to the server, please visit $analysisPageURL"
+                }
+            }
+            else {
+                println "Visit $analysisPageURL"
+            }
+        }
+        start.execute(ps.host, ps.port)
+    }
 
     /**
      * Creates a post doop analysis command (without authenticator) that returns the id of the newly created doop analysis.
@@ -184,6 +274,28 @@ class Helper {
         )
     }
 
+    private static String createAnalysisPageURL(String host, int port, String postedId, String token = null) {
+        return "http://$host:$port/clue/" + (token ? "?t=$token" : "") + "#/analyses/$postedId"
+    }
+
+    private static void openBrowser(String url) {
+        File html = File.createTempFile("_doop", ".html")
+        html.withWriter('UTF-8') { w ->
+            w.write """\
+                    <html>
+                        <head>
+                            <script>
+                                document.location="$url"
+                            </script>
+                        </head>
+                        <body>
+                        </body>
+                    </html>
+                    """.stripIndent()
+        }
+        Desktop.getDesktop().browse(html.toURI())
+    }
+
     /**
      * Creates a start analysis command (without authenticator and onSuccess handlers).
      */
@@ -193,6 +305,29 @@ class Helper {
             requestBuilder: {String url ->
                 return new HttpPut("${url}/${id}/action/start")
             }
+        )
+    }
+
+    /**
+     * Creates a start analysis command (with authenticator).
+     */
+    private static RestCommandBase<Void> createStartCommandAuth(String id, Closure authenticator) {
+        RestCommandBase<Void> command = Helper.createStartCommand(id)
+        command.authenticator = authenticator
+        return command
+    }
+
+    private static RestCommandBase<String> createAutoLoginTokenCommand(Closure authenticator) {
+        return new RestCommandBase<String>(
+            endPoint: "token",
+            requestBuilder:  { String url ->
+                return new HttpPost(url)
+            },
+            onSuccess: { HttpEntity entity ->
+                def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+                return json.token
+            },
+            authenticator: authenticator
         )
     }
 }
