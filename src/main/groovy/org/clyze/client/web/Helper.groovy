@@ -332,4 +332,47 @@ class Helper {
             authenticator: authenticator
         )
     }
+
+    /**
+     * Post again a cached analysis input.
+     */
+    public static void replayPost(String path) {
+        println "Reading state from ${path}..."
+        def deserialized = PostState.fromJson(path)
+        File sources = deserialized["sources"]
+        File hprof = deserialized["hprof"]
+        File jcPluginMetadata = deserialized["jcPluginMetadata"]
+        PostState ps = deserialized["ps"]
+
+        // Optionally read properties from ~/.gradle/gradle.properties.
+        String homeDir = System.getProperty("user.home")
+        if (homeDir != null) {
+            String propertiesFileName = "${homeDir}/.gradle/gradle.properties"
+            println propertiesFileName
+            File propertiesFile = new File(propertiesFileName)
+            if (propertiesFile.exists()) {
+                println "Reading connection information from ${propertiesFile.getCanonicalPath()}"
+                Properties properties = new Properties()
+                propertiesFile.withInputStream {
+                    properties.load(it)
+                }
+                def readProperty = { String name ->
+                    String readVal = properties.getProperty(name)
+                    if (readVal != null) {
+                        println "Found ${name} = ${readVal}"
+                    }
+                    readVal
+                }
+                ps.username = readProperty("clue_user")             ?: ps.username
+                ps.password = readProperty("clue_password")         ?: ps.password
+                ps.host     = readProperty("clue_host")             ?: ps.host
+                ps.port     = readProperty("clue_port").toInteger() ?: ps.port
+            }
+        }
+
+        // Turn off caching, we already have a cache available.
+        boolean cache = false
+
+        postAndStartAnalysis(ps, cache)
+    }
 }

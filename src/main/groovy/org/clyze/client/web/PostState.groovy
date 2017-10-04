@@ -17,6 +17,9 @@ class PostState {
     File jcPluginMetadata
     File hprof
 
+    // Needed for JSON deserialization.
+    public PostState() { }
+
     public PostState(String host, int port, String username, String password,
                      String orgName, String projectName, String projectVersion,
                      Map<String, Object> options, File sources,
