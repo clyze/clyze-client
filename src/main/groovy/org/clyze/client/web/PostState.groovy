@@ -12,6 +12,8 @@ class PostState {
     String orgName
     String projectName
     String projectVersion
+    String rating
+    String ratingCount
     Map<String, Object> options
     File sources
     File jcPluginMetadata
@@ -22,6 +24,7 @@ class PostState {
 
     public PostState(String host, int port, String username, String password,
                      String orgName, String projectName, String projectVersion,
+                     String rating, String ratingCount,
                      Map<String, Object> options, File sources,
                      File jcPluginMetadata, File hprof) {
         this.username         = username
@@ -31,6 +34,8 @@ class PostState {
         this.orgName          = orgName
         this.projectName      = projectName
         this.projectVersion   = projectVersion
+        this.rating           = rating
+        this.ratingCount      = ratingCount
         this.options          = options
         this.sources          = sources
         this.jcPluginMetadata = jcPluginMetadata
@@ -49,6 +54,8 @@ class PostState {
             "  \"orgName\" : \"${orgName}\",\n" +
             "  \"projectName\" : \"${projectName}\",\n" +
             "  \"projectVersion\" : \"${projectVersion}\",\n" +
+            "  \"rating\" : \"${rating}\",\n" +
+            "  \"ratingCount\" : \"${ratingCount}\",\n" +
             "  \"options\" : ${optionsJson},\n" +
             "  \"sourcesName\" : ${sourcesName},\n" +
             "  \"jcPluginMetadataName\" : ${jcPluginMetadataName},\n" +
@@ -60,14 +67,16 @@ class PostState {
         File jsonFile = new File("${dir}/analysis.json")
         Object obj = (new JsonSlurper()).parseText(jsonFile.text)
         PostState ps = new PostState()
-        ps.host = obj.host
-        ps.port = obj.port.toInteger()
-        ps.username = obj.username
-        ps.password = obj.password
-        ps.orgName = obj.orgName
-        ps.projectName = obj.projectName
+        ps.host           = obj.host
+        ps.port           = obj.port.toInteger()
+        ps.username       = obj.username
+        ps.password       = obj.password
+        ps.orgName        = obj.orgName
+        ps.projectName    = obj.projectName
         ps.projectVersion = obj.projectVersion
-        ps.options = obj.options
+        ps.rating         = obj.rating
+        ps.ratingCount    = obj.ratingCount
+        ps.options        = obj.options
 
         // Fix the paths of inputs to point to the given directory.
         def dirFile = { String n -> n == null ? null : new File("${dir}/${n}") }
