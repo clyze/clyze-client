@@ -39,7 +39,9 @@ class Helper {
     }
 
     static void addFilesToMultiPart(String name, Collection<File> files, MultipartEntityBuilder builder) {
-        files?.each { File f -> builder.addPart(name, new FileBody(f)) }
+        files?.each { File f ->
+            if (f != null) { builder.addPart(name, new FileBody(f)) }
+        }
     }
 
     static void buildPostRequest(MultipartEntityBuilder builder,
