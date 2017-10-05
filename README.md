@@ -48,66 +48,66 @@ To install the doop client, we need to extract the distribution zip or tarball i
 
 We can invoke the doop client by issuing:
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c [command]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c [command]
 
 The available commands are the following.
 
 ### Ping
 Pings the remote server (validates that a connection is available).
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c ping
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c ping
 
 ### List
 Lists the analyses of the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c list
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c list
 
 ### Get
 Gets the main information of an analysis of the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c get -id [analysis-id]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c get -id [analysis-id]
 
 ### Post
 Posts a new analysis to the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c post -a context-insensitive -j [jar]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c post -a context-insensitive -j [jar]
 
 Use the -h flag to see the available options for creating a new analysis.
 
 ### Start
 Starts a analysis on the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c start -id [analysis-id]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c start -id [analysis-id]
 
 ### Stop
 Stops the execution of an analysis running on the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c stop -id [analysis-id]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c stop -id [analysis-id]
 
 ### Post process
 Runs (or re-runs) the post processor of an analysis.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c post_process -id [analysis-id]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c post_process -id [analysis-id]
 
 ### Reset
 Resets (cleans-up) an analysis running on the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c reset -id [analysis-id]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c reset -id [analysis-id]
     
 ### Restart
 Restarts an analysis running on the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c restart -id [analysis-id]    
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c restart -id [analysis-id]
 
 ### Query
 Queries the results of an analysis that has completed its execution on the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c query -id [analysis-id] -q [datalog query] -p [optional print opt]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c query -id [analysis-id] -q [datalog query] -p [optional print opt]
 
 ### Delete
 Deletes an analysis from the remote server.
 
-    $ INSTALL_DIR>./bin/client -r [server:port] -c delete -id [analysis-id]
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c delete -id [analysis-id]
 
 ## Local Install
 
