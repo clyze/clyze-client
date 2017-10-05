@@ -52,6 +52,11 @@ We can invoke the doop client by issuing:
 
 The available commands are the following.
 
+### Login
+Authenticates the user by the remote server. This is usually the first command to run before interacting with the server.
+
+    $ INSTALL_DIR>./bin/clue-client -r [server:port] -c login
+
 ### Ping
 Pings the remote server (validates that a connection is available).
 
