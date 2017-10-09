@@ -51,9 +51,11 @@ dependencies {
             "org.codehaus.groovy:groovy-all:2.4.7",             // Groovy
             "commons-logging:commons-logging:1.1",              // Logging wrapper
             "log4j:log4j:1.2.14",                               // Logging implementation
+            "commons-io:commons-io:2.4",                        // IO utils
             "commons-cli:commons-cli:1.2",                      // Command line processor
             "org.apache.httpcomponents:httpclient:4.4",         // Used by the Rest client
             "org.apache.httpcomponents:httpmime:4.4"            // Used by the Rest client
+    compile group: 'com.googlecode.juniversalchardet', name: 'juniversalchardet', version: '1.0.3'
 }
 
 run {
