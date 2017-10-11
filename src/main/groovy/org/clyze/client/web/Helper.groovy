@@ -353,7 +353,6 @@ class Helper {
         String homeDir = System.getProperty("user.home")
         if (homeDir != null) {
             String propertiesFileName = "${homeDir}/.gradle/gradle.properties"
-            println propertiesFileName
             File propertiesFile = new File(propertiesFileName)
             if (propertiesFile.exists()) {
                 println "Reading connection information from ${propertiesFile.getCanonicalPath()}"
