@@ -123,7 +123,7 @@ class Helper {
      * server. If flag 'cache' is set, the analysis is also cached to
      * be replayed later.
      */
-    public static void postAndStartAnalysis(PostState ps, boolean cache) {
+    public static void postAndStartAnalysis(PostState ps, boolean cache, boolean dry) {
 
         // Optionally save the data to be posted to the server, so
         // that they can be reused in the future.
@@ -148,6 +148,11 @@ class Helper {
             println "Writing ${tmpFileName}..."
             new File(tmpFileName) << ps.toJson()
             println "Analysis submission data saved in ${tmpDir}"
+        }
+
+        if (dry) {
+            println "End of dry run."
+            return
         }
 
         println "Connecting to server at ${ps.host}:${ps.port}"
@@ -373,6 +378,6 @@ class Helper {
         // Turn off caching, we already have a cache available.
         boolean cache = false
 
-        postAndStartAnalysis(ps, cache)
+        postAndStartAnalysis(ps, cache, false)
     }
 }
