@@ -81,7 +81,8 @@ class PostState {
         // Fix the paths of inputs to point to the given directory.
         def dirFile = { String n -> n == null ? null : new File("${dir}/${n}") }
         def fileName = { String f -> f.substring(f.lastIndexOf(File.separator)) }
-        ps.options.inputs = ps.options.inputs.collect { dirFile(fileName(it)) }
+        ps.options.inputs = ps.options.inputs.findAll { it != null }
+                                             .collect { dir + "/" + fileName(it) }
 
         return [ ps               : (PostState)ps,
                  sources          : dirFile(obj.sourcesName),
