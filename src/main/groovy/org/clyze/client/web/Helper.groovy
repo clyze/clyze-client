@@ -129,7 +129,6 @@ class Helper {
         // that they can be reused in the future.
         if (cache) {
             String tmpDir = java.nio.file.Files.createTempDirectory("").toString()
-            println "Caching output to ${tmpDir}"
 
             def copyToTmp = { String fPath ->
                 String fName = fPath.substring(fPath.lastIndexOf(File.separator))
@@ -149,7 +148,6 @@ class Helper {
 
             // Save remaining information.
             String tmpFileName = "${tmpDir}/analysis.json"
-            println "Writing ${tmpFileName}..."
             new File(tmpFileName) << ps.toJson()
             println "Analysis submission data saved in ${tmpDir}"
         }
