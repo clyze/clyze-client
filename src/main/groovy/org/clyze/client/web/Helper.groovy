@@ -131,17 +131,21 @@ class Helper {
             String tmpDir = java.nio.file.Files.createTempDirectory("").toString()
             println "Caching output to ${tmpDir}"
 
-            def copyToTmp = { File f ->
-                File newFile = new File("${tmpDir}/${f.name}")
-                newFile << f.bytes
+            def copyToTmp = { String fPath ->
+                String fName = fPath.substring(fPath.lastIndexOf(File.separator))
+                File newFile = new File("${tmpDir}/${fName}")
+                newFile << (new File(fPath)).bytes
                 newFile
             }
 
-            // Replace all files with their copies.
-            ps.options.inputs = ps.options.inputs.collect { copyToTmp(it) }
-            if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources)          }
-            if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata) }
-            if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.sources)          }
+            // Replace all file paths with the paths of their copies.
+            ps.options.inputs = ps.options.inputs.collect {
+                File f = copyToTmp(it)
+                f.canonicalPath
+            }
+            if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources.canonicalPath)          }
+            if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata.canonicalPath) }
+            if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.sources.canonicalPath)          }
 
             // Save remaining information.
             String tmpFileName = "${tmpDir}/analysis.json"
@@ -252,8 +256,12 @@ class Helper {
                         addFilesToMultiPart("ANALYZE_MEMORY_DUMP", [hprof], builder)
                     }
 
-                    //process the options
+                    // Process the options.
                     println "Submitting options: ${options}"
+                    // Convert the inputs from a string list to a file list.
+                    if (options.inputs != null) {
+                        options.inputs = options.inputs.collect { new File(it) }
+                    }
                     options.each { Map.Entry<String, Object> entry ->
                         String optionId = entry.key.toUpperCase()
                         def value = entry.value
