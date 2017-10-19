@@ -144,7 +144,7 @@ class Helper {
             }
             if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources.canonicalPath)          }
             if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata.canonicalPath) }
-            if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.sources.canonicalPath)          }
+            if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.hprof.canonicalPath)          }
 
             // Save remaining information.
             String tmpFileName = "${tmpDir}/analysis.json"
