@@ -84,10 +84,10 @@ class PostState {
         ps.options.inputs = ps.options.inputs.findAll { it != null }
                                              .collect { dir + "/" + fileName(it) }
 
-        return [ ps               : (PostState)ps,
-                 sources          : dirFile(obj.sourcesName),
-                 jcPluginMetadata : dirFile(obj.jcPluginMetadataName),
-                 hprof            : dirFile(obj.hprofName)
-               ]
+        ps.sources = dirFile(obj.sourcesName)
+        ps.jcPluginMetadata = dirFile(obj.jcPluginMetadataName)
+        ps.hprof = dirFile(obj.hprofName)
+
+        return (PostState)ps
     }
 }

@@ -349,11 +349,7 @@ class Helper {
      */
     public static void replayPost(String path) {
         println "Reading state from ${path}..."
-        def deserialized = PostState.fromJson(path)
-        File sources = deserialized["sources"]
-        File hprof = deserialized["hprof"]
-        File jcPluginMetadata = deserialized["jcPluginMetadata"]
-        PostState ps = deserialized["ps"]
+        PostState ps = PostState.fromJson(path)
 
         // Optionally read properties from ~/.gradle/gradle.properties.
         String homeDir = System.getProperty("user.home")
