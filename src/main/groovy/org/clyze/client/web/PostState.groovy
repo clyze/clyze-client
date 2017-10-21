@@ -90,4 +90,67 @@ class PostState {
 
         return (PostState)ps
     }
+
+    // Generate shell script to runs Doop with this state's options.
+    public String generateDoopScript(String dir) {
+        String script = '#!/bin/bash' + '\n' + '\n' + 'pushd $DOOP_HOME' + '\n'
+        List<String> cmdLine = [ "./doop" ]
+        options.each { String opt, Object val ->
+            String option = opt?.replaceAll('_', '-')
+            if (option == 'inputs') {
+                cmdLine << "-i"
+                val.each { cmdLine << it }
+            } else if (option == 'analysis') {
+                cmdLine << "-a ${val}"
+            } else if (option.startsWith("x-")) {
+                String xOption = option.substring(2)
+                if (val.class == Boolean.class) {
+                    if (val == true) {
+                        cmdLine << "-X${xOption}"
+                    }
+                } else if (val != null && isPrimitiveOrString(val)) {
+                    cmdLine << "-X${xOption} ${val}"
+                } else {
+                    println "WARNING: unknown X option ${opt} = ${val}"
+                }
+            } else if (val == null) {
+                println "WARNING: ignoring null entry ${option} in Doop script"
+            } else if (val.class == Boolean.class) {
+                if (val == true) {
+                    cmdLine << "--${option}"
+                }
+            } else if (isPrimitiveOrString(val)) {
+                cmdLine << "--${option} ${val}"
+            } else {
+                println "WARNING: unknown entry ${option} (${opt}) = ${val}"
+            }
+        }
+        if (hprof != null) {
+            cmdLine << "--heapdl"
+            cmdLine << hprof.canonicalPath
+        }
+        script += cmdLine.join(" ")
+        script += '\n' + 'popd' + '\n'
+        return script
+    }
+
+    // Used to check if an object can be simply converted to a string.
+    private static boolean isPrimitiveOrString(Object obj) {
+        return (obj.class in [ String.class, Boolean.class, Character.class,
+                               Byte.class, Short.class, Integer.class, Long.class,
+                               Float.class, Double.class ])
+    }
+
+    // Given a file path and a directory prefix of it, strip the
+    // prefix from the path (or do nothing if the prefix is wrong).
+    private static String stripDir(String fPath, String dir) {
+        int prefixSz = dir.length()
+        String fPrefix = fPath.substring(0, prefixSz)
+        if (fPrefix.equals(dir)) {
+            return fPath.substring(prefixSz + 1)
+        } else {
+            println "WARNING: ${fPath} is not under ${dir}"
+            return fPath
+        }
+    }
 }

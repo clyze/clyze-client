@@ -147,8 +147,11 @@ class Helper {
             if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.hprof.canonicalPath)          }
 
             // Save remaining information.
-            String tmpFileName = "${tmpDir}/analysis.json"
-            new File(tmpFileName) << ps.toJson()
+            new File("${tmpDir}/analysis.json") << ps.toJson()
+
+            // Generate optional script to call Doop.
+            new File("${tmpDir}/run-doop.sh") << ps.generateDoopScript(tmpDir)
+
             println "Analysis submission data saved in ${tmpDir}"
         }
 
