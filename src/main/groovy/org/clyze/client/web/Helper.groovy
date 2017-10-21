@@ -251,7 +251,7 @@ class Helper {
                     //process the HPROF file
                     if (hprof != null) {
                         println "Submitting HPROF: ${hprof}"
-                        addFilesToMultiPart("ANALYZE_MEMORY_DUMP", [hprof], builder)
+                        addFilesToMultiPart("HEAPDL", [hprof], builder)
                     }
 
                     // Process the options.
