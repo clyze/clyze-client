@@ -447,76 +447,35 @@ class CliRestClient {
      * {@see server.web.restlet.App, server.web.restlet.api.UploadJCPluginMetdataResource}
      * TODO: This offers a convenience for testing
      */
-    private static final CliRestCommand JC_PLUGIN_METADATA = new CliRestCommand(
-        name: 'jcplugin',
-        description: "Upload the jcplugin metadata zip file",
-        endPoint: "analyses",
-        options:[
-            ID,
-            OptionBuilder.hasArg().withArgName('jcplugin metadata zip file').
-                    withDescription('Upload the jc plugin metadata zip file').create('zip'),
-        ],
-        requestBuilder: {String url ->
-            if (cliOptions.id && cliOptions.zip) {
-                String id = cliOptions.id
-                String zip = cliOptions.zip
-                File zipFile = FileOps.findFileOrThrow(zip as String, "Not a valid file: $zip")
-
-                HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
-                MultipartEntityBuilder builder = MultipartEntityBuilder.create()
-                Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
-                post.setEntity(builder.build())
-
-                return post
-            }
-            else {
-                throw new RuntimeException("The id option is not specified")
-            }
-        },
-        authenticator: DEFAULT_AUTHENTICATOR,
-        onSuccess: DEFAULT_SUCCES
-    )
-
-    /**
-     * Consumes the GET /analyses/[analysis-id]/query/datalog response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteDatalogQueryResource}
-     */
-    private static final CliRestCommand QUERY = new CliRestCommand(
-        name: 'query',
-        description: "Queries an analysis that has completed on the remote server",
-        endPoint: "analyses",
-        options:[
-            ID,
-            OptionBuilder.hasArg().withArgName('query').withDescription('the datalog query to execute').create('q'),
-            OptionBuilder.hasArg().withArgName('printOpt').withDescription('the printOpt of the query').create('p'),
-        ],
-        requestBuilder: {String url ->
-            if (cliOptions.id) {
-                String id = cliOptions.id
-                if (cliOptions.q) {
-                    String query = cliOptions.q
-                    String printOpt = cliOptions.p
-                    String getUrl = "${url}/${id}/query?query=${query}"
-                    if (printOpt) {
-                        getUrl += "&printOpt=${printOpt}"
-                    }
-                    return new HttpGet(getUrl)
-                }
-                else {
-                    throw new RuntimeException("The query option is not specified")
-                }
-
-            }
-            else {
-                throw new RuntimeException("The id option is not specified")
-            }
-        },
-        authenticator: DEFAULT_AUTHENTICATOR,
-        onSuccess: { HttpEntity entity ->
-            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return json.result.join("\n")
-        }
-    )
+//    private static final CliRestCommand JC_PLUGIN_METADATA = new CliRestCommand(
+//        name: 'jcplugin',
+//        description: "Upload the jcplugin metadata zip file",
+//        endPoint: "analyses",
+//        options:[
+//            ID,
+//            OptionBuilder.hasArg().withArgName('jcplugin metadata zip file').
+//                    withDescription('Upload the jc plugin metadata zip file').create('zip'),
+//        ],
+//        requestBuilder: {String url ->
+//            if (cliOptions.id && cliOptions.zip) {
+//                String id = cliOptions.id
+//                String zip = cliOptions.zip
+//                File zipFile = FileOps.findFileOrThrow(zip as String, "Not a valid file: $zip")
+//
+//                HttpPost post = new HttpPost("${url}/${id}/jcPluginMetadata")
+//                MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+//                Helper.addFilesToMultiPart("jcPluginMetadata", [zipFile], builder)
+//                post.setEntity(builder.build())
+//
+//                return post
+//            }
+//            else {
+//                throw new RuntimeException("The id option is not specified")
+//            }
+//        },
+//        authenticator: DEFAULT_AUTHENTICATOR,
+//        onSuccess: DEFAULT_SUCCES
+//    )
 
     /**
      * Consumes the DELETE /analyses/[analysis-id] response.
@@ -592,7 +551,7 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        PING, LOGIN, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, JC_PLUGIN_METADATA, QUERY, DELETE, SEARCH_MAVEN
+        PING, LOGIN, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN
     ].collectEntries {
         [(it.name):it]
     }
