@@ -177,13 +177,13 @@ class CliRestClient {
     )
 
     /**
-     * Posts to the /family/doop endpoint, printing the result.
+     * Posts to the analyses/family/doop endpoint, printing the result.
      * {@see server.web.restlet.WebApp, server.web.restlet.api.CreateAnalysisResource}
      */
     private static final CliRestCommand POST_DOOP = new CliRestCommand(
         name: 'post_doop',
         description: "Posts a new doop analysis to the remote server",
-        endPoint: "family/doop",
+        endPoint: "analyses/family/doop",
         options: [
                 OptionBuilder.withLongOpt('properties').hasArg().withArgName('properties').
                         withDescription(CommandLineAnalysisFactory.PROPS).create('p'),
@@ -285,13 +285,13 @@ class CliRestClient {
 
 
     /**
-     * Posts to the /family/cclyzer endpoint, printing the result.
+     * Posts to the analyses/family/cclyzer endpoint, printing the result.
      * {@see server.web.restlet.WebApp, server.web.restlet.api.CreateAnalysisResource}
      */
     private static final CliRestCommand POST_CCLYZER = new CliRestCommand(
         name: 'post_cclyzer',
         description: "Posts a new cclyzer analysis to the remote server",
-        endPoint: "family/cclyzer",
+        endPoint: "analyses/family/cclyzer",
         options: [],
         requestBuilder: {String url ->
             throw new RuntimeException("Not supported yet")

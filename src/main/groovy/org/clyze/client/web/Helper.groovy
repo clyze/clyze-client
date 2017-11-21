@@ -229,7 +229,7 @@ class Helper {
                                                                  File hprof,
                                                                  Map<String, Object> options) {
         return new RestCommandBase<String>(
-            endPoint: "family/doop",
+            endPoint: "analyses/family/doop",
             requestBuilder: { String url ->
                 HttpPost post = new HttpPost(url)
                 MultipartEntityBuilder builder = MultipartEntityBuilder.create()
