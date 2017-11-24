@@ -548,10 +548,35 @@ class CliRestClient {
     )
 
     /**
+     * Consumes the GET /quickstart response, printing the result.
+     * {@see server.web.restlet.App, server.web.restlet.api.QuickstartResource}
+     */
+    private static final CliRestCommand QUICKSTART = new CliRestCommand(
+        name: 'quickstart',
+        description: "Gets the quickstart guide for an analysis from the server.",
+        endPoint: "analyses",
+        options:[ID],
+        requestBuilder: {String url ->
+            if (cliOptions.id) {
+                String id = cliOptions.id
+                return new HttpGet("${url}/${id}/quickstart")
+            }
+            else {
+                throw new RuntimeException("The id option is not specified")
+            }
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: { HttpEntity entity ->
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+            return json.results
+        }
+    )
+
+    /**
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        PING, LOGIN, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN
+        PING, LOGIN, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
     ].collectEntries {
         [(it.name):it]
     }
