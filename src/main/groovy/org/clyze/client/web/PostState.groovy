@@ -80,10 +80,6 @@ class PostState {
 
         // Fix the paths of inputs to point to the given directory.
         def dirFile = { String n -> n == null ? null : new File("${dir}/${n}") }
-        def fileName = { String f ->
-            int idx = f.lastIndexOf(File.separator);
-            (idx == -1) ? f : f.substring(idx)
-        }
         ps.options.inputs = ps.options.inputs.findAll { it != null }
                                              .collect { dir + "/" + fileName(it) }
 
@@ -94,15 +90,27 @@ class PostState {
         return (PostState)ps
     }
 
+    private static String fileName(String f) {
+        int idx = f.lastIndexOf(File.separator);
+        return (idx == -1) ? f : f.substring(idx+1)
+    }
+
     // Generate shell script to runs Doop with this state's options.
     public String generateDoopScript(String dir) {
-        String script = '#!/bin/bash' + '\n' + '\n' + 'pushd $DOOP_HOME' + '\n'
+        String script = '#!/bin/bash' + '\n' + '\n' +
+            'if [ "${PROJECT_DIR}" == "" ]; then\n' +
+            '    PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]-$0}" )" && pwd )"' + '\n' +
+            '    echo "Using PROJECT_DIR=${PROJECT_DIR}"' + '\n' +
+            'fi' + '\n' + '\n' +
+            'pushd $DOOP_HOME' + '\n' +
+            ''
         List<String> cmdLine = [ "./doop" ]
+        Closure projFile = { String p -> '${PROJECT_DIR}/' + fileName(p) }
         options.each { String opt, Object val ->
             String option = opt?.replaceAll('_', '-')
             if (option == 'inputs') {
                 cmdLine << "-i"
-                val.each { cmdLine << it }
+                val.each { cmdLine << projFile(it) }
             } else if (option == 'analysis') {
                 cmdLine << "-a ${val}"
             } else if (option.startsWith("x-")) {
@@ -130,8 +138,9 @@ class PostState {
         }
         if (hprof != null) {
             cmdLine << "--heapdl"
-            cmdLine << hprof.canonicalPath
+            cmdLine << projFile(hprof.canonicalPath)
         }
+        cmdLine << '"$@"'
         script += cmdLine.join(" ")
         script += '\n' + 'popd' + '\n'
         return script
