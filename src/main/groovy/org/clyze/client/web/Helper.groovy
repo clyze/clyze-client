@@ -19,6 +19,8 @@ import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.message.BasicNameValuePair
 
 import java.awt.Desktop
+import java.nio.file.attribute.PosixFilePermission
+import static java.nio.file.Files.setPosixFilePermissions
 
 //@TypeChecked
 class Helper {
@@ -150,7 +152,23 @@ class Helper {
             new File("${tmpDir}/analysis.json") << ps.toJson()
 
             // Generate optional script to call Doop.
-            new File("${tmpDir}/run-doop.sh") << ps.generateDoopScript(tmpDir)
+            File doopScript = new File("${tmpDir}/run-doop.sh")
+            doopScript << ps.generateDoopScript(tmpDir)
+            // Try to make file executable.
+            try {
+                Set<PosixFilePermission> perms =
+                    [ PosixFilePermission.OWNER_READ,
+                      PosixFilePermission.OWNER_WRITE,
+                      PosixFilePermission.OWNER_EXECUTE,
+                      PosixFilePermission.GROUP_READ,
+                      PosixFilePermission.GROUP_WRITE,
+                      PosixFilePermission.GROUP_EXECUTE,
+                      PosixFilePermission.OTHERS_READ,
+                      PosixFilePermission.OTHERS_EXECUTE ] as Set
+                setPosixFilePermissions(doopScript.toPath(), perms)
+            } catch (Exception ex) {
+                println ("Failed to make ${doopScript} executable: " + ex.getClass().getName())
+            }
 
             println "Analysis submission data saved in ${tmpDir}"
         }

@@ -98,7 +98,11 @@ class PostState {
     // Generate shell script to runs Doop with this state's options.
     public String generateDoopScript(String dir) {
         String script = '#!/bin/bash' + '\n' + '\n' +
-            'if [ "${PROJECT_DIR}" == "" ]; then\n' +
+            'if [ "${DOOP_HOME}" == "" ]; then' + '\n' +
+            '    echo "Plase set DOOP_HOME."' + '\n' +
+            '    exit' + '\n' +
+            'fi' + '\n' + '\n' +
+            'if [ "${PROJECT_DIR}" == "" ]; then' + '\n' +
             '    PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]-$0}" )" && pwd )"' + '\n' +
             '    echo "Using PROJECT_DIR=${PROJECT_DIR}"' + '\n' +
             'fi' + '\n' + '\n' +
