@@ -63,8 +63,8 @@ class PostState {
             "}"
     }
 
-    public static def fromJson(String dir) {
-        File jsonFile = new File("${dir}/analysis.json")
+    public static def fromJson(String dir, String analysisJsonName) {
+        File jsonFile = new File("${dir}/${analysisJsonName}")
         Object obj = (new JsonSlurper()).parseText(jsonFile.text)
         PostState ps = new PostState()
         ps.host           = obj.host

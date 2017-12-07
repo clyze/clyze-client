@@ -25,6 +25,8 @@ import static java.nio.file.Files.setPosixFilePermissions
 //@TypeChecked
 class Helper {
 
+    final static String ANALYSIS_JSON = "analysis.json"
+
     static List<File> resolveFiles(List<String> files) {
         if (files) {
             InputResolutionContext ctx = new DefaultInputResolutionContext(new ChainResolver(
@@ -149,7 +151,7 @@ class Helper {
             if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.hprof.canonicalPath)          }
 
             // Save remaining information.
-            new File("${tmpDir}/analysis.json") << ps.toJson()
+            new File("${tmpDir}/${ANALYSIS_JSON}") << ps.toJson()
 
             // Generate optional script to call Doop.
             File doopScript = new File("${tmpDir}/run-doop.sh")
@@ -370,7 +372,7 @@ class Helper {
      */
     public static void replayPost(String path) {
         println "Reading state from ${path}..."
-        PostState ps = PostState.fromJson(path)
+        PostState ps = PostState.fromJson(path, ANALYSIS_JSON)
 
         // Optionally read properties from ~/.gradle/gradle.properties.
         String homeDir = System.getProperty("user.home")
