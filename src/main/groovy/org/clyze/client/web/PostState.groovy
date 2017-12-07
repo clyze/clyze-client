@@ -43,7 +43,10 @@ class PostState {
     }
 
     public String toJson() {
-        String optionsJson = new JsonBuilder(options).toPrettyString()
+        def options2 = options.clone()
+        options2.inputs = options2.inputs.findAll { it != null }
+                                         .collect { fileName(it) }
+        String optionsJson = new JsonBuilder(options2).toPrettyString()
         String sourcesName = sources == null? "null" : "\"${sources.name}\""
         String jcPluginMetadataName = jcPluginMetadata == null? "null" : "\"${jcPluginMetadata.name}\""
         String hprofName = hprof == null? "null" : "\"${hprof.name}\""
