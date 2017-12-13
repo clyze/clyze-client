@@ -77,14 +77,15 @@ class CliRestClient {
                ${sep}               
                ${head}               
                ${sep}                              
-               Org    : ${analysisData.orgName}
-               Project: ${analysisData.projectName}
-               Version: ${analysisData.projectVersion}
-               ID     : ${analysisData.id}
-               Family : ${analysisData.family}
-               Name   : ${analysisData.name}               
-               Inputs : ${analysisData.inputs.join(", ")}
-               Status : ${analysisData.state}""".stripIndent()
+               Org      : ${analysisData.orgName}
+               Project  : ${analysisData.projectName}
+               Version  : ${analysisData.projectVersion}
+               ID       : ${analysisData.id}
+               Family   : ${analysisData.family}
+               Name     : ${analysisData.name}               
+               Inputs   : ${analysisData.inputs.join(", ")}
+               Libraries: ${analysisData.libraries.join(", ")}
+               Status   : ${analysisData.state}""".stripIndent()
     }
 
     /**
@@ -191,7 +192,7 @@ class CliRestClient {
         requestBuilder: { String url ->
 
             String name, id
-            List<String> inputs
+            List<String> inputs, libraries
             Map<String, AnalysisOption> options
 
             if (cliOptions.p) {
@@ -215,6 +216,17 @@ class CliRestClient {
                     }
                 }
 
+                //Get the libraries of the analysis. If there are no librraries in the CLI, we get them from the properties.
+                libraries = cliOptions.ls
+                if (!libraries) {
+                    libraries = props.getProperty("LIBRARIES").split().collect { String s -> s.trim() }
+                    //The libraries, if relative, are being resolved via the propsBaseDir
+                    libraries = libraries.collect { String jar ->
+                        File jarFile = new File(jar)
+                        return jarFile.isAbsolute() ? jar : new File(propsBaseDir, jar).getCanonicalFile().getAbsolutePath()
+                    }
+                }
+
                 //Get the optional id of the analysis
                 id = cliOptions.id ?: props.getProperty("id")
 
@@ -226,6 +238,8 @@ class CliRestClient {
                 name = cliOptions.a ?: null
                 //Get the inputs of the analysis
                 inputs = cliOptions.is ?: null
+                //Get the libraries of the analysis
+                libraries = cliOptions.ls ?: null
                 //Get the optional id of the analysis
                 id = cliOptions.id ?: null
 
@@ -234,6 +248,7 @@ class CliRestClient {
 
             options = options.findAll { it.value.webUI }
             options["INPUTS"].value = inputs
+            options["LIBRARIES"].value = libraries
 
             //create the HttpPost
             HttpPost post = new HttpPost(url)
@@ -257,6 +272,18 @@ class CliRestClient {
                                     //jar is not a local file
                                     Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
                                     builder.addPart("INPUTS", new StringBody(jar))
+                                }
+                            }
+                        }
+                        if (optionId == "LIBRARIES") {
+                            option.value.each { String jar ->
+                                try {
+                                    Helper.addFilesToMultiPart(optionId, [new File(jar)], builder)
+                                }
+                                catch(e) {
+                                    //jar is not a local file
+                                    Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
+                                    builder.addPart("LIBRARIES", new StringBody(jar))
                                 }
                             }
                         }

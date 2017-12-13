@@ -146,6 +146,11 @@ class Helper {
                 File f = copyToTmp(it)
                 f.canonicalPath
             }
+
+            ps.options.libraries = ps.options.libraries.collect {
+                File f = copyToTmp(it)
+                f.canonicalPath
+            }
             if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources.canonicalPath)          }
             if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata.canonicalPath) }
             if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.hprof.canonicalPath)          }

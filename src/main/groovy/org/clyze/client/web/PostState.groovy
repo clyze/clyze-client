@@ -118,7 +118,12 @@ class PostState {
             if (option == 'inputs') {
                 cmdLine << "-i"
                 val.each { cmdLine << projFile(it) }
-            } else if (option == 'analysis') {
+            }
+            else if (option == 'libraries') {
+                cmdLine << "-l"
+                val.each { cmdLine << projFile(it) }
+            }
+            else if (option == 'analysis') {
                 cmdLine << "-a ${val}"
             } else if (option.startsWith("x-")) {
                 String xOption = option.substring(2)
