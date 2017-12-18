@@ -120,8 +120,10 @@ class PostState {
                 val.each { cmdLine << projFile(it) }
             }
             else if (option == 'libraries') {
-                cmdLine << "-l"
-                val.each { cmdLine << projFile(it) }
+                if (val?.size() > 0) {
+                    cmdLine << "-l"
+                    val.each { cmdLine << projFile(it) }
+                }
             }
             else if (option == 'analysis') {
                 cmdLine << "-a ${val}"
