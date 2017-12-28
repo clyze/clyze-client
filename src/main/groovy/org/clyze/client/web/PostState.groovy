@@ -46,6 +46,8 @@ class PostState {
         def options2 = options.clone()
         options2.inputs = options2.inputs.findAll { it != null }
                                          .collect { fileName(it) }
+        options2.libraries = options2.libraries.findAll { it != null }
+                                               .collect { fileName(it) }
         String optionsJson = new JsonBuilder(options2).toPrettyString()
         String sourcesName = sources == null? "null" : "\"${sources.name}\""
         String jcPluginMetadataName = jcPluginMetadata == null? "null" : "\"${jcPluginMetadata.name}\""
@@ -81,10 +83,12 @@ class PostState {
         ps.ratingCount    = obj.ratingCount
         ps.options        = obj.options
 
-        // Fix the paths of inputs to point to the given directory.
+        // Fix the paths of inputs/libraries to point to the given directory.
         def dirFile = { String n -> n == null ? null : new File("${dir}/${n}") }
         ps.options.inputs = ps.options.inputs.findAll { it != null }
                                              .collect { dir + "/" + fileName(it) }
+        ps.options.libraries = ps.options.libraries.findAll { it != null }
+                                                   .collect { dir + "/" + fileName(it) }
 
         ps.sources = dirFile(obj.sourcesName)
         ps.jcPluginMetadata = dirFile(obj.jcPluginMetadataName)
