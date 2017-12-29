@@ -288,11 +288,15 @@ class Helper {
                     if (options.inputs != null) {
                         options.inputs = options.inputs.collect { new File(it) }
                     }
+                    if (options.libraries != null) {
+                        options.libraries = options.libraries.collect { new File(it) }
+                    }
                     options.each { Map.Entry<String, Object> entry ->
                         String optionId = entry.key.toUpperCase()
                         def value = entry.value
                         if (value) {
-                            if (optionId == "INPUTS" || optionId == "DYNAMIC") {
+                            if (optionId == "INPUTS" || optionId == "LIBRARIES" ||
+                                optionId == "DYNAMIC") {
                                 addFilesToMultiPart(optionId, value, builder)
                             }
                             else if (isFileOption(optionId)) {
