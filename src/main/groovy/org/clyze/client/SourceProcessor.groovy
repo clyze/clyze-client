@@ -44,7 +44,7 @@ class SourceProcessor {
         int lineCount = 0
 
         sourcesDir.eachFileRecurse(FILES) {
-            if (it.name =~ /.*\.java/) {
+            if (it.name.endsWith(".java")) {
                 sourceFiles << it.canonicalPath
                 if (convertUTF8) {
                     ensureUTF8(it.canonicalPath)
@@ -65,6 +65,8 @@ class SourceProcessor {
                 scalaFilesCount++
             } else if (it.name =~ /.*\.groovy/) {
                 groovyFilesCount++
+            } else {
+                println "Ignoring source file: ${it}"
             }
         }
         int sourceFilesCount = sourceFiles.size()
