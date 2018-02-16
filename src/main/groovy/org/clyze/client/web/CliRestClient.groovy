@@ -26,16 +26,18 @@ import org.apache.log4j.Logger
  *
  * The client can execute the following commands via the remote server:
  * <ul>
- *     <li>login        - authenticate user.
- *     <li>ping         - check connection with server.
- *     <li>list         - list the available analyses.
- *     <li>post_doop    - create a new doop analysis.
- *     <li>post_cclyzer - create a new cclyzer analysis.
- *     <li>get          - retrieves an analysis.
- *     <li>start        - start an analysis.
- *     <li>stop         - stop an analysis.
- *     <li>query        - query a complete analysis.
- *     <li>delete       - delete an analysis.
+ *     <li>login             - authenticate user.
+ *     <li>ping              - check connection with server.
+ *     <li>list_bundles      - list the available bundles.
+ *     <li>post_doop_bundle  - create a new doop bundle.    
+ *     <li>list              - list the available analyses.
+ *     <li>post_doop         - create a new doop analysis.
+ *     <li>post_cclyzer      - create a new cclyzer analysis.
+ *     <li>get               - retrieves an analysis.
+ *     <li>start             - start an analysis.
+ *     <li>stop              - stop an analysis.
+ *     <li>query             - query a complete analysis.
+ *     <li>delete            - delete an analysis.
  * </ul>
  *
  * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
@@ -65,6 +67,32 @@ class CliRestClient {
 
         //send the token with the request
         request.addHeader(RestCommandBase.HEADER_TOKEN, token)
+    }
+
+    //Used by list analyses and list bundles commands
+    private static final Closure<HttpUriRequest> LIST_REQUEST_BUILDER = { String url ->
+        Integer start = 0
+        Integer count = DEFAULT_LIST_SIZE
+
+        if (cliOptions.s) {
+            try {
+                start = cliOptions.s as Integer
+            }
+            catch (all) {
+                Logger.getRootLogger().warn("Option start (${cliOptions.s}) is not valid, using default ($start).")
+            }                
+        }
+
+        if (cliOptions.l) {
+            try {
+                count = cliOptions.l as Integer
+            }
+            catch (all) {
+                Logger.getRootLogger().warn("Option count (${cliOptions.l}) is not valid, using default ($count).")
+            }
+        }
+
+        return new HttpGet("${url}?_start=${start}&_count=${count}")
     }
 
     private static final String processAnalysisData(Integer index, def analysisData) {
@@ -114,8 +142,7 @@ class CliRestClient {
 
 
     /**
-     * Consumes the GET /ping response, ignoring the result.
-     * {@see server.web.restlet.App, server.web.restlet.Ping}
+     * Consumes the GET /ping response, ignoring the result.     
      */
     private static final CliRestCommand PING = new CliRestCommand(
         name: 'ping',
@@ -127,8 +154,79 @@ class CliRestClient {
     )
 
     /**
-     * Consumes the GET /analyses response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.AnalysesResource}
+     * Consumes the GET /bundles response, printing the result.
+     */
+    private static final CliRestCommand LIST_BUNDLES = new CliRestCommand(
+        name: 'list_bundles',
+        description: 'Lists the available bundles',
+        endPoint: 'bundles',
+        options: [
+            OptionBuilder.withLongOpt('start').hasArg().withArgName('start-position').
+                          withDescription('The start position of the list (default 0)').                          
+                          create('s'),
+            OptionBuilder.withLongOpt('limit').hasArg().withArgName('number-of-results').
+                          withDescription("The size of the list (default ${DEFAULT_LIST_SIZE})").
+                          create('l')  
+        ],
+        requestBuilder: LIST_REQUEST_BUILDER,
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: { HttpEntity entity ->
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")                
+            int start = json.start as Integer
+            return "Start: ${json.start}, count: ${json.list?.size()?:0} of ${json.hits} total results.\n" + json.list?.collect {
+                it //TODO: print bundle attributes
+            }.join("\n")
+        }
+    )
+
+    /**
+     * Posts to the /bundles endpoint, printing the result
+     */
+    private static final CliRestCommand POST_DOOP_BUNDLE = new CliRestCommand(
+        name: 'post_doop_bundle',
+        description: 'Posts a new doop input bundle',
+        endPoint: 'bundles',
+        options: [
+            OptionBuilder.withLongOpt('inputs').hasArg().withArgName('input jar').
+                          withDescription('The input jar(s)').                          
+                          create('i'),
+            OptionBuilder.withLongOpt('libraries').hasArg().withArgName('library jar').
+                          withDescription('The library jar(s)').                          
+                          create('l')
+            //TODO: Add more options  
+        ],
+        requestBuilder: { String url ->
+            HttpPost post = new HttpPost("${url}?family=doop")
+            def inputs    = cliOptions.is
+            def libraries = cliOptions.ls
+            
+            if (!inputs) throw new RuntimeException("No input jars")
+
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create() 
+            inputs.each { String jar ->
+                File f = new File(jar)
+                if (f.exists()) {
+                    Helper.addFilesToMultiPart("INPUTS", [f], builder)
+                }
+                else {
+                    //jar is not a local file
+                    println("$jar is not a local file, it will be posted as string.")
+                    builder.addPart("INPUTS", new StringBody(jar))
+                }                
+            }           
+            HttpEntity entity = builder.build()
+            post.setEntity(entity)
+            return post
+        },
+        authenticator: DEFAULT_AUTHENTICATOR,
+        onSuccess: { HttpEntity entity ->
+            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")    
+            println json
+        }
+    )
+
+    /**
+     * Consumes the GET /analyses response, printing the result.     
      */
     private static final CliRestCommand LIST = new CliRestCommand(
         name: 'list',
@@ -143,30 +241,7 @@ class CliRestClient {
                           create('l')  
 
         ],
-        requestBuilder: { String url ->
-            Integer start = 0
-            Integer count = DEFAULT_LIST_SIZE
-
-            if (cliOptions.s) {
-                try {
-                    start = cliOptions.s as Integer
-                }
-                catch (all) {
-                    Logger.getRootLogger().warn("Option start (${cliOptions.s}) is not valid, using default ($start).")
-                }                
-            }
-
-            if (cliOptions.l) {
-                try {
-                    count = cliOptions.l as Integer
-                }
-                catch (all) {
-                    Logger.getRootLogger().warn("Option count (${cliOptions.l}) is not valid, using default ($count).")
-                }
-            }
-
-            return new HttpGet("${url}?_start=${start}&_count=${count}")
-        },
+        requestBuilder: LIST_REQUEST_BUILDER,
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")                
@@ -178,8 +253,7 @@ class CliRestClient {
     )
 
     /**
-     * Posts to the analyses/family/doop endpoint, printing the result.
-     * {@see server.web.restlet.WebApp, server.web.restlet.api.CreateAnalysisResource}
+     * Posts to the analyses/family/doop endpoint, printing the result.     
      */
     private static final CliRestCommand POST_DOOP = new CliRestCommand(
         name: 'post_doop',
@@ -312,8 +386,7 @@ class CliRestClient {
 
 
     /**
-     * Posts to the analyses/family/cclyzer endpoint, printing the result.
-     * {@see server.web.restlet.WebApp, server.web.restlet.api.CreateAnalysisResource}
+     * Posts to the analyses/family/cclyzer endpoint, printing the result.     
      */
     private static final CliRestCommand POST_CCLYZER = new CliRestCommand(
         name: 'post_cclyzer',
@@ -333,7 +406,6 @@ class CliRestClient {
 
     /**
      * Consumes the GET /analyses/[analysis-id] response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.AnalysisResource}
      */
     private static final CliRestCommand GET = new CliRestCommand(
         name: 'get',
@@ -357,8 +429,7 @@ class CliRestClient {
     )
 
     /**
-     * Consumes the PUT /analyses/[analysis-id]/action/start response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
+     * Consumes the PUT /analyses/[analysis-id]/action/start response, printing the result.     
      */
     private static final CliRestCommand START = new CliRestCommand(
         name:'start',
@@ -380,7 +451,6 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/stop response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      */
     private static final CliRestCommand STOP = new CliRestCommand(
         name: 'stop',
@@ -402,7 +472,6 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/post_process response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand POST_PROCESS = new CliRestCommand(
@@ -425,7 +494,6 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/reset response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand RESET = new CliRestCommand(
@@ -448,7 +516,6 @@ class CliRestClient {
 
     /**
      * Consumes the PUT /analyses/[analysis-id]/action/restart response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.ExecuteAnalysisActionResource}
      * TODO: This offers a convenience for testing
      */
     private static final CliRestCommand RESTART = new CliRestCommand(
@@ -506,7 +573,6 @@ class CliRestClient {
 
     /**
      * Consumes the DELETE /analyses/[analysis-id] response.
-     * {@see server.web.restlet.App, server.web.restlet.api.AnalysisResource}
      */
     private static final CliRestCommand DELETE = new CliRestCommand(
         name:'delete',
@@ -576,7 +642,6 @@ class CliRestClient {
 
     /**
      * Consumes the GET /quickstart response, printing the result.
-     * {@see server.web.restlet.App, server.web.restlet.api.QuickstartResource}
      */
     private static final CliRestCommand QUICKSTART = new CliRestCommand(
         name: 'quickstart',
@@ -603,7 +668,7 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        PING, LOGIN, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+        PING, LOGIN, LIST_BUNDLES, POST_DOOP_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
     ].collectEntries {
         [(it.name):it]
     }
