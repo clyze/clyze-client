@@ -17,6 +17,7 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 import org.apache.log4j.Logger
@@ -97,22 +98,21 @@ class CliRestClient {
 
     private static final String processAnalysisData(Integer index, def analysisData) {
 
-        String head = """${index == null ? "" : "$index."} ${analysisData.projectName}"""
+        String head = """${index == null ? "" : "$index."} ${analysisData.id}"""
         String sep  = ""
-        head.length().times { sep += "#" }
+        head.length().times { sep += "#" }        
 
         return """\
                ${sep}               
                ${head}               
-               ${sep}                              
+               ${sep}                                             
                Org      : ${analysisData.orgName}
                Project  : ${analysisData.projectName}
-               Version  : ${analysisData.projectVersion}
-               ID       : ${analysisData.id}
+               Version  : ${analysisData.projectVersion}               
                Family   : ${analysisData.family}
                Name     : ${analysisData.name}               
-               Inputs   : ${analysisData.inputs.join(", ")}
-               Libraries: ${analysisData.libraries.join(", ")}
+               Inputs   : ${analysisData.options.INPUTS}
+               Libraries: ${analysisData.options.LIBRARIES}
                Status   : ${analysisData.state}""".stripIndent()
     }
 
@@ -206,12 +206,12 @@ class CliRestClient {
             inputs.each { String jar ->
                 File f = new File(jar)
                 if (f.exists()) {
-                    Helper.addFilesToMultiPart("INPUTS", [f], builder)
+                    Helper.addFilesToMultiPart("inputs", [f], builder)
                 }
                 else {
                     //jar is not a local file
                     println("$jar is not a local file, it will be posted as string.")
-                    builder.addPart("INPUTS", new StringBody(jar))
+                    builder.addPart("inputs", new StringBody(jar))
                 }                
             }           
             HttpEntity entity = builder.build()
@@ -245,10 +245,10 @@ class CliRestClient {
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")                
-            int start = json.start as Integer
+            int start = json.start as Integer            
             return "Start: ${json.start}, count: ${json.list?.size()?:0} of ${json.hits} total results.\n" + json.list?.collect {
                 processAnalysisData(start++, it)
-            }.join("\n")
+            }.join("\n")            
         }
     )
 
@@ -331,41 +331,25 @@ class CliRestClient {
 
                 if (!inputs) throw new RuntimeException("No input files are specified")
 
-                //process the options
-                println "Submitting options: ${options}"
+                //process the options                
                 options.each { Map.Entry<String, AnalysisOption> entry ->
                     String optionId = entry.key.toUpperCase()
                     AnalysisOption option = entry.value
-                    if (option.value) {
-                        if (optionId == "INPUTS") {
-                            option.value.each { String jar ->
+                    if (option.value) {                                        
+                        if (optionId == "INPUTS" || optionId == "LIBRARIES") {
+                            option.value.each { String jar ->                                   
                                 try {
-                                    Helper.addFilesToMultiPart(optionId, [new File(jar)], builder)
+                                    File f = FileOps.findFileOrThrow(jar, "Not a valid file: $jar")
+                                    builder.addPart(optionId, new FileBody(f))
                                 }
-                                catch(e) {
-                                    //jar is not a local file
-                                    Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
-                                    builder.addPart("INPUTS", new StringBody(jar))
+                                catch(e) {                                    
+                                    Logger.getRootLogger().warn("$jar will be posted as string.")
+                                    builder.addPart(optionId, new StringBody(jar))
                                 }
                             }
-                        }
-                        if (optionId == "LIBRARIES") {
-                            option.value.each { String jar ->
-                                try {
-                                    Helper.addFilesToMultiPart(optionId, [new File(jar)], builder)
-                                }
-                                catch(e) {
-                                    //jar is not a local file
-                                    Logger.getRootLogger().warn("$jar is not a local file, it will be posted as string.")
-                                    builder.addPart("LIBRARIES", new StringBody(jar))
-                                }
-                            }
-                        }
-                        else if (optionId == "DYNAMIC") {
-                            Helper.addFilesToMultiPart(optionId, [new File(option.value)], builder)
-                        }
-                        else if (Helper.isFileOption(optionId)) {
-                            Helper.addFilesToMultiPart(optionId, [new File(option.value)], builder)
+                        }                        
+                        else if (optionId == "DYNAMIC" || Helper.isFileOption(optionId)) {
+                            builder.addPart(optionId, new FileBody(new File(option.value).getCanonicalFile()))
                         }
                         else {
                             builder.addPart(optionId, new StringBody(option.value as String))
