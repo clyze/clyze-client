@@ -142,18 +142,12 @@ class Helper {
             }
 
             // Replace all file paths with the paths of their copies.
-            ps.options.inputs = ps.options.inputs.collect {
-                File f = copyToTmp(it)
-                f.canonicalPath
-            }
-
-            ps.options.libraries = ps.options.libraries.collect {
-                File f = copyToTmp(it)
-                f.canonicalPath
-            }
+            def copier = { copyToTmp(it).canonicalPath }
+            ps.options.inputs    = ps.options.inputs.collect    copier
+            ps.options.libraries = ps.options.libraries.collect copier
+            ps.options.hprofs    = ps.options.hprofs.collect    copier
             if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources.canonicalPath)          }
             if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata.canonicalPath) }
-            if (ps.hprofs           != null) { ps.hprofs           = ps.hprofs.collect { hprof -> copyToTmp(hprof.canonicalPath) } }
 
             // Save remaining information.
             new File("${tmpDir}/${ANALYSIS_JSON}") << ps.toJson()

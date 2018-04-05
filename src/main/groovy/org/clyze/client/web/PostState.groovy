@@ -51,7 +51,7 @@ class PostState {
         String optionsJson = new JsonBuilder(options2).toPrettyString()
         String sourcesName = sources == null? "null" : "\"${sources.name}\""
         String jcPluginMetadataName = jcPluginMetadata == null? "null" : "\"${jcPluginMetadata.name}\""
-        List<String> hprofNames = hprofs.find { it != null }
+        List<String> hprofNames = hprofs.findAll { it != null }
                                         .collect { "\"${it.name}\"" }
         return "{ \"host\" : \"${host}\",\n" +
             "  \"port\" : \"${port}\",\n" +
