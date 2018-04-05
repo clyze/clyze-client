@@ -93,7 +93,7 @@ class PostState {
 
         ps.sources = dirFile(obj.sourcesName)
         ps.jcPluginMetadata = dirFile(obj.jcPluginMetadataName)
-        ps.hprofs = obj.hprofNames.each { dirFile(it) }
+        ps.hprofs = obj.hprofNames.collect { dirFile(it) }
 
         return (PostState)ps
     }
