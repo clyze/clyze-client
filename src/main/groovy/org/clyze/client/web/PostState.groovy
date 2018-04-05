@@ -17,7 +17,7 @@ class PostState {
     Map<String, Object> options
     File sources
     File jcPluginMetadata
-    File hprof
+    List<File> hprofs
 
     // Needed for JSON deserialization.
     public PostState() { }
@@ -26,7 +26,7 @@ class PostState {
                      String orgName, String projectName, String projectVersion,
                      String rating, String ratingCount,
                      Map<String, Object> options, File sources,
-                     File jcPluginMetadata, File hprof) {
+                     File jcPluginMetadata, List<File> hprofs) {
         this.username         = username
         this.password         = password
         this.host             = host
@@ -39,7 +39,7 @@ class PostState {
         this.options          = options
         this.sources          = sources
         this.jcPluginMetadata = jcPluginMetadata
-        this.hprof            = hprof
+        this.hprofs           = hprofs
     }
 
     public String toJson() {
@@ -51,7 +51,8 @@ class PostState {
         String optionsJson = new JsonBuilder(options2).toPrettyString()
         String sourcesName = sources == null? "null" : "\"${sources.name}\""
         String jcPluginMetadataName = jcPluginMetadata == null? "null" : "\"${jcPluginMetadata.name}\""
-        String hprofName = hprof == null? "null" : "\"${hprof.name}\""
+        List<String> hprofNames = hprofs.find { it != null }
+                                        .collect { "\"${it.name}\"" }
         return "{ \"host\" : \"${host}\",\n" +
             "  \"port\" : \"${port}\",\n" +
             "  \"username\" : \"${username}\",\n" +
@@ -64,7 +65,7 @@ class PostState {
             "  \"options\" : ${optionsJson},\n" +
             "  \"sourcesName\" : ${sourcesName},\n" +
             "  \"jcPluginMetadataName\" : ${jcPluginMetadataName},\n" +
-            "  \"hprofName\" : ${hprofName}\n" +
+            "  \"hprofNames\" : ${hprofNames}\n" +
             "}"
     }
 
@@ -92,7 +93,7 @@ class PostState {
 
         ps.sources = dirFile(obj.sourcesName)
         ps.jcPluginMetadata = dirFile(obj.jcPluginMetadataName)
-        ps.hprof = dirFile(obj.hprofName)
+        ps.hprofs = obj.hprofNames.each { dirFile(it) }
 
         return (PostState)ps
     }
@@ -154,9 +155,9 @@ class PostState {
                 println "WARNING: unknown entry ${option} (${opt}) = ${val}"
             }
         }
-        if (hprof != null) {
+        if ((hprofs != null) && (hprofs.size() > 0)) {
             cmdLine << "--heapdl"
-            cmdLine << projFile(hprof.canonicalPath)
+            hprofs.each { hprof -> cmdLine << projFile(hprof.canonicalPath) }
         }
         cmdLine << '"$@"'
         script += cmdLine.join(" ")

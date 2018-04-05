@@ -153,7 +153,7 @@ class Helper {
             }
             if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources.canonicalPath)          }
             if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata.canonicalPath) }
-            if (ps.hprof            != null) { ps.hprof            = copyToTmp(ps.hprof.canonicalPath)          }
+            if (ps.hprofs           != null) { ps.hprofs           = ps.hprofs.collect { hprof -> copyToTmp(hprof.canonicalPath) } }
 
             // Save remaining information.
             new File("${tmpDir}/${ANALYSIS_JSON}") << ps.toJson()
@@ -205,7 +205,7 @@ class Helper {
             null, //ratingCount
             ps.sources,
             ps.jcPluginMetadata,
-            ps.hprof,
+            ps.hprofs,
             ps.options
         )
         postAnalysis.authenticator = authenticator
@@ -251,7 +251,7 @@ class Helper {
                                                                  String ratingCount,
                                                                  File sources,
                                                                  File jcPluginMetadata,
-                                                                 File hprof,
+                                                                 List<File> hprofs,
                                                                  Map<String, Object> options) {
         return new RestCommandBase<String>(
             endPoint: "analyses/family/doop",
@@ -276,10 +276,10 @@ class Helper {
                     println "Submitting jcplugin metadata: ${jcPluginMetadata}"
                     addFilesToMultiPart("jcPluginMetadata", [jcPluginMetadata], builder)
 
-                    //process the HPROF file
-                    if (hprof != null) {
-                        println "Submitting HPROF: ${hprof}"
-                        addFilesToMultiPart("HEAPDL", [hprof], builder)
+                    //process the HPROF files
+                    if ((hprofs != null) && (hprofs.size() > 0)) {
+                        println "Submitting HPROF inputs: ${hprofs}"
+                        addFilesToMultiPart("HEAPDL", hprofs, builder)
                     }
 
                     // Process the options.
