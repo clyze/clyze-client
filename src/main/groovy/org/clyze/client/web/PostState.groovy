@@ -53,6 +53,11 @@ class PostState {
         String jcPluginMetadataName = jcPluginMetadata == null? "null" : "\"${jcPluginMetadata.name}\""
         List<String> hprofNames = hprofs.findAll { it != null }
                                         .collect { "\"${it.name}\"" }
+
+        // The resulting directory has a flat structure, so files
+        // should not overwrite each other.
+        checkFlatStructure(options2, sourcesName, jcPluginMetadataName, hprofNames)
+
         return "{ \"host\" : \"${host}\",\n" +
             "  \"port\" : \"${port}\",\n" +
             "  \"username\" : \"${username}\",\n" +
@@ -183,5 +188,17 @@ class PostState {
             println "WARNING: ${fPath} is not under ${dir}"
             return fPath
         }
+    }
+
+    private static void checkFlatStructure(def options, String sourcesName, String jcPluginMetadataName, List hprofNames) {
+        List l = []
+        l.addAll(options.inputs)
+        l.add(sourcesName)
+        l.add(jcPluginMetadataName)
+        l.addAll(options.libraries)
+        l.addAll(hprofNames)
+        l = l.findAll { it != null }
+        if (l.size() != l.toSet().size())
+            throw new RuntimeException("Flat structure violation, duplicate elements found in: ${l}")
     }
 }
