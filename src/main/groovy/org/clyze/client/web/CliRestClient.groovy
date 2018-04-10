@@ -291,7 +291,7 @@ class CliRestClient {
                     }
                 }
 
-                //Get the libraries of the analysis. If there are no librraries in the CLI, we get them from the properties.
+                //Get the libraries of the analysis. If there are no libraries in the CLI, we get them from the properties.
                 libraries = cliOptions.ls
                 if (!libraries) {
                     libraries = props.getProperty("LIBRARIES").split().collect { String s -> s.trim() }
