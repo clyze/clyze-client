@@ -113,6 +113,7 @@ class CliRestClient {
                Name     : ${analysisData.name}               
                Inputs   : ${analysisData.options.INPUTS}
                Libraries: ${analysisData.options.LIBRARIES}
+               Hprofs   : ${analysisData.options.HEAPDL}
                Status   : ${analysisData.state}""".stripIndent()
     }
 
