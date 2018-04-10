@@ -267,7 +267,7 @@ class CliRestClient {
         requestBuilder: { String url ->
 
             String name, id
-            List<String> inputs, libraries
+            List<String> inputs, libraries, hprofs, dynamics
             Map<String, AnalysisOption> options
 
             if (cliOptions.p) {
@@ -302,6 +302,17 @@ class CliRestClient {
                     }
                 }
 
+                //Get the heap dumps of the analysis. If there are no heap dumps in the CLI, we get them from the properties.
+                hprofs = cliOptions.heapdls
+                if (!hprofs) {
+                    hprofs = props.getProperty("HEAPDL").split().collect { String s -> s.trim() }
+                    //The heap dumps, if relative, are being resolved via the propsBaseDir
+                    hprofs = hprofs.collect { String hprof ->
+                        File hprofFile = new File(hprof)
+                        return hprofFile.isAbsolute() ? hprof : new File(propsBaseDir, hprof).getCanonicalFile().getAbsolutePath()
+                    }
+                }
+
                 //Get the optional id of the analysis
                 id = cliOptions.id ?: props.getProperty("id")
 
@@ -321,9 +332,15 @@ class CliRestClient {
                 options = Doop.overrideDefaultOptionsWithCLI(cliOptions) { AnalysisOption option -> option.webUI }
             }
 
-            options = options.findAll { it.value.webUI }
+            // TODO: "DYNAMIC" is not yet supported in the CliRestClient.
+            dynamics = []
+
+            List specialNonUIOpts = [ "HEAPDL", "DYNAMIC" ]
+            options = options.findAll { it.value.webUI || specialNonUIOpts.contains(it.value.id)}
             options["INPUTS"].value = inputs
             options["LIBRARIES"].value = libraries
+            options["HEAPDL"].value = hprofs
+            options["DYNAMIC"].value = dynamics
 
             //create the HttpPost
             HttpPost post = new HttpPost(url)
@@ -337,22 +354,18 @@ class CliRestClient {
                     String optionId = entry.key.toUpperCase()
                     AnalysisOption option = entry.value
                     if (option.value) {                                        
-                        if (optionId == "INPUTS" || optionId == "LIBRARIES") {
-                            option.value.each { String jar ->                                   
+                        if (option.acceptsMultipleInputs()) {
+                            option.value.each { String input ->
                                 try {
-                                    File f = FileOps.findFileOrThrow(jar, "Not a valid file: $jar")
+                                    File f = FileOps.findFileOrThrow(input, "Not a valid file: ${input}")
                                     builder.addPart(optionId, new FileBody(f))
                                 }
                                 catch(e) {                                    
-                                    Logger.getRootLogger().warn("$jar will be posted as string.")
-                                    builder.addPart(optionId, new StringBody(jar))
+                                    Logger.getRootLogger().warn("${input} will be posted as string.")
+                                    builder.addPart(optionId, new StringBody(input))
                                 }
                             }
-                        }                        
-                        else if (optionId == "DYNAMIC" || Helper.isFileOption(optionId)) {
-                            builder.addPart(optionId, new FileBody(new File(option.value).getCanonicalFile()))
-                        }
-                        else {
+                        } else {
                             builder.addPart(optionId, new StringBody(option.value as String))
                         }
                     }

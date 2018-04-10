@@ -290,7 +290,7 @@ class Helper {
                         def value = entry.value
                         if (value) {
                             if (optionId == "INPUTS" || optionId == "LIBRARIES" ||
-                                optionId == "DYNAMIC") {
+                                optionId == "DYNAMIC" || optionId == "HEAPDL") {
                                 addFilesToMultiPart(optionId, value, builder)
                             }
                             else if (isFileOption(optionId)) {
