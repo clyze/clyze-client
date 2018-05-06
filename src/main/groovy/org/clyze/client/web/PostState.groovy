@@ -135,6 +135,12 @@ class PostState {
                     val.each { cmdLine << projFile(it) }
                 }
             }
+            else if (option == 'hprofs') {
+                if (val?.size() > 0) {
+                    cmdLine << "--heapdl"
+                    val.each { cmdLine << projFile(it) }
+                }
+            }
             else if (option == 'analysis') {
                 cmdLine << "-a ${val}"
             } else if (option.startsWith("x-")) {
