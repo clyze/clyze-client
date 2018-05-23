@@ -2,7 +2,7 @@ plugins {
     id 'groovy'
     id 'application'
     id 'maven-publish'
-    id 'net.researchgate.release' version '2.4.0'
+    id 'net.researchgate.release' version '2.6.0'
 }
 
 //applicationDefaultJvmArgs = ["-Xmx2048m"]
@@ -15,7 +15,7 @@ applicationName = project.name
 mainClassName = 'org.clyze.client.web.Main'
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
+    gradleVersion = '4.7'
 }
 
 repositories {
