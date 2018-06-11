@@ -187,15 +187,7 @@ class CliRestClient {
         name: 'post_doop_bundle',
         description: 'Posts a new doop input bundle',
         endPoint: 'bundles',
-        options: [
-            OptionBuilder.withLongOpt('inputs').hasArg().withArgName('input jar').
-                          withDescription('The input jar(s)').                          
-                          create('i'),
-            OptionBuilder.withLongOpt('libraries').hasArg().withArgName('library jar').
-                          withDescription('The library jar(s)').                          
-                          create('l')
-            //TODO: Add more options  
-        ],
+        //options are discovered at runtime
         requestBuilder: { String url ->
             HttpPost post = new HttpPost("${url}?family=doop")
             def inputs    = cliOptions.is

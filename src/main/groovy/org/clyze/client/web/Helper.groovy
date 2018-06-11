@@ -7,9 +7,13 @@ import org.clyze.analysis.AnalysisOption
 import org.clyze.analysis.AnalysisFamilies
 import org.clyze.doop.core.*
 import org.clyze.doop.input.*
+
+import org.apache.commons.cli.Option
+
 import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
+import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpUriRequest
@@ -407,4 +411,24 @@ class Helper {
 
         postAndStartAnalysis(ps, cache, false)
     }
+
+    static RestCommandBase<List> createCommandForOptionsDiscovery(String whatOptions) {
+        return new RestCommandBase<List>(
+            endPoint: "options",
+            authenticationRequired: false,
+            requestBuilder: { String url ->            
+                return new HttpGet("${url}?what=${whatOptions}")
+            },
+            onSuccess: { HttpEntity entity ->
+                def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
+                return json.options //the options array
+            }
+        )
+    }
+
+    static List<Option> convertJsonEncodedOptionsToCliOptions(List<Object> jsonList) {
+        jsonList.collect { option ->
+            return new Option(null, option.label, true, option.description)
+        }
+    }    
 }
