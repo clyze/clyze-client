@@ -99,7 +99,7 @@ class Main {
         CliBuilder cli = new CliBuilder(
             parser: new org.apache.commons.cli.GnuParser (),
             usage : "client -r [remote] -c [command].",
-            header: "Note that some commands may require -r to be present in order to discover options dynamically.",
+            footer: "Note that some commands may require -r to be present in order to discover options dynamically.",
             width : 120
         )        
 

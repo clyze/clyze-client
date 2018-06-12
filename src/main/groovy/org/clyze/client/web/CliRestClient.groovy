@@ -205,7 +205,7 @@ class CliRestClient {
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
             def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")    
-            println json
+            return "Bundle has been created with id ${json.id}"
         }
     )
 
