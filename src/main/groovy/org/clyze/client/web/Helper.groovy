@@ -428,7 +428,23 @@ class Helper {
 
     static List<Option> convertJsonEncodedOptionsToCliOptions(List<Object> jsonList) {
         jsonList.collect { option ->
-            return new Option(null, option.label, true, option.description)
+            String description = option.description
+            if (option.validValues) {
+                description = "${description} (Allowed values: ${option.validValues.join(', ')})"
+            }
+            Option o = new Option(null, option.label, true, description)            
+            if (option.multipleValues) {
+                o.setArgs(Option.UNLIMITED_VALUES)
+                if (option.isFile) {
+                    o.setArgName("files")    
+                }
+            }
+            else {
+                if (option.isFile) {
+                    o.setArgName("file")
+                }
+            }            
+            return o
         }
     }    
 }

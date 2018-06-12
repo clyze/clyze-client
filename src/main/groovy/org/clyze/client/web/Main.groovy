@@ -97,9 +97,11 @@ class Main {
 
     private static final CliBuilder createCliBuilder() {
         CliBuilder cli = new CliBuilder(
-            usage: "client -r [remote] -c [command]. Note that some commands may require -r to be present in order to discover options dynamically."
-        )
-        cli.width = 120
+            parser: new org.apache.commons.cli.GnuParser (),
+            usage : "client -r [remote] -c [command].",
+            header: "Note that some commands may require -r to be present in order to discover options dynamically.",
+            width : 120
+        )        
 
         cli.with {
             h(longOpt: 'help', "Display help and exit. Combine it with a command to see the command options.")

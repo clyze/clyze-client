@@ -190,26 +190,17 @@ class CliRestClient {
         //options are discovered at runtime
         requestBuilder: { String url ->
             HttpPost post = new HttpPost("${url}?family=doop")
-            def inputs    = cliOptions.is
-            def libraries = cliOptions.ls
             
-            if (!inputs) throw new RuntimeException("No input jars")
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create()             
 
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create() 
-            inputs.each { String jar ->
-                File f = new File(jar)
-                if (f.exists()) {
-                    Helper.addFilesToMultiPart("inputs", [f], builder)
-                }
-                else {
-                    //jar is not a local file
-                    println("$jar is not a local file, it will be posted as string.")
-                    builder.addPart("inputs", new StringBody(jar))
-                }                
-            }           
+            //options have been discovered here
+            options.each { Option o ->
+                handleCliOption(o, cliOptions, builder)
+            }                        
+
             HttpEntity entity = builder.build()
             post.setEntity(entity)
-            return post
+            return post            
         },
         authenticator: DEFAULT_AUTHENTICATOR,
         onSuccess: { HttpEntity entity ->
@@ -653,6 +644,31 @@ class CliRestClient {
             return json.results
         }
     )
+
+    private static final void handleCliOption(Option o, OptionAccessor cliOptions, MultipartEntityBuilder builder) {
+        if (cliOptions.hasOption(o.longOpt)) {
+            String[] values = cliOptions.getOptionValues(o.longOpt)
+            if (o.argName && o.argName.startsWith('file')) {
+                values.each { String file ->
+                    File f = new File(file)
+                    if (f.exists()) {
+                        println("$file is a local file, it will be posted as attachment.")
+                        builder.addPart(o.longOpt, new FileBody(f))
+                    }
+                    else {
+                        //not a local file
+                        println("$file is not a local file, it will be posted as text.")
+                        builder.addPart(o.longOpt, new StringBody(file))
+                    }           
+                }
+            }
+            else {
+                values.each { String v ->
+                    builder.addPart(o.longOpt, new StringBody(v))
+                }                        
+            }
+        }
+    }
 
     /**
      * The map of available commands.
