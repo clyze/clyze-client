@@ -1,26 +1,22 @@
 package org.clyze.client.web
 
-import org.clyze.doop.CommandLineAnalysisFactory
-import org.clyze.analysis.AnalysisOption
-import org.clyze.analysis.AnalysisFamilies
-import org.clyze.doop.core.Doop
-import org.clyze.utils.FileOps
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
 import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.HttpDelete
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.client.methods.*
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 import org.apache.log4j.Logger
+import org.clyze.analysis.AnalysisFamilies
+import org.clyze.analysis.AnalysisOption
+import org.clyze.doop.CommandLineAnalysisFactory
+import org.clyze.doop.core.Doop
+import org.clyze.utils.FileOps
 
 /**
  * A command line client for a remote doop server.
@@ -336,8 +332,8 @@ class CliRestClient {
                 options.each { Map.Entry<String, AnalysisOption> entry ->
                     String optionId = entry.key.toUpperCase()
                     AnalysisOption option = entry.value
-                    if (option.value) {                                        
-                        if (option.acceptsMultipleInputs()) {
+                    if (option.value) {
+                        if (option.multipleValues && option.argInputType) {
                             option.value.each { String input ->
                                 try {
                                     File f = FileOps.findFileOrThrow(input, "Not a valid file: ${input}")
