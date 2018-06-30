@@ -109,7 +109,7 @@ class CliRestClient {
                Name     : ${analysisData.name}               
                Inputs   : ${analysisData.options.INPUTS}
                Libraries: ${analysisData.options.LIBRARIES}
-               Hprofs   : ${analysisData.options.HEAPDL}
+               HeapDLs  : ${analysisData.options.HEAPDL}
                Status   : ${analysisData.state}""".stripIndent()
     }
 
@@ -246,7 +246,7 @@ class CliRestClient {
         requestBuilder: { String url ->
 
             String name, id
-            List<String> inputs, libraries, hprofs, dynamics
+            List<String> inputs, libraries, heapDLs, dynamics
             Map<String, AnalysisOption> options
 
             if (cliOptions.p) {
@@ -282,13 +282,13 @@ class CliRestClient {
                 }
 
                 //Get the heap dumps of the analysis. If there are no heap dumps in the CLI, we get them from the properties.
-                hprofs = cliOptions.heapdls
-                if (!hprofs) {
-                    hprofs = props.getProperty("HEAPDL").split().collect { String s -> s.trim() }
+                heapDLs = cliOptions.heapdls
+                if (!heapDLs) {
+                    heapDLs = props.getProperty("HEAPDL").split().collect { String s -> s.trim() }
                     //The heap dumps, if relative, are being resolved via the propsBaseDir
-                    hprofs = hprofs.collect { String hprof ->
-                        File hprofFile = new File(hprof)
-                        return hprofFile.isAbsolute() ? hprof : new File(propsBaseDir, hprof).getCanonicalFile().getAbsolutePath()
+                    heapDLs = heapDLs.collect { String heapDL ->
+                        File heapDLFile = new File(heapDL)
+                        return heapDLFile.isAbsolute() ? heapDL : new File(propsBaseDir, heapDL).getCanonicalFile().getAbsolutePath()
                     }
                 }
 
@@ -318,7 +318,7 @@ class CliRestClient {
             options = options.findAll { it.value.webUI || specialNonUIOpts.contains(it.value.id)}
             options["INPUTS"].value = inputs
             options["LIBRARIES"].value = libraries
-            options["HEAPDL"].value = hprofs
+            options["HEAPDL"].value = heapDLs
             options["DYNAMIC"].value = dynamics
 
             //create the HttpPost

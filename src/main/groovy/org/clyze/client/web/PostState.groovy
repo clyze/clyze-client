@@ -17,7 +17,7 @@ class PostState {
     Map<String, Object> options
     File sources
     File jcPluginMetadata
-    List<File> hprofs
+    List<File> heapDLs
 
     // Needed for JSON deserialization.
     public PostState() { }
@@ -26,7 +26,7 @@ class PostState {
                      String orgName, String projectName, String projectVersion,
                      String rating, String ratingCount,
                      Map<String, Object> options, File sources,
-                     File jcPluginMetadata, List<File> hprofs) {
+                     File jcPluginMetadata, List<File> heapDLs) {
         this.username         = username
         this.password         = password
         this.host             = host
@@ -39,7 +39,7 @@ class PostState {
         this.options          = options
         this.sources          = sources
         this.jcPluginMetadata = jcPluginMetadata
-        this.hprofs           = hprofs
+        this.heapDLs           = heapDLs
     }
 
     public String toJson() {
@@ -51,12 +51,12 @@ class PostState {
         String optionsJson = new JsonBuilder(options2).toPrettyString()
         String sourcesName = sources == null? "null" : "\"${sources.name}\""
         String jcPluginMetadataName = jcPluginMetadata == null? "null" : "\"${jcPluginMetadata.name}\""
-        List<String> hprofNames = hprofs.findAll { it != null }
+        List<String> heapDLNames = heapDLs.findAll { it != null }
                                         .collect { "\"${it.name}\"" }
 
         // The resulting directory has a flat structure, so files
         // should not overwrite each other.
-        checkFlatStructure(options2, sourcesName, jcPluginMetadataName, hprofNames)
+        checkFlatStructure(options2, sourcesName, jcPluginMetadataName, heapDLNames)
 
         return "{ \"host\" : \"${host}\",\n" +
             "  \"port\" : \"${port}\",\n" +
@@ -70,7 +70,7 @@ class PostState {
             "  \"options\" : ${optionsJson},\n" +
             "  \"sourcesName\" : ${sourcesName},\n" +
             "  \"jcPluginMetadataName\" : ${jcPluginMetadataName},\n" +
-            "  \"hprofNames\" : ${hprofNames}\n" +
+            "  \"heapDLNames\" : ${heapDLNames}\n" +
             "}"
     }
 
@@ -98,7 +98,7 @@ class PostState {
 
         ps.sources = dirFile(obj.sourcesName)
         ps.jcPluginMetadata = dirFile(obj.jcPluginMetadataName)
-        ps.hprofs = obj.hprofNames.collect { dirFile(it) }
+        ps.heapDLs = obj.heapDLNames.collect { dirFile(it) }
 
         return (PostState)ps
     }
@@ -135,7 +135,7 @@ class PostState {
                     val.each { cmdLine << projFile(it) }
                 }
             }
-            else if (option == 'hprofs') {
+            else if (option == 'heapDLs') {
                 if (val?.size() > 0) {
                     cmdLine << "--heapdl"
                     val.each { cmdLine << projFile(it) }
@@ -166,9 +166,9 @@ class PostState {
                 println "WARNING: unknown entry ${option} (${opt}) = ${val}"
             }
         }
-        if ((hprofs != null) && (hprofs.size() > 0)) {
+        if ((heapDLs != null) && (heapDLs.size() > 0)) {
             cmdLine << "--heapdl"
-            hprofs.each { hprof -> cmdLine << projFile(hprof.canonicalPath) }
+            heapDLs.each { heapdl -> cmdLine << projFile(heapdl.canonicalPath) }
         }
         cmdLine << '"$@"'
         script += cmdLine.join(" ")
@@ -196,13 +196,13 @@ class PostState {
         }
     }
 
-    private static void checkFlatStructure(def options, String sourcesName, String jcPluginMetadataName, List hprofNames) {
+    private static void checkFlatStructure(def options, String sourcesName, String jcPluginMetadataName, List heapDLNames) {
         List l = []
         l.addAll(options.inputs)
         l.add(sourcesName)
         l.add(jcPluginMetadataName)
         l.addAll(options.libraries)
-        l.addAll(hprofNames)
+        l.addAll(heapDLNames)
         l = l.findAll { it != null }
         if (l.size() != l.toSet().size())
             throw new RuntimeException("Flat structure violation, duplicate elements found in: ${l}")

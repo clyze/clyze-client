@@ -1,15 +1,9 @@
 package org.clyze.client.web
 
-//import groovy.transform.TypeChecked
 import groovy.json.JsonSlurper
 
-import org.clyze.analysis.AnalysisOption
-import org.clyze.analysis.AnalysisFamilies
-import org.clyze.doop.core.*
-import org.clyze.doop.input.*
-
+//import groovy.transform.TypeChecked
 import org.apache.commons.cli.Option
-
 import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
@@ -18,12 +12,19 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpPut
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.entity.mime.content.FileBody
+import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
+import org.clyze.analysis.AnalysisFamilies
+import org.clyze.analysis.AnalysisOption
+import org.clyze.doop.core.Doop
+import org.clyze.doop.core.DoopAnalysisFamily
+import org.clyze.doop.input.*
 
-import java.awt.Desktop
+import java.awt.*
 import java.nio.file.attribute.PosixFilePermission
+import java.util.List
+
 import static java.nio.file.Files.setPosixFilePermissions
 
 //@TypeChecked
@@ -149,7 +150,7 @@ class Helper {
             def copier = { copyToTmp(it).canonicalPath }
             ps.options.inputs    = ps.options.inputs.collect    copier
             ps.options.libraries = ps.options.libraries.collect copier
-            ps.options.hprofs    = ps.options.hprofs.collect    copier
+            ps.options.heapDLs    = ps.options.heapDLs.collect    copier
             if (ps.sources          != null) { ps.sources          = copyToTmp(ps.sources.canonicalPath)          }
             if (ps.jcPluginMetadata != null) { ps.jcPluginMetadata = copyToTmp(ps.jcPluginMetadata.canonicalPath) }
 
@@ -203,7 +204,7 @@ class Helper {
             null, //ratingCount
             ps.sources,
             ps.jcPluginMetadata,
-            ps.hprofs,
+            ps.heapDLs,
             ps.options
         )
         postAnalysis.authenticator = authenticator
@@ -249,7 +250,7 @@ class Helper {
                                                                  String ratingCount,
                                                                  File sources,
                                                                  File jcPluginMetadata,
-                                                                 List<File> hprofs,
+                                                                 List<File> heapDLs,
                                                                  Map<String, Object> options) {
         return new RestCommandBase<String>(
             endPoint: "analyses/family/doop",
@@ -274,10 +275,10 @@ class Helper {
                     println "Submitting jcplugin metadata: ${jcPluginMetadata}"
                     addFilesToMultiPart("jcPluginMetadata", [jcPluginMetadata], builder)
 
-                    //process the HPROF files
-                    if ((hprofs != null) && (hprofs.size() > 0)) {
-                        println "Submitting HPROF inputs: ${hprofs}"
-                        addFilesToMultiPart("HEAPDL", hprofs, builder)
+                    //process the HeapDL files
+                    if ((heapDLs != null) && (heapDLs.size() > 0)) {
+                        println "Submitting HeapDL inputs: ${heapDLs}"
+                        addFilesToMultiPart("HEAPDL", heapDLs, builder)
                     }
 
                     // Process the options.
