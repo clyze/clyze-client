@@ -1,4 +1,6 @@
-package org.clyze.client.web
+package org.clyze.client.cli
+
+import org.clyze.client.web.http.CliRestCommand
 
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
@@ -18,11 +20,13 @@ class Main {
 
         try {
 
+            /*
             if (!AnalysisFamilies.isRegistered('doop')) {
                 AnalysisFamilies.register(DoopAnalysisFamily.instance)
             }
+            */
 
-            Helper.initConsoleLogging("WARN")
+            Helper.initConsoleLogging("DEBUG")            
 
             CliBuilder builder = createCliBuilder()
             OptionAccessor cli = builder.parse(args)
@@ -78,14 +82,14 @@ class Main {
                     cli = builder.parse(args)
                 }
 
-                Authenticator.init()
+                CliAuthenticator.init()
                 command.cliOptions = cli
                 println command.execute(remote.host, remote.port)
 
             }
             else {
                 builder.usage()
-            }
+            }            
 
         } catch (e) {
             println e.getMessage()
@@ -121,7 +125,7 @@ class Main {
     }
 
     private static void discoverOptionsOfCommand(CliRestCommand command, String host, int port) {        
-        if (command.name == 'post_doop_bundle' && !command.options) {            
+        if (command.name == 'post_doop_bundle') {            
             println "Discovering options of ${command.name}..."                        
             List<Object> jsonList = ClientHelper.createCommandForOptionsDiscovery("bundle").execute(host, port)
             command.options = ClientHelper.convertJsonEncodedOptionsToCliOptions(jsonList)

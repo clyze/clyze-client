@@ -1,9 +1,9 @@
-package org.clyze.client.web
+package org.clyze.client.cli
 
 import org.clyze.utils.FileOps
 import org.apache.log4j.Logger
 
-class Authenticator {
+class CliAuthenticator {
 
     private static String token
 
@@ -25,7 +25,7 @@ class Authenticator {
     }
 
     static void setUserToken(String token) {
-        Authenticator.token = token
+        CliAuthenticator.token = token
         try {
             String userHome = System.getProperty("user.home")
             FileOps.writeToFile(new File("${userHome}/.jdoop-client"), token)

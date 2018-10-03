@@ -2,6 +2,8 @@ package org.clyze.client.web
 
 import groovy.json.JsonSlurper
 
+import org.clyze.client.web.http.HttpClientCommand
+
 //import groovy.transform.TypeChecked
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
@@ -108,8 +110,8 @@ class Helper {
     /**
      * Creates the default login command (that returns the token when executed).
      */
-    static RestCommandBase<String> createLoginCommand(String username, String password) {
-        return new RestCommandBase<String>(
+    static HttpClientCommand<String> createLoginCommand(String username, String password) {
+        return new HttpClientCommand<String>(
             endPoint: "authenticate",
             authenticationRequired: false,
             requestBuilder: { String url ->
@@ -191,12 +193,12 @@ class Helper {
 
         def authenticator = {String h, int p, HttpUriRequest request ->
             //send the token with the request
-            request.addHeader(RestCommandBase.HEADER_TOKEN, token)
+            request.addHeader(HttpClientCommand.HEADER_TOKEN, token)
         }
 
         String autoLoginToken = null
 
-        RestCommandBase<String> postAnalysis = createPostDoopAnalysisCommand(
+        HttpClientCommand<String> postAnalysis = createPostDoopAnalysisCommand(
             ps.orgName,
             ps.projectName,
             ps.projectVersion,
@@ -212,7 +214,7 @@ class Helper {
         String postedId = postAnalysis.execute(ps.host, ps.port).replaceAll("\\+", "%2b")
         println "The analysis has been submitted successfully: $postedId."
 
-        RestCommandBase<String> createAutoLoginToken = createAutoLoginTokenCommand(authenticator)
+        HttpClientCommand<String> createAutoLoginToken = createAutoLoginTokenCommand(authenticator)
         try {
             autoLoginToken = createAutoLoginToken.execute(ps.host, ps.port)
         }
@@ -222,7 +224,7 @@ class Helper {
 
         String analysisPageURL = createAnalysisPageURL(ps.host, ps.port, postedId, autoLoginToken)
 
-        RestCommandBase<Void> start = createStartCommandAuth(postedId, authenticator)
+        HttpClientCommand<Void> start = createStartCommandAuth(postedId, authenticator)
         start.onSuccess = { HttpEntity ent ->
 
             if (autoLoginToken) {
@@ -243,7 +245,7 @@ class Helper {
     /**
      * Creates a post doop analysis command (without authenticator) that returns the id of the newly created doop analysis.
      */
-    static RestCommandBase<String> createPostDoopAnalysisCommand(String orgName,
+    static HttpClientCommand<String> createPostDoopAnalysisCommand(String orgName,
                                                                  String projectName,
                                                                  String projectVersion,
                                                                  String rating,
@@ -252,7 +254,7 @@ class Helper {
                                                                  File jcPluginMetadata,
                                                                  List<File> heapDLs,
                                                                  Map<String, Object> options) {
-        return new RestCommandBase<String>(
+        return new HttpClientCommand<String>(
             endPoint: "analyses/family/doop",
             requestBuilder: { String url ->
                 HttpPost post = new HttpPost(url)
@@ -343,8 +345,8 @@ class Helper {
     /**
      * Creates a start analysis command (without authenticator and onSuccess handlers).
      */
-    static RestCommandBase<Void> createStartCommand(String id) {
-        return new RestCommandBase<Void>(
+    static HttpClientCommand<Void> createStartCommand(String id) {
+        return new HttpClientCommand<Void>(
             endPoint: "analyses",
             requestBuilder: {String url ->
                 return new HttpPut("${url}/${id}/action/start")
@@ -355,14 +357,14 @@ class Helper {
     /**
      * Creates a start analysis command (with authenticator).
      */
-    private static RestCommandBase<Void> createStartCommandAuth(String id, Closure authenticator) {
-        RestCommandBase<Void> command = createStartCommand(id)
+    private static HttpClientCommand<Void> createStartCommandAuth(String id, Closure authenticator) {
+        HttpClientCommand<Void> command = createStartCommand(id)
         command.authenticator = authenticator
         return command
     }
 
-    private static RestCommandBase<String> createAutoLoginTokenCommand(Closure authenticator) {
-        return new RestCommandBase<String>(
+    private static HttpClientCommand<String> createAutoLoginTokenCommand(Closure authenticator) {
+        return new HttpClientCommand<String>(
             endPoint: "token",
             requestBuilder:  { String url ->
                 return new HttpPost(url)
@@ -413,8 +415,8 @@ class Helper {
         postAndStartAnalysis(ps, cache, false)
     }
 
-    static RestCommandBase<List> createCommandForOptionsDiscovery(String whatOptions) {
-        return new RestCommandBase<List>(
+    static HttpClientCommand<List> createCommandForOptionsDiscovery(String whatOptions) {
+        return new HttpClientCommand<List>(
             endPoint: "options",
             authenticationRequired: false,
             requestBuilder: { String url ->            
