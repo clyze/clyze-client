@@ -33,26 +33,28 @@ class Remote {
 
 
 	public <T> T ping(Closure<T> onSuccess) {
-		HttpClientCommand.extend(LowLevelAPI.PING, onSuccess:onSuccess, httpClientLifeCycle:httpClientLifeCycle).execute(host, port)
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&ping,
+			onSuccess: onSuccess
+		).execute(host, port)		
 	}
 
 	
 	public <T> T cleanDeploy(Closure<T> onSuccess) {
-		HttpClientCommand.extend(LowLevelAPI.CLEAN_DEPLOY, onSuccess:onSuccess, httpClientLifeCycle:httpClientLifeCycle).execute(host, port)
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&cleanDeploy,
+			onSuccess: onSuccess
+		).execute(host, port)		
 	}	
 
 	public void login(String username, String password) {		
 		new HttpClientCommand(			
-			requestBuilder: { String host, int port ->
-				HttpPost post = LowLevelAPI.LOGIN.requestBuilder.call(host, port)
-				List<NameValuePair> params = new ArrayList<>(2)
-	            params.add(new BasicNameValuePair("username", username))
-	            params.add(new BasicNameValuePair("password", password))
-	            post.setEntity(new UrlEncodedFormEntity(params))
-	            return post
-			},
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
 			onSuccess: { HttpEntity entity ->
-				userToken = LowLevelAPI.LOGIN.onSuccess.call(entity)
+				userToken = LowLevelAPI.Responses.parseJsonAndGetAttr("token", entity)
 			}
 		).execute(host, port)		
 	}
@@ -63,12 +65,35 @@ class Remote {
 
 	public <T> T listBundles(Closure<T> onSuccess)  {
 		new HttpClientCommand(			
-			requestBuilder: { String host, int port ->
-				HttpGet get = LowLevelAPI.LIST_BUNDLES.requestBuilder.call(host, port)
-				if (userToken) get.addHeader(LowLevelAPI.HEADER_TOKEN, userToken)
-			},
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&listBundles.curry(userToken),
 			onSuccess: onSuccess
 		).execute(host, port)		
 	}
 
+	public String createDoopBundle(String platform, String bundleResolvableByServer) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&createDoopBundle.curry(userToken, platform, bundleResolvableByServer),
+			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
+		).execute(host, port)		
+	}
+
+	public String createAnalysis(String bundleId, String analysis) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(userToken, bundleId, analysis),
+			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
+		).execute(host, port)		
+	}
+
+	boolean executeAnalysisAction(String bundleId, String analysisId, String action) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&executeAnalysisAction.curry(userToken, bundleId, analysisId, action),
+			onSuccess: { HttpEntity entity ->
+            	LowLevelAPI.Responses.parseJson(entity) != null
+        	}
+		).execute(host, port)				
+	}
 }

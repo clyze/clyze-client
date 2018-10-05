@@ -49,17 +49,15 @@ class CliRestClient {
     private static final Option ID = OptionBuilder.hasArg().withArgName('id').
                                                    withDescription('the analysis id').create('id')
 
-    private static final void addAuthHeader(String host, int port, HttpUriRequest request, boolean askForCredentialsIfEmpty) {
+    private static final String getUserToken(boolean askForCredentialsIfEmpty, host, port) {
         String token = CliAuthenticator.getUserToken()
         if (!token && askForCredentialsIfEmpty) {
             //Ask for username and password
             COMMANDS.login.execute(host, port)
             token = CliAuthenticator.getUserToken()
         }
-
-        //send the token with the request
-        if (token) request.addHeader(LowLevelAPI.HEADER_TOKEN, token)
-    }
+        token
+    }    
 
     private static final Closure<String> DEFAULT_SUCCES = { HttpEntity entity ->
         return "OK"
@@ -114,11 +112,11 @@ class CliRestClient {
     }
     */
 
-    private static final CliRestCommand PING = CliRestCommand.extend(
-        LowLevelAPI.PING,                        
+    private static final CliRestCommand PING = new CliRestCommand(        
         name               : 'ping',
         description        : 'pings the remote server',
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+        requestBuilder     : LowLevelAPI.Requests.&ping,
         onSuccess          : DEFAULT_SUCCES,                
     )    
 
@@ -128,15 +126,10 @@ class CliRestClient {
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             Map<String, String> credentials = CliAuthenticator.askForCredentials()
-            HttpPost post = LowLevelAPI.LOGIN.requestBuilder.call(host, port)
-            List<NameValuePair> params = new ArrayList<>(2)
-            params.add(new BasicNameValuePair("username", credentials.username))
-            params.add(new BasicNameValuePair("password", credentials.password))
-            post.setEntity(new UrlEncodedFormEntity(params))
-            return post
+            return LowLevelAPI.Requests.login(credentials.username, credentials.password, host, port)                        
         },
         onSuccess          : { HttpEntity entity ->
-            String token = LowLevelAPI.LOGIN.onSuccess.call(entity)
+            String token = LowLevelAPI.Responses.parseJsonAndGetAttr("token", entity)
             CliAuthenticator.setUserToken(token)
             return "Logged in, token updated."
         }
@@ -148,13 +141,12 @@ class CliRestClient {
         options            : [], //TODO add pagination options
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
-            HttpGet get = LowLevelAPI.LIST_BUNDLES.requestBuilder.call(host, port)
-            addAuthHeader(host, port, get, true)
-            return get
+            String token = getUserToken(true, host, port)
+            return LowLevelAPI.Requests.listBundles(token, host, port)
         },
         onSuccess          : { HttpEntity entity ->
-            def json = LowLevelAPI.LIST_BUNDLES.onSuccess.call(entity)
-            println json
+            def json = LowLevelAPI.Responses.parseJson(entity)
+            json as String
         }
     )
 
