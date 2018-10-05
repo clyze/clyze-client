@@ -41,7 +41,7 @@ class LowLevelAPI {
         }
 
         static final HttpPost cleanDeploy(String host, int port) {
-            return new HttpPost(createUrl(host, port, BASE_PATH, "/clen/deploy"))
+            return new HttpPost(createUrl(host, port, BASE_PATH, "/clean/deploy"))
         }
 
         static final HttpPost login(String username, String password, String host, int port) {
@@ -82,6 +82,19 @@ class LowLevelAPI {
             HttpPut put = new HttpPut(createUrl(host, port, API_PATH, "/bundles/${bundleId}/analyses/${analysis}/action/${action}"))
             if (userToken) put.addHeader(HEADER_TOKEN, userToken)
             return put
+        }
+
+        static final HttpGet getAnalysisStatus(String userToken, String bundleId, String analysis, String host, port) {
+            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/bundles/${bundleId}/analyses/${analysis}"))
+            if (userToken) get.addHeader(HEADER_TOKEN, userToken)
+            return get
+        }
+
+        static final HttpGet getSymbolAt(String userToken, String bundleId, String analysisId, String file, int line, int col, String host, int port) {
+            String fileEncoded = URLEncoder.encode(file, "UTF-8")       
+            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/bundles/${bundleId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
+            if (userToken) get.addHeader(HEADER_TOKEN, userToken)
+            return get
         }
 
     }    

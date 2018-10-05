@@ -32,20 +32,24 @@ class Remote {
 	}
 
 
-	public <T> T ping(Closure<T> onSuccess) {
+	public <T> T ping() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&ping,
-			onSuccess: onSuccess
+			onSuccess: { HttpEntity entity ->
+				LowLevelAPI.Responses.parseJson(entity) != null
+			}
 		).execute(host, port)		
 	}
 
 	
-	public <T> T cleanDeploy(Closure<T> onSuccess) {
+	public <T> T cleanDeploy() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&cleanDeploy,
-			onSuccess: onSuccess
+			onSuccess: { HttpEntity entity ->
+				LowLevelAPI.Responses.parseJson(entity) != null
+			}
 		).execute(host, port)		
 	}	
 
@@ -63,11 +67,11 @@ class Remote {
 		return (userToken != null)
 	}
 
-	public <T> T listBundles(Closure<T> onSuccess)  {
+	public def listBundles()  {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&listBundles.curry(userToken),
-			onSuccess: onSuccess
+			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
@@ -95,5 +99,45 @@ class Remote {
             	LowLevelAPI.Responses.parseJson(entity) != null
         	}
 		).execute(host, port)				
+	}
+
+	String getAnalysisStatus(String bundleId, String analysisId) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&getAnalysisStatus.curry(userToken, bundleId, analysisId),
+			onSuccess : { HttpEntity entity ->
+				def json = LowLevelAPI.Responses.parseJson(entity)
+				return json.analysis.state
+			}
+		).execute(host, port)		
+	}
+
+	String waitForAnalysisStatus(Set<String> statusSet, String bundleId, String analysisId, int minutes) {
+
+		long millis = minutes * 60 * 1000
+		long expireAt = System.currentTimeMillis() + millis
+
+		def state = null		
+
+		while(!statusSet.contains(state) && System.currentTimeMillis() < expireAt) {
+			state = getAnalysisStatus(bundleId, analysisId)
+			println "State $state"
+			Thread.sleep(15000)
+		}
+
+		if(!statusSet.contains(state)) {
+			throw new RuntimeException("Analysis wait period has expired")
+		}
+
+		state
+	}
+
+	def getSymbolAt(String bundleId, String analysisId, String file, int line, int col) {		
+		String fileEncoded = URLEncoder.encode(file, "UTF-8")		
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(userToken, bundleId, analysisId, file, line, col),
+			onSuccess : LowLevelAPI.Responses.&parseJson(entity)
+		).execute(host, port)		
 	}
 }
