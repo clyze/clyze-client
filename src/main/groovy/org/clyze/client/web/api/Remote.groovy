@@ -120,8 +120,7 @@ class Remote {
 		def state = null		
 
 		while(!statusSet.contains(state) && System.currentTimeMillis() < expireAt) {
-			state = getAnalysisStatus(bundleId, analysisId)
-			println "State $state"
+			state = getAnalysisStatus(bundleId, analysisId)			
 			Thread.sleep(15000)
 		}
 
