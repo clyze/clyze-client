@@ -8,6 +8,7 @@ import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
+import org.apache.http.client.ClientProtocolException
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
@@ -27,7 +28,7 @@ class Remote {
 	}
 
 	static Remote at(String host, Integer port) {
-		final CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
+		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
 		return new Remote(host, port, new SameInstanceHttpClientLifeCycle(client))
 	}
 
@@ -118,14 +119,21 @@ class Remote {
 		long expireAt = System.currentTimeMillis() + millis
 
 		def state = null		
-
-		while(!statusSet.contains(state) && System.currentTimeMillis() < expireAt) {
-			state = getAnalysisStatus(bundleId, analysisId)			
-			Thread.sleep(15000)
-		}
-
-		if(!statusSet.contains(state)) {
-			throw new RuntimeException("Analysis wait period has expired")
+		
+		while(!Thread.currentThread().isInterrupted() && !statusSet.contains(state) && System.currentTimeMillis() < expireAt) {
+			try {
+				state = getAnalysisStatus(bundleId, analysisId)			
+				Thread.sleep(15000)
+			}
+			catch(InterruptedException ie) {
+				throw new RuntimeException("Analysis wait interrupted")
+			}
+			catch(ClientProtocolException cpe) {
+				throw new RuntimeException("Analysis wait server error - ${cpe.getMessage()}", cpe)
+			}
+			catch(Throwable other) {
+				throw new RuntimeException("Analysis wait internal error - ${other.getMessage()}", other)
+			}
 		}
 
 		state
