@@ -84,7 +84,7 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpGet getAnalysisStatus(String userToken, String bundleId, String analysis, String host, port) {
+        static final HttpGet getAnalysisStatus(String userToken, String bundleId, String analysis, String host, int port) {
             HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/bundles/${bundleId}/analyses/${analysis}"))
             if (userToken) get.addHeader(HEADER_TOKEN, userToken)
             return get
@@ -95,8 +95,11 @@ class LowLevelAPI {
             HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/bundles/${bundleId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
             if (userToken) get.addHeader(HEADER_TOKEN, userToken)
             return get
-        }
+        }        
 
+        static final HttpGet getOptionsForCreate(String what, String host, int port) {
+            return new HttpGet(createUrl(host, port, API_PATH, "/options?what=${what}"))
+        }        
     }    
 
     static final class Responses {

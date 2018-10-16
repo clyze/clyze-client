@@ -2,6 +2,7 @@ package org.clyze.client.cli
 
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
+import org.clyze.client.web.Helper as ClientHelper
 
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
@@ -15,10 +16,8 @@ import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 import org.apache.log4j.Logger
-import org.clyze.analysis.AnalysisFamilies
-import org.clyze.analysis.AnalysisOption
-import org.clyze.doop.CommandLineAnalysisFactory
-import org.clyze.doop.core.Doop
+
+
 import org.clyze.utils.FileOps
 
 /**
@@ -138,7 +137,7 @@ class CliRestClient {
     private static final CliRestCommand LIST_BUNDLES = new CliRestCommand(
         name               : 'list_bundles',
         description        : 'list the bundles stored in the remote server',
-        options            : [], //TODO add pagination options
+        //TODO add pagination options
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
@@ -150,12 +149,30 @@ class CliRestClient {
         }
     )
 
+    private static final CliRestCommand POST_DOOP_BUNDLE = new CliRestCommand(
+        name               : 'post_doop_bundle',
+        description        : 'posts a new doop bundle to the remote server',        
+        httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+        optionsBuilder     : { String host, int port ->
+            def json = ClientHelper.createCommandForOptionsDiscovery("BUNDLE", new DefaultHttpClientLifeCycle()).execute(host, port)
+            return ClientHelper.convertJsonEncodedOptionsToCliOptions(json.options as List)
+        },
+        requestBuilder     : { String host, int port ->
+            println cliOptions
+            throw new RuntimeException("Stop")
+        },
+        onSuccess          : { HttpEntity entity ->
+            String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
+            return id
+        }
+    )    
+
     /**
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_DOOP_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART        
-        PING, LOGIN, LIST_BUNDLES
+        PING, LOGIN, LIST_BUNDLES, POST_DOOP_BUNDLE
     ].collectEntries {
         [(it.name):it]
     }

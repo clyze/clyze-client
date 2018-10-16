@@ -3,6 +3,8 @@ package org.clyze.client.web
 import groovy.json.JsonSlurper
 
 import org.clyze.client.web.http.HttpClientCommand
+import org.clyze.client.web.http.HttpClientLifeCycle
+import org.clyze.client.web.api.LowLevelAPI
 
 //import groovy.transform.TypeChecked
 import org.apache.commons.cli.Option
@@ -415,27 +417,32 @@ class Helper {
         postAndStartAnalysis(ps, cache, false)
     }
 
-    static HttpClientCommand<List> createCommandForOptionsDiscovery(String whatOptions) {
-        return new HttpClientCommand<List>(
-            endPoint: "options",
-            authenticationRequired: false,
-            requestBuilder: { String url ->            
-                return new HttpGet("${url}?what=${whatOptions}")
-            },
-            onSuccess: { HttpEntity entity ->
-                def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-                return json.options //the options array
+    static HttpClientCommand<List> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {     
+
+        new HttpClientCommand(
+            httpClientLifeCycle: httpClientLifeCycle,
+            requestBuilder     : LowLevelAPI.Requests.&getOptionsForCreate.curry("BUNDLE"),
+            onSuccess          : { HttpEntity entity ->
+                LowLevelAPI.Responses.parseJson(entity)
             }
-        )
+        )            
     }
 
     static List<Option> convertJsonEncodedOptionsToCliOptions(List<Object> jsonList) {
         jsonList.collect { option ->
+            println option
             String description = option.description
-            if (option.validValues) {
-                description = "${description} (Allowed values: ${option.validValues.join(', ')})"
+            if (option.validValues) {                
+                description = "${description}\nAllowed values: ${option.validValues.join(', ')}"
             }
-            Option o = new Option(null, option.label, true, description)            
+            if (option.defaultValue) {
+                description = "${description}\nDefault value: ${option.defaultValue}"
+            }
+            if (option.isMandatory) {
+                description = "${description}\nMandatory option."
+            }
+
+            Option o = new Option(option.id?.toLowerCase(), option.label, !option.isBoolean, description)                    
             if (option.multipleValues) {
                 o.setArgs(Option.UNLIMITED_VALUES)
                 if (option.isFile) {
@@ -446,8 +453,9 @@ class Helper {
                 if (option.isFile) {
                     o.setArgName("file")
                 }
-            }            
-            return o
+            }       
+            println o     
+            return o            
         }
-    }    
+    }        
 }

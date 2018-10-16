@@ -52,7 +52,7 @@ class Remote {
 				LowLevelAPI.Responses.parseJson(entity) != null
 			}
 		).execute(host, port)		
-	}	
+	}		
 
 	public void login(String username, String password) {		
 		new HttpClientCommand(			
@@ -146,5 +146,5 @@ class Remote {
 			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(userToken, bundleId, analysisId, file, line, col),
 			onSuccess : LowLevelAPI.Responses.&parseJson(entity)
 		).execute(host, port)		
-	}
+	}	
 }

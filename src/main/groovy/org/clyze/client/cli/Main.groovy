@@ -5,8 +5,6 @@ import org.clyze.client.web.http.CliRestCommand
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 import org.clyze.analysis.*
-import org.clyze.doop.CommandLineAnalysisFactory
-import org.clyze.doop.core.DoopAnalysisFamily
 import org.clyze.utils.Helper
 
 import org.clyze.client.web.Helper as ClientHelper
@@ -19,12 +17,6 @@ class Main {
     static void main(String[] args) {
 
         try {
-
-            /*
-            if (!AnalysisFamilies.isRegistered('doop')) {
-                AnalysisFamilies.register(DoopAnalysisFamily.instance)
-            }
-            */
 
             Helper.initConsoleLogging("DEBUG")            
 
@@ -48,20 +40,23 @@ class Main {
 
             if (cli.h) {
                 if (command) {                    
+
+                    List<Option> options = []
+
                     if (cli.r) {                        
-                        Remote remote = parseRemote(cli.r as String)                
-                        discoverOptionsOfCommand(command, remote.host, remote.port)
+                        Remote remote = parseRemote(cli.r as String)                                        
+                        options = command.optionsBuilder(remote.host, remote.port)
                     }
                     println "${command.name} - ${command.description}"
 
-                    if (command.options) {
+                    if (options) {
                         CliBuilder builder2 = new CliBuilder(usage: "-r [remote] -c ${command.name} [OPTION]...")
                         builder2.width = 120
-                        command.options.each { Option option -> builder2 << option }
+                        options.each { Option option -> builder2 << option }
                         builder2.usage()
                     }                    
                     else {
-                        println "You may need to provide a valid remote to enable the client discover the options supported by the command dynamically."
+                        println "Provide a valid remote to help the client dynamically discover the options supported by the command."
                     }
                     return
                 }
@@ -72,12 +67,15 @@ class Main {
             }
 
             if (cli.r) {
+
+                List<Option> options = []
+
                 Remote remote = parseRemote(cli.r as String)                
-                discoverOptionsOfCommand(command, remote.host, remote.port)
+                options = command.optionsBuilder(remote.host, remote.port)
 
-                if (command.options) {
+                if (options) {
 
-                    command.options.each { Option option -> builder << option }
+                    options.each { Option option -> builder << option }
                     //reparse the args
                     cli = builder.parse(args)
                 }
@@ -115,13 +113,6 @@ class Main {
         }
 
         return cli
-    }
-
-    private static final void extendCliBuilderForCreateCommand(CliBuilder cli) {
-        List<AnalysisOption> clientOptions = AnalysisFamilies.supportedOptionsOf('doop').findAll { AnalysisOption option ->
-            option.webUI //all options with webUI property
-        }
-        CommandLineAnalysisFactory.addAnalysisOptionsToCliBuilder(clientOptions, cli)
     }
 
     private static void discoverOptionsOfCommand(CliRestCommand command, String host, int port) {        

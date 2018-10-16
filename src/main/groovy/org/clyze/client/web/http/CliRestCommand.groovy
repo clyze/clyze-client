@@ -24,8 +24,8 @@ class CliRestCommand extends HttpClientCommand<String> {
     /** The description of the command */
     String description
 
-    /** The command line options supported by the command */
-    List<Option> options = []
+    /** A closure that returns the command line options supported by the command */
+    Closure<List<Option>> optionsBuilder = { String host, int port -> [] }
 
     /** The command line options the command has been actually invoked with */
     OptionAccessor cliOptions
