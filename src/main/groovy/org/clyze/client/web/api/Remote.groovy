@@ -144,7 +144,7 @@ class Remote {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(userToken, bundleId, analysisId, file, line, col),
-			onSuccess : LowLevelAPI.Responses.&parseJson(entity)
+			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
-	}	
+	}		
 }
