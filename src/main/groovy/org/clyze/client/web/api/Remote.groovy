@@ -147,4 +147,28 @@ class Remote {
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}		
+
+	def listUsers() {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&getUsers.curry(userToken),
+			onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)		
+	}
+
+	def createUser(String username, String password) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&createUser.curry(userToken, username, password),
+			onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)		
+	}
+
+	def deleteUser(String username) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&deleteUser.curry(userToken, username),
+			onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)		
+	}
 }

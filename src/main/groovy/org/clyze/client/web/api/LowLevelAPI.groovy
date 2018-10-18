@@ -100,6 +100,28 @@ class LowLevelAPI {
         static final HttpGet getOptionsForCreate(String what, String host, int port) {
             return new HttpGet(createUrl(host, port, API_PATH, "/options?what=${what}"))
         }        
+
+        static final HttpGet getUsers(String userToken, String host, int port) {
+            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/users"))
+            if (userToken) get.addHeader(HEADER_TOKEN, userToken)
+            return get
+        }
+
+        static final HttpPost createUser(String userToken, String username, String password, String host, int port) {
+            HttpPost post = new HttpPost(createUrl(host, port, API_PATH, "/users"))
+            if (userToken) post.addHeader(HEADER_TOKEN, userToken)
+            List<NameValuePair> params = new ArrayList<>(2)
+            params.add(new BasicNameValuePair("username", username))
+            params.add(new BasicNameValuePair("password", password))
+            post.setEntity(new UrlEncodedFormEntity(params))
+            return post
+        }
+
+        static final HttpDelete deleteUser(String userToken, String username, String host, int port) {
+            HttpDelete delete = new HttpDelete(createUrl(host, port, API_PATH, "/users/${username}"))
+            if (userToken) delete.addHeader(HEADER_TOKEN, userToken)
+            return delete
+        }        
     }    
 
     static final class Responses {
