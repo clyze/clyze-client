@@ -432,6 +432,9 @@ class Helper {
         jsonList.collect { option ->
             println option
             String description = option.description
+            if (!description) {
+                description = "<no description>"
+            }
             if (option.validValues) {                
                 description = "${description}\nAllowed values: ${option.validValues.join(', ')}"
             }
@@ -441,8 +444,11 @@ class Helper {
             if (option.isMandatory) {
                 description = "${description}\nMandatory option."
             }
+            if (option.multipleValues) {
+                description = "${description}\nRepeatable option."
+            }
 
-            Option o = new Option(option.id?.toLowerCase(), option.label, !option.isBoolean, description)                    
+            Option o = new Option(null, option.id?.toLowerCase(), !option.isBoolean, description)                    
             if (option.multipleValues) {
                 o.setArgs(Option.UNLIMITED_VALUES)
                 if (option.isFile) {
@@ -457,5 +463,29 @@ class Helper {
             println o     
             return o            
         }
-    }        
+    }     
+
+    static final void addCliOptionToMultipart(Option o, OptionAccessor cliOptions, MultipartEntityBuilder builder) {        
+        String id = o.longOpt.toUpperCase()
+        String[] values = cliOptions.getOptionValues(o.longOpt)
+        if (o.argName && o.argName.startsWith('file')) {
+            values.each { String file ->
+                File f = new File(file)
+                if (f.exists()) {
+                    println("$file is a local file, it will be posted as attachment.")
+                    builder.addPart(id, new FileBody(f))
+                }
+                else {
+                    //not a local file
+                    println("$file is not a local file, it will be posted as text.")
+                    builder.addPart(id, new StringBody(file))
+                }
+            }
+        }
+        else {
+            values.each { String v ->
+                builder.addPart(id, new StringBody(v))
+            }
+        }        
+    }   
 }

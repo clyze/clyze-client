@@ -45,7 +45,7 @@ class Main {
 
                     if (cli.r) {                        
                         Remote remote = parseRemote(cli.r as String)                                        
-                        options = command.optionsBuilder(remote.host, remote.port)
+                        options = command.discoverOptions(remote.host, remote.port)
                     }
                     println "${command.name} - ${command.description}"
 
@@ -71,7 +71,7 @@ class Main {
                 List<Option> options = []
 
                 Remote remote = parseRemote(cli.r as String)                
-                options = command.optionsBuilder(remote.host, remote.port)
+                options = command.discoverOptions(remote.host, remote.port)
 
                 if (options) {
 

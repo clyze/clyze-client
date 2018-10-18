@@ -29,4 +29,11 @@ class CliRestCommand extends HttpClientCommand<String> {
 
     /** The command line options the command has been actually invoked with */
     OptionAccessor cliOptions
+
+    private List<Option> supportedOptions = null
+
+    List<Option> discoverOptions(String host, int port) {
+        supportedOptions = optionsBuilder ? optionsBuilder.call(host, port) : []
+        supportedOptions
+    }
 }

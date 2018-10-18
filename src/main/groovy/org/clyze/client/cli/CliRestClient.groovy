@@ -157,9 +157,16 @@ class CliRestClient {
             def json = ClientHelper.createCommandForOptionsDiscovery("BUNDLE", new DefaultHttpClientLifeCycle()).execute(host, port)
             return ClientHelper.convertJsonEncodedOptionsToCliOptions(json.options as List)
         },
-        requestBuilder     : { String host, int port ->
-            println cliOptions
-            throw new RuntimeException("Stop")
+        requestBuilder     : { String host, int port ->            
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+
+            //options have been discovered here
+            supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
+                ClientHelper.addCliOptionToMultipart(it, cliOptions, builder)
+            }            
+
+            String token = getUserToken(true, host, port)
+            return LowLevelAPI.Requests.createDoopBundle(token, builder, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
