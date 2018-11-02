@@ -1,6 +1,8 @@
-package org.clyze.client.web.http
+package org.clyze.client.cli
 
 import org.apache.commons.cli.Option
+
+import org.clyze.client.web.http.HttpClientCommand
 
 /**
  * A CLI Rest Client command.

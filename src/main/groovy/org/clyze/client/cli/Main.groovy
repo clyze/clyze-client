@@ -1,7 +1,5 @@
 package org.clyze.client.cli
 
-import org.clyze.client.web.http.CliRestCommand
-
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 import org.clyze.analysis.*
