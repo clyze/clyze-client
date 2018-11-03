@@ -3,18 +3,13 @@ package org.clyze.client.cli
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
 import org.clyze.client.web.Helper as ClientHelper
+import org.clyze.client.web.PostState
 
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
 import org.apache.http.HttpEntity
-import org.apache.http.NameValuePair
-import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
-import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.FileBody
-import org.apache.http.entity.mime.content.StringBody
-import org.apache.http.message.BasicNameValuePair
 import org.apache.log4j.Logger
 
 
@@ -158,15 +153,15 @@ class CliRestClient {
             return ClientHelper.convertJsonEncodedOptionsToCliOptions(json.options as List)
         },
         requestBuilder     : { String host, int port ->            
-            MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+            PostState post = new PostState()
 
             //options have been discovered here
             supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
-                ClientHelper.addCliOptionToMultipart(it, cliOptions, builder)
+                post.addInputFromCliOption(it, cliOptions)
             }            
 
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Requests.createDoopBundle(token, builder, host, port)
+            return LowLevelAPI.Requests.createDoopBundle(token, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String

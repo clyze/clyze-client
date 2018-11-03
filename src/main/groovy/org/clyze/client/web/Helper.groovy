@@ -465,27 +465,4 @@ class Helper {
         }
     }     
 
-    static final void addCliOptionToMultipart(Option o, OptionAccessor cliOptions, MultipartEntityBuilder builder) {        
-        String id = o.longOpt.toUpperCase()
-        String[] values = cliOptions.getOptionValues(o.longOpt)
-        if (o.argName && o.argName.startsWith('file')) {
-            values.each { String file ->
-                File f = new File(file)
-                if (f.exists()) {
-                    println("$file is a local file, it will be posted as attachment.")
-                    builder.addPart(id, new FileBody(f))
-                }
-                else {
-                    //not a local file
-                    println("$file is not a local file, it will be posted as text.")
-                    builder.addPart(id, new StringBody(file))
-                }
-            }
-        }
-        else {
-            values.each { String v ->
-                builder.addPart(id, new StringBody(v))
-            }
-        }        
-    }   
 }
