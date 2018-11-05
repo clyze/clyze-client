@@ -16,19 +16,18 @@ import org.apache.commons.logging.LogFactory
 
 class PostState implements Item {
 
-    private Log logger = LogFactory.getLog(getClass())   
+    private static final Log logger = LogFactory.getLog(getClass())   
 
     String id
+    List<Input> inputs = []
 
     static class Input {
         String key
         String value
         boolean isFile = false 
-    }
-    
-    List<Input> inputs = []
+    }    
 
-    public PostState() { }
+    PostState() { }
 
     @Override
     PostState fromJSON(String json) {
@@ -46,15 +45,19 @@ class PostState implements Item {
         return null
     }
 
-    public void addStringInput(String key, String value) {
+    void saveTo(File dir) {
+        //TODO
+    }
+
+    void addStringInput(String key, String value) {
         inputs.add(new Input(key:key, value:value))
     }
 
-    public void addFileInput(String key, String file) {
+    void addFileInput(String key, String file) {
         inputs.add(new Input(key:key, value:file, isFile:true))
     }
 
-    public void addInputFromCliOption(Option o, OptionAccessor cliOptions) {
+    void addInputFromCliOption(Option o, OptionAccessor cliOptions) {
         String oid = o.longOpt.toUpperCase()
         String[] values = cliOptions.getOptionValues(o.longOpt)
         if (o.argName && o.argName.startsWith('file')) {
@@ -69,24 +72,24 @@ class PostState implements Item {
         }
     }
 
-    public MultipartEntityBuilder asMultipart() {
+    MultipartEntityBuilder asMultipart() {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create()              
-        inputs.each {
-            if (it.isFile) {
-                File f = new File(it.value)
+        inputs.each { Input input ->
+            if (input.isFile) {
+                File f = new File(input.value)
                 if (f.exists()) {
-                    logger.debug("$it.value is a local file, it will be posted as attachment.")
-                    builder.addPart(it.key, new FileBody(f))
+                    logger.debug("$input.value is a local file, it will be posted as attachment.")
+                    builder.addPart(input.key, new FileBody(f))
                 }
                 else {
                     //not a local file
-                    logger.debug("$it.value is not a local file, it will be posted as text.")
-                    builder.addPart(it.key, new StringBody(it.value))
+                    logger.debug("$input.value is not a local file, it will be posted as text.")
+                    builder.addPart(input.key, new StringBody(input.value))
                 }
             }
             else {
-                builder.addPart(it.key, new StringBody(it.value))
-            }            
+                builder.addPart(input.key, new StringBody(input.value))
+            }       
         }
         builder
     }

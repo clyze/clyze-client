@@ -2,6 +2,8 @@ package org.clyze.client.web
 
 import groovy.json.JsonSlurper
 
+import org.clyze.client.web.api.Remote
+
 import org.clyze.client.web.http.HttpClientCommand
 import org.clyze.client.web.http.HttpClientLifeCycle
 import org.clyze.client.web.api.LowLevelAPI
@@ -106,30 +108,7 @@ class Helper {
         }
         AnalysisOption option  = AnalysisFamilies.supportedOptionsOf('doop').find {AnalysisOption option -> option.id == id}
         return option ? option.isFile : false
-    }
-
-
-    /**
-     * Creates the default login command (that returns the token when executed).
-     */
-    static HttpClientCommand<String> createLoginCommand(String username, String password) {
-        return new HttpClientCommand<String>(
-            endPoint: "authenticate",
-            authenticationRequired: false,
-            requestBuilder: { String url ->
-                HttpPost post = new HttpPost(url)
-                List<NameValuePair> params = new ArrayList<>(2)
-                params.add(new BasicNameValuePair("username", username))
-                params.add(new BasicNameValuePair("password", password))
-                post.setEntity(new UrlEncodedFormEntity(params))
-                return post
-            },
-            onSuccess: { HttpEntity entity ->
-                def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-                return json.token
-            }
-        )
-    }
+    }    
 
     /**
      * Post an analysis (represented by argument 'ps') to the
@@ -417,11 +396,11 @@ class Helper {
         postAndStartAnalysis(ps, cache, false)
     }
 
-    static HttpClientCommand<List> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {     
+    static HttpClientCommand<Object> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {     
 
         new HttpClientCommand(
             httpClientLifeCycle: httpClientLifeCycle,
-            requestBuilder     : LowLevelAPI.Requests.&getOptionsForCreate.curry("BUNDLE"),
+            requestBuilder     : LowLevelAPI.Requests.&getOptionsForCreate.curry(what),
             onSuccess          : { HttpEntity entity ->
                 LowLevelAPI.Responses.parseJson(entity)
             }
@@ -429,8 +408,7 @@ class Helper {
     }
 
     static List<Option> convertJsonEncodedOptionsToCliOptions(List<Object> jsonList) {
-        jsonList.collect { option ->
-            println option
+        jsonList.collect { option ->            
             String description = option.description
             if (!description) {
                 description = "<no description>"
@@ -459,8 +437,7 @@ class Helper {
                 if (option.isFile) {
                     o.setArgName("file")
                 }
-            }       
-            println o     
+            }                   
             return o            
         }
     }     

@@ -74,10 +74,14 @@ class LowLevelAPI {
         }
 
         static final HttpPost createAnalysis(String userToken, String bundleId, String analysis, String host, int port) {
-            HttpPost post = new HttpPost(LowLevelAPI.createUrl(host, port, LowLevelAPI.API_PATH, "/bundles/${bundleId}/analyses"))
-            if (userToken) post.addHeader(LowLevelAPI.HEADER_TOKEN, userToken)
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
             entityBuilder.addPart(LowLevelAPI.InputConstants.ANALYSIS, new StringBody(analysis))                
+            return createAnalysis(userToken, bundleId, entityBuilder, host, port)
+        }
+
+        static final HttpPost createAnalysis(String userToken, String bundleId, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new HttpPost(LowLevelAPI.createUrl(host, port, LowLevelAPI.API_PATH, "/bundles/${bundleId}/analyses"))
+            if (userToken) post.addHeader(LowLevelAPI.HEADER_TOKEN, userToken)            
             post.setEntity(entityBuilder.build())
             return post
         }

@@ -1,6 +1,7 @@
 package org.clyze.client.web.api
 
 import org.clyze.client.web.http.*
+import org.clyze.client.web.PostState
 
 import org.apache.http.impl.client.CloseableHttpClient
 
@@ -84,10 +85,26 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	public String createDoopBundle(PostState ps) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&createDoopBundle.curry(userToken, ps.asMultipart()),
+			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
+		).execute(host, port)		
+	}
+
 	public String createAnalysis(String bundleId, String analysis) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(userToken, bundleId, analysis),
+			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
+		).execute(host, port)		
+	}
+
+	public String createAnalysis(String bundleId, PostState ps) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(userToken, bundleId, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}

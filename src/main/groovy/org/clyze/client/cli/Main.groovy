@@ -113,14 +113,6 @@ class Main {
         return cli
     }
 
-    private static void discoverOptionsOfCommand(CliRestCommand command, String host, int port) {        
-        if (command.name == 'post_doop_bundle') {            
-            println "Discovering options of ${command.name}..."                        
-            List<Object> jsonList = ClientHelper.createCommandForOptionsDiscovery("bundle").execute(host, port)
-            command.options = ClientHelper.convertJsonEncodedOptionsToCliOptions(jsonList)
-        }
-    }
-
     static Remote parseRemote(String remoteDef) {        
         String[] parts = remoteDef.split(":")
         int len = parts.length
