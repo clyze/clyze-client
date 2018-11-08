@@ -1,6 +1,6 @@
 package org.clyze.client.web
 
-import groovy.json.JsonBuilder
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 import org.clyze.persistent.model.Item
@@ -10,6 +10,8 @@ import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 
 import org.apache.commons.cli.Option
+
+import static org.apache.commons.io.FileUtils.*
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -31,22 +33,60 @@ class PostState implements Item {
 
     @Override
     PostState fromJSON(String json) {
-        return this
+        def obj = new JsonSlurper().parseText(json)        
+        obj.inputs.each {
+            if (it.isFile) {
+                addFileInput(it.key, it.value)
+            }
+            else {
+                addStringInput(it.key, it.value)
+            }
+        }
+        this
     }
 
     @Override
     String toJSON() { 
-        //return new Gson().toJson();
-        return null
+        return JsonOutput.toJson(toMap())
     }
 
     @Override
     Map<String, Object> toMap() {
-        return null
+        return [            
+            inputs: inputs
+        ]
     }
 
-    void saveTo(File dir) {
-        //TODO
+    PostState saveTo(File dir) {
+        //process inputs to copy all files in the given dir
+        inputs.each { Input input ->            
+            if (input.isFile) {
+                File f = new File(input.value)
+                if (f.exists()) {
+                    String name = f.getName()
+                    File dest = new File(dir, name)
+                    if (dest.exists()) {
+                        throw new RuntimeException("File $name already exists in $dir")
+                    }
+                    copyFileToDirectory(f, dir)
+                    input.value = new File(dir, name).canonicalPath
+                }
+            }
+        }   
+        File json = new File(dir, id + ".json")
+        json.text = toJSON()
+
+        return this
+    }
+
+    PostState loadFrom(File dir) {
+        File json = new File(dir, id + ".json") 
+        if (json.exists()) {
+            return fromJSON(json.text)
+        }
+        else {
+            throw new RuntimeException("File ${id}.json not found in $dir")
+        }        
     }
 
     void addStringInput(String key, String value) {

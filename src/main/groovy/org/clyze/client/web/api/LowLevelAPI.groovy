@@ -13,6 +13,9 @@ import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 
+import groovy.transform.CompileStatic 
+
+@CompileStatic
 class LowLevelAPI {
 
     public static final String BASE_PATH    = "/clue"
@@ -26,7 +29,7 @@ class LowLevelAPI {
     }
 
     static final String createUrl(String host, int port, String path, String endPoint) {
-        return "http://${host}:${port}${path}${endPoint}"
+        return "http://${host}:${port}${path}${endPoint}" as String
     }
 
     static final def asJson(HttpEntity entity) {
@@ -144,12 +147,4 @@ class LowLevelAPI {
             return json[(attrName)]
         }
     }
-
-
-    static final HttpClientCommand<String> CREATE_ANALYSIS = new HttpClientCommand<>(        
-        onSuccess: { HttpEntity entity ->
-             def json = asJson(entity)
-             return json.id as String
-        }
-    )
 }
