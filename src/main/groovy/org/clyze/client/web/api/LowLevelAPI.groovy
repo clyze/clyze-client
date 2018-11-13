@@ -133,6 +133,21 @@ class LowLevelAPI {
             if (userToken) delete.addHeader(HEADER_TOKEN, userToken)
             return delete
         }        
+
+        static final HttpGet getProjects(String userToken, String host, int port) {
+            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/projects"))
+            if (userToken) get.addHeader(HEADER_TOKEN, userToken)
+            return get
+        }
+
+        static final HttpPost createProject(String userToken, String projectName, String host, int port) {
+            HttpPost post = new HttpPost(createUrl(host, port, API_PATH, "/projects"))
+            if (userToken) post.addHeader(HEADER_TOKEN, userToken)
+            List<NameValuePair> params = new ArrayList<>(1)
+            params.add(new BasicNameValuePair("name", projectName))
+            post.setEntity(new UrlEncodedFormEntity(params))
+            return post
+        }
     }    
 
     static final class Responses {
