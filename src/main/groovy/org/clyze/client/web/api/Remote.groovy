@@ -212,4 +212,12 @@ class Remote {
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
+
+	def updateProject(String id, String newName, List<String> newMembers) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&updateProject.curry(userToken, id, newName, newMembers),
+			onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)		
+	}
 }

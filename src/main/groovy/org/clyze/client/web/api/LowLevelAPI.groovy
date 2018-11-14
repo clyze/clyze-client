@@ -154,6 +154,18 @@ class LowLevelAPI {
             if (userToken) get.addHeader(HEADER_TOKEN, userToken)
             return get
         }
+
+        static final HttpPut updateProject(String userToken, String projectId, String newName, List<String> newMembers, String host, int port) {
+            HttpPut put = new HttpPut(createUrl(host, port, API_PATH, "/projects/" + projectId))
+            if (userToken) put.addHeader(HEADER_TOKEN, userToken)
+            List<NameValuePair> params = new ArrayList<>(2)
+            params.add(new BasicNameValuePair("name", newName))
+            newMembers?.each {
+                params.add(new BasicNameValuePair("members", it))            
+            }
+            put.setEntity(new UrlEncodedFormEntity(params))
+            return put
+        }
     }    
 
     static final class Responses {
