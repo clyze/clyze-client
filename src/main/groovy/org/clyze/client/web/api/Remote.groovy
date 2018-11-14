@@ -204,4 +204,12 @@ class Remote {
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
+
+	def getProject(String id) {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&getProject.curry(userToken, id),
+			onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)		
+	}
 }

@@ -148,6 +148,12 @@ class LowLevelAPI {
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
         }
+
+        static final HttpGet getProject(String userToken, String id, String host, int port) {
+            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/projects/" + id))
+            if (userToken) get.addHeader(HEADER_TOKEN, userToken)
+            return get
+        }
     }    
 
     static final class Responses {
