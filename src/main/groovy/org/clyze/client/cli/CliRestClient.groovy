@@ -161,7 +161,7 @@ class CliRestClient {
             }            
 
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Requests.createDoopBundle(token, post.asMultipart(), host, port)
+            return LowLevelAPI.Requests.createDoopBundle(token, null, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String

@@ -62,18 +62,18 @@ class LowLevelAPI {
             return get
         }
 
-        static final HttpPost createDoopBundle(String userToken, MultipartEntityBuilder entityBuilder, String host, int port) {            
-            HttpPost post = new HttpPost(createUrl(host, port, API_PATH, "/bundles?family=doop"))
+        static final HttpPost createDoopBundle(String userToken, String projectId, MultipartEntityBuilder entityBuilder, String host, int port) {            
+            HttpPost post = new HttpPost(createUrl(host, port, API_PATH, "/bundles?family=doop&project=" + projectId))
             if (userToken) post.addHeader(LowLevelAPI.HEADER_TOKEN, userToken)            
             post.setEntity(entityBuilder.build())
             return post        
         }
 
-        static final HttpPost createDoopBundle(String userToken, String platform, String bundleResolvableByServer, String host, int port) {                    
+        static final HttpPost createDoopBundle(String userToken, String projectId, String platform, String bundleResolvableByServer, String host, int port) {                    
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
             entityBuilder.addPart(LowLevelAPI.InputConstants.INPUTS, new StringBody(bundleResolvableByServer))
             entityBuilder.addPart(LowLevelAPI.InputConstants.PLATFORM, new StringBody(platform))
-            return createDoopBundle(userToken, entityBuilder, host, port)
+            return createDoopBundle(userToken, projectId, entityBuilder, host, port)
         }
 
         static final HttpPost createAnalysis(String userToken, String bundleId, String analysis, String host, int port) {
