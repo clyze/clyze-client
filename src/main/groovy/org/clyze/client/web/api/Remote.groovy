@@ -69,10 +69,20 @@ class Remote {
 		return (userToken != null)
 	}
 
-	public def listBundles()  {
+	public void logout() {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&listBundles.curry(userToken),
+			requestBuilder: LowLevelAPI.Requests.&logout,
+			onSuccess: { HttpEntity entity ->
+				userToken = null
+			}
+		).execute(host, port)		
+	}
+
+	public def listBundles(String projectId)  {
+		new HttpClientCommand(			
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&listBundles.curry(userToken, projectId),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}

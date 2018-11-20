@@ -20,6 +20,7 @@ class LowLevelAPI {
 
     public static final String BASE_PATH    = "/clue"
 	public static final String API_PATH     = "${BASE_PATH}/api/v1"
+    public static final String AUTH_PATH    = "${BASE_PATH}/auth/v1"
     public static final String HEADER_TOKEN = "x-clue-token"    
 
     static final class InputConstants {
@@ -56,8 +57,16 @@ class LowLevelAPI {
             return post
         }        
 
-        static final HttpGet listBundles(String userToken, String host, int port) {
-            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/bundles"))
+        /*
+        static final HttpDelete logout(String host, int port) {
+            HttpDelete delete = new HttpDelete(createUrl(host, port, AUTH_PATH, "/session"))            
+            if (userToken) delete.addHeader(LowLevelAPI.HEADER_TOKEN, userToken)            
+            return delete
+        } 
+        */       
+
+        static final HttpGet listBundles(String userToken, String projectId, String host, int port) {
+            HttpGet get = new HttpGet(createUrl(host, port, API_PATH, "/bundles?project=" + projectId))
             if (userToken) get.addHeader(HEADER_TOKEN, userToken)
             return get
         }

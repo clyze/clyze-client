@@ -136,7 +136,7 @@ class CliRestClient {
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Requests.listBundles(token, host, port)
+            return LowLevelAPI.Requests.listBundles(token, null, host, port) //TODO: Fix this
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
