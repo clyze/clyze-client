@@ -21,7 +21,6 @@ task wrapper(type: Wrapper) {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "https://raw.github.com/msridhar/maven-jars/mvn-repo/" }
     maven { url "${artifactory_contextUrl}/plast-public" }
     maven {
         credentials {
