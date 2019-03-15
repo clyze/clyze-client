@@ -166,4 +166,38 @@ class Helper {
         }
     }     
 
+    public static Closure<Boolean> checkFileEmpty = { String f ->
+        boolean isEmpty = (new File(f)).length() == 0
+        if (isEmpty) {
+            println "Skipping empty file ${n}"
+        }
+        !isEmpty
+    }
+
+    static void doPost(String host, int port, String username, String password, String clueProject, PostState bundlePostState, PostState analysisPostState) {
+        println "Connecting to server at ${host}:${port}"
+        Remote remote = Remote.at(host, port)
+
+        println "Logging in as ${username}"
+        remote.login(username, password)
+
+        if (!clueProject) {
+            throw new RuntimeException("Clue project missing")
+        }
+
+        println "Submitting bundle in ${clueProject}..."
+        String bundleId = remote.createDoopBundle(clueProject, bundlePostState)
+
+        println "Done (new bundle $bundleId)."
+
+        if (analysisPostState?.inputs) {
+            println "Creating new analysis of bundle $bundleId..."
+            String analysisId = remote.createAnalysis(bundleId, analysisPostState)
+            println "Done. Starting it..."
+            remote.executeAnalysisAction(bundleId, analysisId, 'start')
+            println "Analysis has been started, waiting..."
+            String status = remote.waitForAnalysisStatus(["FINISHED", "ERROR"] as Set, bundleId, analysisId, 120)
+            println "Analysis state: $status"
+        }
+    }
 }

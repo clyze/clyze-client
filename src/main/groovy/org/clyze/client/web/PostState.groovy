@@ -31,6 +31,25 @@ class PostState implements Item {
 
     PostState() { }
 
+    /**
+     * Create a POST state from an options map.
+     */
+    PostState(String id, Map<String, Object> options) {
+        this.id = id
+        options.each { k, v ->
+            println "${k} -> ${v}"
+            if ((k == "inputs" || k == "libraries" || k == "heapdls") && v) {
+                v.findAll(Helper.checkFileEmpty).each {
+                    addFileInput(k.toUpperCase(), it)
+                }
+            } else if (k == "platform" || k == "analysis") {
+                addStringInput(k.toUpperCase(), v)
+            } else {
+                println "Ignoring option ${k}: ${}"
+            }
+        }
+    }
+
     @Override
     PostState fromJSON(String json) {
         def obj = new JsonSlurper().parseText(json)        
