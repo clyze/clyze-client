@@ -3,9 +3,7 @@ package org.clyze.client.web
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-import org.clyze.analysis.AnalysisOption
 import org.clyze.analysis.InputType
-import org.clyze.doop.core.DoopAnalysisFamily
 import org.clyze.persistent.model.Item
 
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -33,43 +31,6 @@ class PostState implements Item {
     }    
 
     PostState() { }
-
-    /**
-     * Create a POST state from an options map.
-     */
-    PostState(String id, Map<String, Object> options) {
-        this.id = id
-        DoopAnalysisFamily family = DoopAnalysisFamily.instance
-        options.each { k, v ->
-            println "Reading option: ${k} -> ${v}"
-            if (k == 'inputs') {
-                k = 'input-file'
-            } else if (k == 'libraries') {
-                k = 'library-file'
-            } else if (k == 'platforms') {
-                k = 'platform-files'
-            } else if (k == 'heapdls') {
-                k = 'heapdl-file'
-            }
-            AnalysisOption opt = family.getOptionByName(k)
-            if (opt) {
-                if (opt.argInputType) {
-                    if (opt.multipleValues) {
-                        v.findAll(Helper.checkFileEmpty).each {
-                            println "Adding entry: ${it}"
-                            addFileInput(opt.id, it)
-                        }
-                    } else if (Helper.checkFileEmpty(v)) {
-                        addFileInput(opt.id, v)
-                    }
-                } else {
-                    addStringInput(opt.id, v)
-                }
-            } else {
-                println "Ignoring option ${k}: ${v}"
-            }
-        }
-    }
 
     @Override
     PostState fromJSON(String json) {
