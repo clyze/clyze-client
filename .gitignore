@@ -11,3 +11,6 @@
 #vi(m) files
 *~
 *swp
+
+#installDist Gradle task output directory
+/dist/
