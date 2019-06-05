@@ -1,6 +1,8 @@
 package org.clyze.client
 
+import groovy.transform.TypeChecked
 import static groovy.io.FileType.FILES
+import org.clyze.utils.JHelper;
 
 /**
  * Analyzes the sources of a project and optionally converts them to
@@ -9,6 +11,7 @@ import static groovy.io.FileType.FILES
  * conversion addresses the issue of feeding sources with different
  * encodings to the jcPlugin.
  */
+@TypeChecked
 class SourceProcessor {
 
     /**
@@ -36,7 +39,7 @@ class SourceProcessor {
             if (it.name.endsWith(".java")) {
                 sourceFiles << it.canonicalPath
                 if (convertUTF8) {
-                    ensureUTF8(it.canonicalPath)
+                    JHelper.ensureUTF8(it.canonicalPath)
                 }
                 def lines = (new File(it.canonicalPath)).readLines()
                 for (String l : lines) {
