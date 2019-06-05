@@ -42,7 +42,7 @@ class SourceProcessor {
                 for (String l : lines) {
                     // Heuristic to report creation of dynamic proxies.
                     if (l.contains("newProxyInstance(") && !l.contains("//") && !l.contains("*")) {
-                        System.out.println("Dynamic proxies found.");
+                        System.out.println("Dynamic proxies found.")
                     }
                 }
                 lineCount += lines.size()
@@ -63,10 +63,10 @@ class SourceProcessor {
             throw new RuntimeException("No Java sources were found.")
         }
         if (scalaFilesCount > sourceFilesCount) {
-            throw new RuntimeException("This looks like a Scala project.");
+            throw new RuntimeException("This looks like a Scala project.")
         }
         if (groovyFilesCount > sourceFilesCount) {
-            throw new RuntimeException("This looks like a Groovy project.");
+            throw new RuntimeException("This looks like a Groovy project.")
         }
 
         return [ sourceFiles        : sourceFiles,
