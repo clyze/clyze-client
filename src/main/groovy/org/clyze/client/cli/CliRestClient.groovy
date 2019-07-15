@@ -4,16 +4,9 @@ import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
 import org.clyze.client.web.Helper as ClientHelper
 import org.clyze.client.web.PostState
-
-import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.OptionBuilder
 import org.apache.http.HttpEntity
-import org.apache.http.client.methods.*
-import org.apache.log4j.Logger
-
-
-import org.clyze.utils.FileOps
 
 /**
  * A command line client for a remote doop server.
@@ -136,7 +129,7 @@ class CliRestClient {
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Requests.listBundles(token, null, host, port) //TODO: Fix this
+            return LowLevelAPI.Bundles.listBundles(token, null, host, port) //TODO: Fix this
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
@@ -161,7 +154,7 @@ class CliRestClient {
             }            
 
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Requests.createDoopBundle(token, null, post.asMultipart(), host, port)
+            return LowLevelAPI.Bundles.createDoopBundle(token, null, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String

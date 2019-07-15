@@ -6,21 +6,15 @@ import org.clyze.client.web.PostState
 import org.apache.http.impl.client.CloseableHttpClient
 
 import org.apache.http.HttpEntity
-import org.apache.http.NameValuePair
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.*
 import org.apache.http.client.ClientProtocolException
-import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.FileBody
-import org.apache.http.entity.mime.content.StringBody
-import org.apache.http.message.BasicNameValuePair
 
 class Remote {
 
 	private final String host
 	private final Integer port
 	private final HttpClientLifeCycle httpClientLifeCycle	
-	private String userToken = null
+	private String token    = null
+	private String username = null
 
 	private Remote(String host, Integer port, HttpClientLifeCycle httpClientLifeCycle) {
 		this.host = host
@@ -31,6 +25,14 @@ class Remote {
 	static Remote at(String host, Integer port) {
 		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
 		return new Remote(host, port, new SameInstanceHttpClientLifeCycle(client))
+	}
+
+	String currentUser() {
+		return username
+	}
+
+	boolean isLoggedIn() {
+		return (token != null)
 	}
 
 
@@ -60,13 +62,11 @@ class Remote {
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
 			onSuccess: { HttpEntity entity ->
-				userToken = LowLevelAPI.Responses.parseJsonAndGetAttr("token", entity)
+				def json = LowLevelAPI.Responses.parseJson(entity)
+				this.token    = json.token
+				this.username = json.username
 			}
 		).execute(host, port)		
-	}
-
-	public boolean isLoggedIn() {
-		return (userToken != null)
 	}
 
 	public void logout() {
@@ -74,7 +74,7 @@ class Remote {
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&logout,
 			onSuccess: { HttpEntity entity ->
-				userToken = null
+				token = null
 			}
 		).execute(host, port)		
 	}
@@ -82,15 +82,15 @@ class Remote {
 	public def listBundles(String projectId)  {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&listBundles.curry(userToken, projectId),
+			requestBuilder: LowLevelAPI.Bundles.&listBundles.curry(token, projectId),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
-	public String createDoopBundle(String projectId, String platform, String bundleResolvableByServer) {
+	public String createDoopBundle(String owner, String projectName, String platform, String bundleResolvableByServer) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createDoopBundle.curry(userToken, projectId, platform, bundleResolvableByServer),
+			requestBuilder: LowLevelAPI.Bundles.&createDoopBundle.curry(token, owner, projectName, platform, bundleResolvableByServer),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}
@@ -98,7 +98,7 @@ class Remote {
 	public String createDoopBundle(String projectId, PostState ps) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createDoopBundle.curry(userToken, projectId, ps.asMultipart()),
+			requestBuilder: LowLevelAPI.Bundles.&createDoopBundle.curry(token, projectId, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}
@@ -106,7 +106,7 @@ class Remote {
 	public String createAnalysis(String bundleId, String analysis) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(userToken, bundleId, analysis),
+			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, bundleId, analysis),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}
@@ -114,7 +114,7 @@ class Remote {
 	public String createAnalysis(String bundleId, PostState ps) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(userToken, bundleId, ps.asMultipart()),
+			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, bundleId, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}
@@ -122,7 +122,7 @@ class Remote {
 	boolean executeAnalysisAction(String bundleId, String analysisId, String action) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&executeAnalysisAction.curry(userToken, bundleId, analysisId, action),
+			requestBuilder: LowLevelAPI.Requests.&executeAnalysisAction.curry(token, bundleId, analysisId, action),
 			onSuccess: { HttpEntity entity ->
             	LowLevelAPI.Responses.parseJson(entity) != null
         	}
@@ -132,7 +132,7 @@ class Remote {
 	String getAnalysisStatus(String bundleId, String analysisId) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getAnalysisStatus.curry(userToken, bundleId, analysisId),
+			requestBuilder: LowLevelAPI.Requests.&getAnalysisStatus.curry(token, bundleId, analysisId),
 			onSuccess : { HttpEntity entity ->
 				def json = LowLevelAPI.Responses.parseJson(entity)
 				return json.analysis.state
@@ -170,7 +170,7 @@ class Remote {
 		String fileEncoded = URLEncoder.encode(file, "UTF-8")		
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(userToken, bundleId, analysisId, file, line, col),
+			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(token, bundleId, analysisId, file, line, col),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}		
@@ -178,7 +178,7 @@ class Remote {
 	def listUsers() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getUsers.curry(userToken),
+			requestBuilder: LowLevelAPI.Requests.&getUsers.curry(token),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
@@ -186,7 +186,7 @@ class Remote {
 	def createUser(String username, String password) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createUser.curry(userToken, username, password),
+			requestBuilder: LowLevelAPI.Requests.&createUser.curry(token, username, password),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
@@ -194,7 +194,7 @@ class Remote {
 	def deleteUser(String username) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&deleteUser.curry(userToken, username),
+			requestBuilder: LowLevelAPI.Requests.&deleteUser.curry(token, username),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
@@ -202,7 +202,7 @@ class Remote {
 	def listProjects() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getProjects.curry(userToken),
+			requestBuilder: LowLevelAPI.Projects.&getProjects.curry(token, currentUser()),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
@@ -210,23 +210,23 @@ class Remote {
 	def createProject(String name) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createProject.curry(userToken, name),
+			requestBuilder: LowLevelAPI.Projects.&createProject.curry(token, currentUser(), name),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
-	def getProject(String id) {
+	def getProject(String owner, String name) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getProject.curry(userToken, id),
+			requestBuilder: LowLevelAPI.Projects.&getProject.curry(token, owner, name),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
-	def updateProject(String id, String newName, List<String> newMembers) {
+	def updateProject(String owner, String name, List<String> newMembers) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&updateProject.curry(userToken, id, newName, newMembers),
+			requestBuilder: LowLevelAPI.Projects.&updateProject.curry(token, owner, name, newMembers),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}

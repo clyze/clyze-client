@@ -10,7 +10,7 @@ class CliAuthenticator {
     //TODO: Unsafe, yet convenient for the time being
     static void init(){
         String userHome = System.getProperty("user.home")
-        String fileName = "${userHome}/.jdoop-client"
+        String fileName = "${userHome}/.clue-client"
         try {
             File f = FileOps.findFileOrThrow(fileName, "File invalid: $fileName")
             token = f.text.trim()
@@ -28,7 +28,7 @@ class CliAuthenticator {
         CliAuthenticator.token = token
         try {
             String userHome = System.getProperty("user.home")
-            FileOps.writeToFile(new File("${userHome}/.jdoop-client"), token)
+            FileOps.writeToFile(new File("${userHome}/.clue-client"), token)
         }
         catch(e) {
             Logger.getRootLogger().error(e.getMessage(), e)
