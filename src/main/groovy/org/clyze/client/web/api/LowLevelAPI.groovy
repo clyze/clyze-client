@@ -87,7 +87,7 @@ class LowLevelAPI {
         }        
 
         static final HttpGet getUsers(String userToken, String host, int port) {
-            return new Endpoints(host, port, userToken).getUsersEndpoint()
+            return new Endpoints(host, port, userToken).listUsersEndpoint()
         }
 
         static final HttpPost createUser(String userToken, String username, String password, String host, int port) {
@@ -107,7 +107,7 @@ class LowLevelAPI {
     static final class Projects {
 
         static final HttpGet getProjects(String userToken, String user, String host, int port) {
-            return new Endpoints(host, port, userToken, user).getProjectsEndpoint()
+            return new Endpoints(host, port, userToken, user).listProjectsEndpoint()
         }
 
         static final HttpPost createProject(String userToken, String owner, String projectName, String host, int port) {
@@ -136,7 +136,11 @@ class LowLevelAPI {
     static final class Bundles {
 
         static final HttpGet listBundles(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).getBundlesEndpoint()
+            return new Endpoints(host, port, userToken, owner, projectName).listBundlesEndpoint()
+        }
+
+        static final HttpGet getBundle(String userToken, String owner, String projectName, String bundleName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName).getBundleEndpoint()
         }
 
         static final HttpPost createDoopBundle(String userToken, String owner, String projectName, MultipartEntityBuilder entityBuilder, String host, int port) {
@@ -178,13 +182,15 @@ class LowLevelAPI {
         String userToken
         String username
         String projectName
+        String bundleName
 
-        Endpoints(String host, int port, String userToken=null, String username=null, String projectName=null) {
+        Endpoints(String host, int port, String userToken=null, String username=null, String projectName=null, String bundleName=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
             this.username    = username
             this.projectName = projectName
+            this.bundleName  = bundleName
         }
 
         HttpGet pingEndpoint() {
@@ -199,7 +205,7 @@ class LowLevelAPI {
             new HttpPost(createUrl(host, port, API_PATH, "/authenticate"))
         }
 
-        HttpGet getUsersEndpoint() {
+        HttpGet listUsersEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, usersSuffix()))) as HttpGet
         }
 
@@ -211,7 +217,7 @@ class LowLevelAPI {
             withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, userSuffix()))) as HttpDelete
         }
 
-        HttpGet getProjectsEndpoint() {
+        HttpGet listProjectsEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectsSuffix()))) as HttpGet
         }
 
@@ -227,8 +233,12 @@ class LowLevelAPI {
             withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix()))) as HttpPut
         }
 
-        HttpGet getBundlesEndpoint() {
+        HttpGet listBundlesEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundlesSuffix()))) as HttpGet
+        }
+
+        HttpGet getBundleEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleSuffix()))) as HttpGet
         }
 
         HttpPost postDoopBundleEndpoint() {
@@ -260,6 +270,11 @@ class LowLevelAPI {
 
         String bundlesSuffix() {
             return "${projectSuffix()}/bundles"
+        }
+
+        String bundleSuffix() {
+            if (!bundleName) throw new RuntimeException("No bundle name")
+            return "${bundlesSuffix()}/$bundleName"
         }
 
         static final String createUrl(String host, int port, String path, String endPoint) {
