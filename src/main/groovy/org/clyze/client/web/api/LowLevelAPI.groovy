@@ -10,7 +10,6 @@ import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 
 import groovy.transform.CompileStatic
-import org.apiguardian.api.API
 
 @CompileStatic
 class LowLevelAPI {
@@ -53,7 +52,7 @@ class LowLevelAPI {
 
         static final HttpPost createAnalysis(String userToken, String bundleId, String analysis, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
-            entityBuilder.addPart(LowLevelAPI.InputConstants.ANALYSIS, new StringBody(analysis))                
+            entityBuilder.addPart(InputConstants.ANALYSIS, new StringBody(analysis))
             return createAnalysis(userToken, bundleId, entityBuilder, host, port)
         }
 
@@ -148,8 +147,8 @@ class LowLevelAPI {
 
         static final HttpPost createDoopBundle(String userToken, String owner, String projectName, String platform, String bundleResolvableByServer, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-            entityBuilder.addPart(LowLevelAPI.InputConstants.INPUTS, new StringBody(bundleResolvableByServer))
-            entityBuilder.addPart(LowLevelAPI.InputConstants.PLATFORM, new StringBody(platform))
+            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(bundleResolvableByServer))
+            entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(platform))
             return createDoopBundle(userToken, owner, projectName, entityBuilder, host, port)
         }
     }
