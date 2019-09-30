@@ -143,17 +143,17 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName).getBundleEndpoint()
         }
 
-        static final HttpPost createDoopBundle(String userToken, String owner, String projectName, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postDoopBundleEndpoint()
+        static final HttpPost createBundle(String userToken, String owner, String projectName, String profile, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postBundleEndpoint(profile)
             post.setEntity(entityBuilder.build())
             return post
         }
 
-        static final HttpPost createDoopBundle(String userToken, String owner, String projectName, String platform, String bundleResolvableByServer, String host, int port) {
+        static final HttpPost createBundle(String userToken, String owner, String projectName, String profile, String bundleResolvableByServer, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
             entityBuilder.addPart(InputConstants.INPUTS, new StringBody(bundleResolvableByServer))
-            entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(platform))
-            return createDoopBundle(userToken, owner, projectName, entityBuilder, host, port)
+            entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(profile))
+            return createBundle(userToken, owner, projectName, profile, entityBuilder, host, port)
         }
     }
 
@@ -241,8 +241,8 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleSuffix()))) as HttpGet
         }
 
-        HttpPost postDoopBundleEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundlesSuffix() + "?family=doop"))) as HttpPost
+        HttpPost postBundleEndpoint(String profile) {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundlesSuffix() + "?profile=${profile}"))) as HttpPost
         }
 
         private HttpRequestBase withTokenHeader(HttpRequestBase req) {

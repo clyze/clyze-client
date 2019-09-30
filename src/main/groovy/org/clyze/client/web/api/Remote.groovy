@@ -87,23 +87,15 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	public def createDoopBundle(String owner, String projectName, String platform, String bundleResolvableByServer) {
+	def createBundle(String owner, String projectName, String profile, PostState ps) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Bundles.&createDoopBundle.curry(token, owner, projectName, platform, bundleResolvableByServer),
+			requestBuilder: LowLevelAPI.Bundles.&createBundle.curry(token, owner, projectName, profile, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
-	public def createDoopBundle(String owner, projectName, PostState ps) {
-		new HttpClientCommand(
-			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Bundles.&createDoopBundle.curry(token, owner, projectName, ps.asMultipart()),
-			onSuccess: LowLevelAPI.Responses.&parseJson
-		).execute(host, port)		
-	}
-
-	public def getBundle(String owner, String projectName, String bundleName) {
+	def getBundle(String owner, String projectName, String bundleName) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Bundles.&getBundle.curry(token, owner, projectName, bundleName),
