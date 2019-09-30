@@ -202,7 +202,7 @@ class LowLevelAPI {
         }
 
         HttpPost authenticateEndpoint() {
-            new HttpPost(createUrl(host, port, API_PATH, "/authenticate"))
+            new HttpPost(createUrl(host, port, API_PATH, "/session"))
         }
 
         HttpGet listUsersEndpoint() {
