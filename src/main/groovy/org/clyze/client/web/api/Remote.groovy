@@ -35,36 +35,31 @@ class Remote {
 		return (token != null)
 	}
 
-
-	public <T> T ping() {
+	def ping() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&ping,
-			onSuccess: { HttpEntity entity ->
-				LowLevelAPI.Responses.parseJson(entity) != null
-			}
+			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
-	
-	public <T> T cleanDeploy() {
+	def cleanDeploy() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&cleanDeploy,
-			onSuccess: { HttpEntity entity ->
-				LowLevelAPI.Responses.parseJson(entity) != null
-			}
+			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}		
 
-	public void login(String username, String password) {		
+	def login(String username, String password) {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
 			onSuccess: { HttpEntity entity ->
-				def json = LowLevelAPI.Responses.parseJson(entity)
-				this.token    = json.token
-				this.username = json.username
+				def data = LowLevelAPI.Responses.parseJson(entity)
+				this.token    = data.token
+				this.username = data.username
+				return data
 			}
 		).execute(host, port)		
 	}
