@@ -35,14 +35,7 @@ class PostState implements Item {
     @Override
     PostState fromJSON(String json) {
         def obj = new JsonSlurper().parseText(json)        
-        obj.inputs.each {
-            if (it.isFile) {
-                addFileInput(it.key, it.value)
-            }
-            else {
-                addStringInput(it.key, it.value)
-            }
-        }
+        fromMap(obj)
         this
     }
 
@@ -56,6 +49,18 @@ class PostState implements Item {
         return [            
             inputs: inputs
         ]
+    }
+
+    @Override
+    void fromMap(Map<String, Object> map) {
+        map.inputs.each {
+            if (it.isFile) {
+                addFileInput(it.key, it.value)
+            }
+            else {
+                addStringInput(it.key, it.value)
+            }
+        }
     }
 
     PostState saveTo(File dir) {
