@@ -64,15 +64,15 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	void logout() {
-		new HttpClientCommand(			
-			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&logout,
-			onSuccess: { HttpEntity entity ->
-				token = null
-			}
-		).execute(host, port)		
-	}
+//	void logout() {
+//		new HttpClientCommand(
+//			httpClientLifeCycle: httpClientLifeCycle,
+//			requestBuilder: LowLevelAPI.Requests.&logout,
+//			onSuccess: { HttpEntity entity ->
+//				token = null
+//			}
+//		).execute(host, port)
+//	}
 
 	def listBundles(String owner, String projectName)  {
 		new HttpClientCommand(			
