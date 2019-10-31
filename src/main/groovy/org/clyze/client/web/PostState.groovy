@@ -136,13 +136,12 @@ class PostState implements Item {
         return (idx == -1) ? f : f.substring(idx+1)
     }
 
-
-    // Used to check if an object can be simply converted to a string.
-    private static boolean isPrimitiveOrString(Object obj) {
-        return (obj.class in [ String.class, Boolean.class, Character.class,
-                               Byte.class, Short.class, Integer.class, Long.class,
-                               Float.class, Double.class ])
-    }
+//    // Used to check if an object can be simply converted to a string.
+//    private static boolean isPrimitiveOrString(Object obj) {
+//        return (obj.class in [ String.class, Boolean.class, Character.class,
+//                               Byte.class, Short.class, Integer.class, Long.class,
+//                               Float.class, Double.class ])
+//    }
 
     // Given a file path and a directory prefix of it, strip the
     // prefix from the path (or do nothing if the prefix is wrong).
@@ -157,15 +156,15 @@ class PostState implements Item {
         }
     }
 
-    private static void checkFlatStructure(def options, String sourcesName, String jcPluginMetadataName, List heapDLNames) {
-        List l = []
-        l.addAll(options.inputs)
-        l.add(sourcesName)
-        l.add(jcPluginMetadataName)
-        l.addAll(options.libraries)
-        l.addAll(heapDLNames)
-        l = l.findAll { it != null }
-        if (l.size() != l.toSet().size())
-            throw new RuntimeException("Flat structure violation, duplicate elements found in: ${l}")
-    }
+//    private static void checkFlatStructure(def options, String sourcesName, String jcPluginMetadataName, List heapDLNames) {
+//        List l = []
+//        l.addAll(options.inputs)
+//        l.add(sourcesName)
+//        l.add(jcPluginMetadataName)
+//        l.addAll(options.libraries)
+//        l.addAll(heapDLNames)
+//        l = l.findAll { it != null }
+//        if (l.size() != l.toSet().size())
+//            throw new RuntimeException("Flat structure violation, duplicate elements found in: ${l}")
+//    }
 }
