@@ -77,7 +77,11 @@ publishing {
 }
 
 release {
-    //use the defaults, see https://github.com/researchgate/gradle-release
+    git {
+        // Permit releasing from all branches.
+        requireBranch = null
+    }
+    // Use the defaults for the rest, see https://github.com/researchgate/gradle-release
 }
 
 afterReleaseBuild.dependsOn publish
