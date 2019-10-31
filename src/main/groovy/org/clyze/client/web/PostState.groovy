@@ -1,5 +1,6 @@
 package org.clyze.client.web
 
+import groovy.cli.commons.OptionAccessor
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.cli.Option

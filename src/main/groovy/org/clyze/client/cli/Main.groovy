@@ -1,5 +1,6 @@
 package org.clyze.client.cli
 
+import groovy.cli.commons.OptionAccessor
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 import org.clyze.analysis.*

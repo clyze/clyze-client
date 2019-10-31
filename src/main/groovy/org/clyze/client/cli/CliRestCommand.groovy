@@ -1,7 +1,7 @@
 package org.clyze.client.cli
 
+import groovy.cli.commons.OptionAccessor
 import org.apache.commons.cli.Option
-
 import org.clyze.client.web.http.HttpClientCommand
 
 /**
