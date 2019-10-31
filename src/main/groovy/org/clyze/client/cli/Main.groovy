@@ -26,8 +26,8 @@ class Main {
 
             CliBuilder builder = createCliBuilder()
             OptionAccessor cli = builder.parse(args)
-            String cmd
-            CliRestCommand command
+            String cmd = null
+            CliRestCommand command = null
 
             if (!cli || !args) {
                 builder.usage()
@@ -87,6 +87,7 @@ class Main {
 
             } else {
                 builder.usage()
+                //noinspection GroovyUnnecessaryReturn
                 return
             }
         } catch (e) {

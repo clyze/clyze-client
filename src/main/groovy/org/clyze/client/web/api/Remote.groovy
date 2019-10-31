@@ -148,7 +148,7 @@ class Remote {
 				Thread.sleep(15000)
 			}
 			catch(InterruptedException ie) {
-				throw new RuntimeException("Analysis wait interrupted")
+				throw new RuntimeException("Analysis wait interrupted: ${ie.message}")
 			}
 			catch(ClientProtocolException cpe) {
 				throw new RuntimeException("Analysis wait server error - ${cpe.getMessage()}", cpe)
