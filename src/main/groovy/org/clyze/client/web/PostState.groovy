@@ -2,27 +2,23 @@ package org.clyze.client.web
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-
-import org.clyze.analysis.InputType
-import org.clyze.persistent.model.Item
-
+import org.apache.commons.cli.Option
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
-
-import org.apache.commons.cli.Option
+import org.clyze.analysis.InputType
+import org.clyze.persistent.model.Item
 
 import static org.apache.commons.io.FileUtils.*
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 
 class PostState implements Item {
 
     private static final Log logger = LogFactory.getLog(getClass())   
 
     String id
-    List<Input> inputs = []
+    Set<Input> inputs = new HashSet<>()
 
     static class Input {
         String key
@@ -56,8 +52,7 @@ class PostState implements Item {
         map.inputs.each {
             if (it.isFile) {
                 addFileInput(it.key, it.value)
-            }
-            else {
+            } else {
                 addStringInput(it.key, it.value)
             }
         }
@@ -65,18 +60,17 @@ class PostState implements Item {
 
     PostState saveTo(File dir) {
         //process inputs to copy all files in the given dir
-        inputs.each { Input input ->            
-            if (input.isFile) {
-                File f = new File(input.value)
-                if (f.exists()) {
-                    String name = f.getName()
-                    File dest = new File(dir, name)
-                    if (dest.exists()) {
-                        throw new RuntimeException("File $name already exists in $dir")
-                    }
-                    copyFileToDirectory(f, dir)
-                    input.value = new File(dir, name).canonicalPath
+        inputs.findAll { it.isFile }.each { Input input ->
+            logger.info "Copying: ${input.value} -> ${dir}"
+            File f = new File(input.value)
+            if (f.exists()) {
+                String name = f.getName()
+                File dest = new File(dir, name)
+                if (dest.exists()) {
+                    throw new RuntimeException("File $name already exists in $dir")
                 }
+                copyFileToDirectory(f, dir)
+                input.value = new File(dir, name).canonicalPath
             }
         }   
         File json = new File(dir, id + ".json")
@@ -89,8 +83,7 @@ class PostState implements Item {
         File json = new File(dir, id + ".json") 
         if (json.exists()) {
             return fromJSON(json.text)
-        }
-        else {
+        } else {
             throw new RuntimeException("File ${id}.json not found in $dir")
         }        
     }
@@ -124,16 +117,14 @@ class PostState implements Item {
             if (input.isFile) {
                 File f = new File(input.value)
                 if (f.exists()) {
-                    logger.debug("$input.value is a local file, it will be posted as attachment.")
+                    logger.debug("${input.value} is a local file, it will be posted as attachment.")
                     builder.addPart(input.key, new FileBody(f))
-                }
-                else {
+                } else {
                     //not a local file
-                    logger.debug("$input.value is not a local file, it will be posted as text.")
+                    logger.debug("${input.value} is not a local file, it will be posted as text.")
                     builder.addPart(input.key, new StringBody(input.value))
                 }
-            }
-            else {
+            } else {
                 builder.addPart(input.key, new StringBody(input.value))
             }       
         }
