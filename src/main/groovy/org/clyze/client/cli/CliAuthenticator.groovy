@@ -39,7 +39,7 @@ class CliAuthenticator {
     static Map<String, String> askForCredentials() {
         Console console = System.console()
         if (console) {
-            def credentials = [:]
+            def credentials = [:] as Map<String, String>
             credentials.username = console.readLine("Username:")
             credentials.password = new String(console.readPassword("Password:"))
             return credentials
