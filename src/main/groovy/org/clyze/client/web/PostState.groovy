@@ -9,10 +9,9 @@ import org.apache.commons.logging.LogFactory
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
-import org.clyze.analysis.InputType
 import org.clyze.persistent.model.Item
 
-import static org.apache.commons.io.FileUtils.*
+import static org.apache.commons.io.FileUtils.copyFileToDirectory
 
 class PostState implements Item {
 
@@ -133,7 +132,7 @@ class PostState implements Item {
     }
     
     private static String fileName(String f) {
-        int idx = f.lastIndexOf(File.separator);
+        int idx = f.lastIndexOf(File.separator)
         return (idx == -1) ? f : f.substring(idx+1)
     }
 
@@ -150,7 +149,7 @@ class PostState implements Item {
     private static String stripDir(String fPath, String dir) {
         int prefixSz = dir.length()
         String fPrefix = fPath.substring(0, prefixSz)
-        if (fPrefix.equals(dir)) {
+        if (fPrefix == dir) {
             return fPath.substring(prefixSz + 1)
         } else {
             println "WARNING: ${fPath} is not under ${dir}"

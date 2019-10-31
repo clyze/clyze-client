@@ -53,27 +53,24 @@ class Main {
                         builder2.width = 120
                         options.each { Option option -> builder2 << option }
                         builder2.usage()
-                    }                    
-                    else {
+                    } else {
                         println "Provide a valid remote to help the client dynamically discover the options supported by the command."
                     }
                     return
-                }
-                else {
+                } else {
                     builder.usage()
                     return
                 }
             }
 
             if (cli.r) {
+                Remote remote = parseRemote(cli.r as String)
 
-                List<Option> options = []
-
-                Remote remote = parseRemote(cli.r as String)                
-                options = command.discoverOptions(remote.host, remote.port)
-
+                if (!command) {
+                    throw new RuntimeException("ERROR: 'command' not properly initialized in: ${cmd}")
+                }
+                List<Option> options = command.discoverOptions(remote.host, remote.port)
                 if (options) {
-
                     options.each { Option option -> builder << option }
                     //reparse the args
                     cli = builder.parse(args)

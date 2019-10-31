@@ -2,7 +2,7 @@ package org.clyze.client
 
 import groovy.transform.TypeChecked
 import static groovy.io.FileType.FILES
-import org.clyze.utils.JHelper;
+import org.clyze.utils.JHelper
 
 /**
  * Analyzes the sources of a project and optionally converts them to
@@ -27,10 +27,9 @@ class SourceProcessor {
      * int lineCount                line count of source files
      * boolean foundAndroidSource   if Android source was detected (via heuristic)
      */
-    public Map<String, Object> process(File sourcesDir, boolean convertUTF8) {
+    static Map<String, Object> process(File sourcesDir, boolean convertUTF8) {
         List<String> sourceFiles = []
         boolean foundAndroidSource = false
-        String baseSrcPath = sourcesDir.canonicalPath + File.separator
         int scalaFilesCount = 0
         int groovyFilesCount = 0
         int lineCount = 0

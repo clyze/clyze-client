@@ -64,7 +64,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	public void logout() {
+	void logout() {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&logout,
@@ -74,7 +74,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	public def listBundles(String owner, String projectName)  {
+	def listBundles(String owner, String projectName)  {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Bundles.&listBundles.curry(token, owner, projectName),
@@ -98,7 +98,7 @@ class Remote {
 		).execute(host, port)
 	}
 
-	public String createAnalysis(String bundleId, String analysis) {
+	String createAnalysis(String bundleId, String analysis) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, bundleId, analysis),
@@ -106,7 +106,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	public String createAnalysis(String bundleId, PostState ps) {
+	String createAnalysis(String bundleId, PostState ps) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, bundleId, ps.asMultipart()),
