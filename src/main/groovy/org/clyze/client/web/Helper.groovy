@@ -174,7 +174,7 @@ class Helper {
         !isEmpty
     }
 
-    static void doPost(String host, int port, String username, String password, String clueProject, PostState bundlePostState, PostState analysisPostState) {
+    static void doPost(String host, int port, String username, String password, String clueProject, PostState bundlePostState) {
         println "Connecting to server at ${host}:${port}"
         Remote remote = Remote.at(host, port)
 
@@ -189,15 +189,5 @@ class Helper {
         String bundleId = remote.createDoopBundle(clueProject, bundlePostState)
 
         println "Done (new bundle $bundleId)."
-
-        if (analysisPostState?.inputs) {
-            println "Creating new analysis of bundle $bundleId..."
-            String analysisId = remote.createAnalysis(bundleId, analysisPostState)
-            println "Done. Starting it..."
-            remote.executeAnalysisAction(bundleId, analysisId, 'start')
-            println "Analysis has been started, waiting..."
-            String status = remote.waitForAnalysisStatus(["FINISHED", "ERROR"] as Set, bundleId, analysisId, 120)
-            println "Analysis state: $status"
-        }
     }
 }
