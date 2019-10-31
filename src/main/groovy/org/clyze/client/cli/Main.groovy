@@ -125,11 +125,11 @@ class Main {
         }
 
         String host = parts[0]
-        int port = 80
+        int port
         try {
             port = parts[1] as int
-        }
-        catch(e) {
+        } catch(e) {
+            port = 80
             println "Using default port number: $port"
             logger.debug e.message
         }
