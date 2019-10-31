@@ -98,7 +98,7 @@ class PostState implements Item {
 
     void addInputFromCliOption(Option o, OptionAccessor cliOptions) {
         String oid = o.longOpt.toUpperCase()
-        String[] values = cliOptions.getOptionValues(o.longOpt)
+        String[] values = cliOptions.commandLine.getOptionValues(o.longOpt)
         if (o.argName && o.argName.startsWith('file')) {
             values.each {
                 addFileInput(oid, it)
