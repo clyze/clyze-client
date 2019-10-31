@@ -1,12 +1,10 @@
 package org.clyze.client.web.api
 
-import org.clyze.client.web.http.*
 import org.clyze.client.web.PostState
-
-import org.apache.http.impl.client.CloseableHttpClient
-
+import org.clyze.client.web.http.*
 import org.apache.http.HttpEntity
 import org.apache.http.client.ClientProtocolException
+import org.apache.http.impl.client.CloseableHttpClient
 
 class Remote {
 

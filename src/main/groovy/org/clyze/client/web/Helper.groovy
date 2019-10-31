@@ -1,32 +1,17 @@
 package org.clyze.client.web
 
-import groovy.json.JsonSlurper
-
-import org.clyze.client.web.api.Remote
-
-import org.clyze.client.web.http.HttpClientCommand
-import org.clyze.client.web.http.HttpClientLifeCycle
-import org.clyze.client.web.api.LowLevelAPI
-
 //import groovy.transform.TypeChecked
+import java.awt.*
+import java.util.List
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
-import org.apache.http.NameValuePair
-import org.apache.http.client.entity.UrlEncodedFormEntity
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpPut
-import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
-import org.apache.http.message.BasicNameValuePair
-
-import java.awt.*
-import java.nio.file.attribute.PosixFilePermission
-import java.util.List
-
-import static java.nio.file.Files.setPosixFilePermissions
+import org.clyze.client.web.api.LowLevelAPI
+import org.clyze.client.web.api.Remote
+import org.clyze.client.web.http.HttpClientCommand
+import org.clyze.client.web.http.HttpClientLifeCycle
 
 //@TypeChecked
 class Helper {
@@ -55,12 +40,10 @@ class Helper {
         jarAndOptionProcessor.call()
     }
 
-
     static List collectWithIndex(def collection, Closure closure) {
         int i = 1
         return collection.collect { closure.call(it, i++) }
     }
-
 
     private static String createAnalysisPageURL(String host, int port, String postedId, String token = null) {
         return "http://$host:$port/clue/" + (token ? "?t=$token" : "") + "#/analyses/$postedId"

@@ -9,8 +9,6 @@ import org.apache.commons.logging.LogFactory
 import org.apache.log4j.Logger
 import org.clyze.utils.Helper
 
-import org.clyze.client.web.Helper as ClientHelper
-
 class Main {
 
     private static final Log logger = LogFactory.getLog(getClass())

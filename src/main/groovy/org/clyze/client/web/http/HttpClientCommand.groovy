@@ -2,13 +2,12 @@ package org.clyze.client.web.http
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
-import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 
 class HttpClientCommand<T> implements ResponseHandler<T> {
