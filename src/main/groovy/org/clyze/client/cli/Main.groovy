@@ -2,13 +2,16 @@ package org.clyze.client.cli
 
 import groovy.cli.commons.OptionAccessor
 import org.apache.commons.cli.Option
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.apache.log4j.Logger
-import org.clyze.analysis.*
 import org.clyze.utils.Helper
 
 import org.clyze.client.web.Helper as ClientHelper
 
-class Main {    
+class Main {
+
+    private static final Log logger = LogFactory.getLog(getClass())
 
     /**
      * The entry point.
@@ -80,15 +83,15 @@ class Main {
                 command.cliOptions = cli
                 println command.execute(remote.host, remote.port)
 
-            }
-            else {
+            } else {
                 builder.usage()
-            }            
-
+                return
+            }
         } catch (e) {
-            println e.getMessage()
-            if (Logger.getRootLogger().isDebugEnabled())
+            println e.message
+            if (Logger.getRootLogger().isDebugEnabled()) {
                 println Helper.stackTraceToString(e)
+            }
             System.exit(-1)
         }
     }
@@ -123,8 +126,9 @@ class Main {
         try {
             port = parts[1] as int
         }
-        catch(all) {
+        catch(e) {
             println "Using default port number: $port"
+            logger.debug e.message
         }
 
         return new Remote(host:host, port:port)
