@@ -174,7 +174,7 @@ class Helper {
         !isEmpty
     }
 
-    static void doPost(String host, int port, String username, String password, String clueProject, PostState bundlePostState) {
+    static void doPost(String host, int port, String username, String password, String clueProject, String profile, PostState bundlePostState) {
         println "Connecting to server at ${host}:${port}"
         Remote remote = Remote.at(host, port)
 
@@ -186,8 +186,7 @@ class Helper {
         }
 
         println "Submitting bundle in ${clueProject}..."
-        String bundleId = remote.createDoopBundle(clueProject, bundlePostState)
-
+        String bundleId = remote.createBundle(username, clueProject, profile, bundlePostState)
         println "Done (new bundle $bundleId)."
     }
 }
