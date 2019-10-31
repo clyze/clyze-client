@@ -1,6 +1,8 @@
 package org.clyze.client.cli
 
+import groovy.cli.commons.CliBuilder
 import groovy.cli.commons.OptionAccessor
+import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
@@ -98,7 +100,7 @@ class Main {
 
     private static final CliBuilder createCliBuilder() {
         CliBuilder cli = new CliBuilder(
-            parser: new org.apache.commons.cli.GnuParser (),
+            parser: new DefaultParser (),
             usage : "client -r [remote] -c [command].",
             footer: "Note that some commands may require -r to be present in order to discover options dynamically.",
             width : 120

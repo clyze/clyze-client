@@ -5,7 +5,6 @@ import org.clyze.client.web.api.*
 import org.clyze.client.web.Helper as ClientHelper
 import org.clyze.client.web.PostState
 import org.apache.commons.cli.Option
-import org.apache.commons.cli.OptionBuilder
 import org.apache.http.HttpEntity
 
 /**
@@ -33,7 +32,7 @@ class CliRestClient {
 
     private static final int DEFAULT_LIST_SIZE = 20
 
-    private static final Option ID = OptionBuilder.hasArg().withArgName('id').
+    private static final Option ID = Option.builder().hasArg().withArgName('id').
                                                    withDescription('the analysis id').create('id')
 
     private static final String getUserToken(boolean askForCredentialsIfEmpty, host, port) {
