@@ -164,7 +164,7 @@ class LowLevelAPI {
             return json
         }
 
-        static final def parseJsonAndGetAttr(String attrName, HttpEntity entity) {
+        static final def parseJsonAndGetAttr(HttpEntity entity, String attrName) {
             def json = parseJson(entity)
             return json[(attrName)]
         }

@@ -35,7 +35,7 @@ class CliRestClient {
     private static final Option ID = Option.builder().hasArg().withArgName('id').
                                                    withDescription('the analysis id').create('id')
 
-    private static final String getUserToken(boolean askForCredentialsIfEmpty, host, port) {
+    private static final String getUserToken(boolean askForCredentialsIfEmpty, String host, int port) {
         String token = CliAuthenticator.getUserToken()
         if (!token && askForCredentialsIfEmpty) {
             //Ask for username and password
@@ -115,7 +115,7 @@ class CliRestClient {
             return LowLevelAPI.Requests.login(credentials.username, credentials.password, host, port)                        
         },
         onSuccess          : { HttpEntity entity ->
-            String token = LowLevelAPI.Responses.parseJsonAndGetAttr("token", entity)
+            String token = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "token")
             CliAuthenticator.setUserToken(token)
             return "Logged in, token updated."
         }
@@ -128,7 +128,7 @@ class CliRestClient {
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Bundles.listBundles(token, null, host, port) //TODO: Fix this
+            return LowLevelAPI.Bundles.listBundles(token, null, null, host, port) //TODO: Fix this
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
