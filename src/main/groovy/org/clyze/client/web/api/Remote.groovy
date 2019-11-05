@@ -96,6 +96,14 @@ class Remote {
 		).execute(host, port)
 	}
 
+	public <T> T repackageBundleForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Projects.&repackageBundleForCI.curry(token, owner, projectName, ps.asMultipart()),
+				onSuccess: handler.&handleAttachment
+		).execute(host, port)
+	}
+
 	String createAnalysis(String bundleId, String analysis) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,

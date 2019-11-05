@@ -131,6 +131,12 @@ class LowLevelAPI {
             put.setEntity(new UrlEncodedFormEntity(params))
             return put
         }
+
+        static final HttpPost repackageBundleForCI(String userToken, String owner, String projectName, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBundleForCIEndpoint()
+            post.setEntity(entityBuilder.build())
+            return post
+        }
     }
 
     static final class Bundles {
@@ -231,6 +237,10 @@ class LowLevelAPI {
 
         HttpPut putProjectEndpoint() {
             withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix()))) as HttpPut
+        }
+
+        HttpPost repackageBundleForCIEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage"))) as HttpPost
         }
 
         HttpGet listBundlesEndpoint() {
