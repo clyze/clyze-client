@@ -157,12 +157,18 @@ class Helper {
         !isEmpty
     }
 
-    static void doPost(String host, int port, String username, String password, String clueProject, String profile, PostState bundlePostState) {
+    static Remote connect(String host, int port, String username, String password) {
         println "Connecting to server at ${host}:${port}"
         Remote remote = Remote.at(host, port)
 
         println "Logging in as ${username}"
         remote.login(username, password)
+
+        return remote
+    }
+
+    static void doPost(String host, int port, String username, String password, String clueProject, String profile, PostState bundlePostState) {
+        Remote remote = connect(host, port, username, password)
 
         if (!clueProject) {
             throw new RuntimeException("Clue project missing")
