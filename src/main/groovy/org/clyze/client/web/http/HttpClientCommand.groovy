@@ -1,7 +1,6 @@
 package org.clyze.client.web.http
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
+import groovy.util.logging.Log4j
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
 import org.apache.http.client.ClientProtocolException
@@ -10,14 +9,13 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 
+@Log4j
 class HttpClientCommand<T> implements ResponseHandler<T> {
 
     public static final Closure<String> DEFAULT_ERROR = { int statusCode, HttpEntity entity ->
         String message = entity ? EntityUtils.toString(entity) : "No message"
         return "Error $statusCode: $message"
     }
-
-    protected Log logger = LogFactory.getLog(getClass())    
 
     /** The http client life cycle manager */
     HttpClientLifeCycle httpClientLifeCycle
@@ -65,7 +63,7 @@ class HttpClientCommand<T> implements ResponseHandler<T> {
 
         try {
             HttpUriRequest request = buildRequest(host, port)            
-            logger.debug "Executing request: ${request.getRequestLine()}"
+            log.debug "Executing request: ${request.getRequestLine()}"
             return client.execute(request, this)
         }
         finally {

@@ -3,9 +3,8 @@ package org.clyze.client.web
 import groovy.cli.commons.OptionAccessor
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.util.logging.Log4j
 import org.apache.commons.cli.Option
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
@@ -13,9 +12,8 @@ import org.clyze.persistent.model.Item
 
 import static org.apache.commons.io.FileUtils.copyFileToDirectory
 
+@Log4j
 class PostState implements Item {
-
-    private static final Log logger = LogFactory.getLog(getClass())   
 
     String id
     Set<Input> inputs = new HashSet<>()
@@ -61,7 +59,7 @@ class PostState implements Item {
     PostState saveTo(File dir) {
         //process inputs to copy all files in the given dir
         inputs.findAll { it.isFile }.each { Input input ->
-            logger.info "Copying: ${input.value} -> ${dir}"
+            log.info "Copying: ${input.value} -> ${dir}"
             File f = new File(input.value)
             if (f.exists()) {
                 String name = f.getName()
@@ -117,11 +115,11 @@ class PostState implements Item {
             if (input.isFile) {
                 File f = new File(input.value)
                 if (f.exists()) {
-                    logger.debug("${input.value} is a local file, it will be posted as attachment.")
+                    log.debug("${input.value} is a local file, it will be posted as attachment.")
                     builder.addPart(input.key, new FileBody(f))
                 } else {
                     //not a local file
-                    logger.debug("${input.value} is not a local file, it will be posted as text.")
+                    log.debug("${input.value} is not a local file, it will be posted as text.")
                     builder.addPart(input.key, new StringBody(input.value))
                 }
             } else {
