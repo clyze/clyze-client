@@ -18,7 +18,7 @@ import org.apache.http.HttpEntity
  *     <li>ping              - check connection with server.
  *     <li>list_projects     - list the available projects.
  *     <li>list_bundles      - list the available bundles.
- *     <li>post_doop_bundle  - create a new doop bundle.    
+ *     <li>post_bundle       - create a new bundle.
  *     <li>list              - list the available analyses.
  *     <li>post_doop         - create a new doop analysis.
  *     <li>post_cclyzer      - create a new cclyzer analysis.
@@ -168,9 +168,9 @@ class CliRestClient {
         }
     )
 
-    private static final CliRestCommand POST_DOOP_BUNDLE = new CliRestCommand(
-        name               : 'post_doop_bundle',
-        description        : 'posts a new doop bundle to the remote server',        
+    private static final CliRestCommand POST_BUNDLE = new CliRestCommand(
+        name               : 'post_bundle',
+        description        : 'posts a new bundle to the remote server',
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         optionsBuilder     : { String host, int port ->
             def json = ClientHelper.createCommandForOptionsDiscovery("BUNDLE", new DefaultHttpClientLifeCycle()).execute(host, port)
@@ -201,8 +201,8 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        //PING, LOGIN, LIST_BUNDLES, POST_DOOP_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART        
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, POST_DOOP_BUNDLE
+        //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, POST_BUNDLE
     ].collectEntries {
         [(it.name):it]
     }
