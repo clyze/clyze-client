@@ -102,12 +102,17 @@ class Helper {
 //        )
 //    }
 
-
     static HttpClientCommand<Object> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {     
 
         new HttpClientCommand(
             httpClientLifeCycle: httpClientLifeCycle,
-            requestBuilder     : LowLevelAPI.Requests.&getOptionsForCreate.curry(what),
+            requestBuilder     : { String host, int port ->
+                if (what == 'BUNDLE') {
+                    LowLevelAPI.Requests.getProfileOptions(host, port)
+                } else {
+                    throw new RuntimeException("Cannot find options for: ${what}")
+                }
+            },
             onSuccess          : { HttpEntity entity ->
                 LowLevelAPI.Responses.parseJson(entity)
             }

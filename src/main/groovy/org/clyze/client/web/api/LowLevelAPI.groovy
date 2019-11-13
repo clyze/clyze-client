@@ -82,8 +82,8 @@ class LowLevelAPI {
             return get
         }        
 
-        static final HttpGet getOptionsForCreate(String what, String host, int port) {
-            return new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/options?what=${what}"))
+        static final HttpGet getProfileOptions(String host, int port) {
+            return new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/options/bundles"))
         }        
 
         static final HttpGet getUsers(String userToken, String host, int port) {
