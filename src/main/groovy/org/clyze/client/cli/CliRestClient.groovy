@@ -1,5 +1,6 @@
 package org.clyze.client.cli
 
+import groovy.transform.TypeChecked
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
 import org.clyze.client.web.Helper as ClientHelper
@@ -28,12 +29,13 @@ import org.apache.http.HttpEntity
  *
  * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
  */
+// @TypeChecked
 class CliRestClient {
 
     private static final int DEFAULT_LIST_SIZE = 20
 
-    private static final Option ID = Option.builder().hasArg().withArgName('id').
-                                                   withDescription('the analysis id').create('id')
+    private static final Option ID = Option.builder('id').hasArg().argName('id').
+                                                   desc('the analysis id').build()
 
     private static final String getUserToken(boolean askForCredentialsIfEmpty, String host, int port) {
         String token = CliAuthenticator.getUserToken()
