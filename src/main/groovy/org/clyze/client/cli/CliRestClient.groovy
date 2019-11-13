@@ -189,6 +189,9 @@ class CliRestClient {
             String project = System.console().readLine("Project: ")
             String DEFAULT_PROFILE = 'apiTargetAndroid25'
             String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
+            if ((profile == null) || (profile == "")) {
+                profile = DEFAULT_PROFILE
+            }
             return LowLevelAPI.Bundles.createBundle(token, user, project, profile, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
