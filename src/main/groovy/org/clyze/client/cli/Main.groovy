@@ -36,7 +36,8 @@ class Main {
                 cmd = cli.c
                 command = CliRestClient.COMMANDS.get(cmd.toLowerCase())
                 if (!command) {
-                    throw new RuntimeException("The value of the command option is invalid: $cmd")
+                    println "The value of the command option is invalid: '${cmd}'. Available commands: ${availableCommands}."
+                    exitWithError()
                 }
             }
 
@@ -93,8 +94,12 @@ class Main {
             if (Logger.getRootLogger().isDebugEnabled()) {
                 println Helper.stackTraceToString(e)
             }
-            System.exit(-1)
+            exitWithError()
         }
+    }
+
+    private static void exitWithError() {
+        System.exit(-1)
     }
 
     private static final CliBuilder createCliBuilder() {
@@ -109,10 +114,14 @@ class Main {
             h(longOpt: 'help', "Display help and exit. Combine it with a command to see the command options.")
             r(longOpt: 'remote', "The remote server.", args:1, argName: "[hostname|ip]:[port]")
             c(longOpt: 'command', "The command to execute via the remote server. Available commands: \
-                                  ${CliRestClient.COMMANDS.keySet().join(', ')}.", args:1, argName: "command")
+                                  ${availableCommands}.", args:1, argName: "command")
         }
 
         return cli
+    }
+
+    static String getAvailableCommands() {
+        return CliRestClient.COMMANDS.keySet().join(', ')
     }
 
     static Remote parseRemote(String remoteDef) {        
