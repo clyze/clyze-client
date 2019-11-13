@@ -23,7 +23,7 @@ class HttpClientCommand<T> implements ResponseHandler<T> {
     /** A closure that creates HttpUriRequest objects. It accepts a single parameter, the url. The closure's delegate
      * is the command itself.
      */
-    Closure<HttpUriRequest> requestBuilder
+    Closure<? extends HttpUriRequest> requestBuilder
 
     /** A closure to be executed in case of success (status code == 200). It accepts an HttpEntity object and returns a
      * T. The closure's delegate is the command itself.
