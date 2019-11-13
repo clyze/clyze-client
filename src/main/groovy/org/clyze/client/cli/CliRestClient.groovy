@@ -1,6 +1,7 @@
 package org.clyze.client.cli
 
 import groovy.transform.TypeChecked
+import org.clyze.client.cli.CliAuthenticator.Selector
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
 import org.clyze.client.web.Helper as ClientHelper
@@ -15,6 +16,7 @@ import org.apache.http.HttpEntity
  * <ul>
  *     <li>login             - authenticate user.
  *     <li>ping              - check connection with server.
+ *     <li>list_projects     - list the available projects.
  *     <li>list_bundles      - list the available bundles.
  *     <li>post_doop_bundle  - create a new doop bundle.    
  *     <li>list              - list the available analyses.
@@ -37,15 +39,23 @@ class CliRestClient {
     private static final Option ID = Option.builder('id').hasArg().argName('id').
                                                    desc('the analysis id').build()
 
-    private static final String getUserToken(boolean askForCredentialsIfEmpty, String host, int port) {
-        String token = CliAuthenticator.getUserToken()
-        if (!token && askForCredentialsIfEmpty) {
+    private static final String getUserInfo(boolean askForCredentialsIfEmpty, String host, int port, Selector selector) {
+        String data = CliAuthenticator.getUserInfo(selector)
+        if (!data && askForCredentialsIfEmpty) {
             //Ask for username and password
             COMMANDS.login.execute(host, port)
-            token = CliAuthenticator.getUserToken()
+            data = CliAuthenticator.getUserInfo(selector)
         }
-        token
-    }    
+        data
+    }
+
+    private static final String getUserToken(boolean askForCredentialsIfEmpty, String host, int port) {
+        getUserInfo(askForCredentialsIfEmpty, host, port, Selector.TOKEN)
+    }
+
+    private static final String getUserName(boolean askForCredentialsIfEmpty, String host, int port) {
+        getUserInfo(askForCredentialsIfEmpty, host, port, Selector.USERNAME)
+    }
 
     private static final Closure<String> DEFAULT_SUCCES = { HttpEntity entity ->
         return "OK"
@@ -108,17 +118,19 @@ class CliRestClient {
         onSuccess          : DEFAULT_SUCCES,                
     )    
 
+    private static String LOGIN_LAST_USERNAME = null
     private static final CliRestCommand LOGIN = new CliRestCommand(        
         name               : 'login',
         description        : 'login to the remote server',
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             Map<String, String> credentials = CliAuthenticator.askForCredentials()
-            return LowLevelAPI.Requests.login(credentials.username, credentials.password, host, port)                        
+            LOGIN_LAST_USERNAME = credentials.username
+            return LowLevelAPI.Requests.login(credentials.username, credentials.password, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String token = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "token")
-            CliAuthenticator.setUserToken(token)
+            CliAuthenticator.setUserInfo(LOGIN_LAST_USERNAME, token)
             return "Logged in, token updated."
         }
     )    
@@ -131,6 +143,22 @@ class CliRestClient {
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             return LowLevelAPI.Bundles.listBundles(token, null, null, host, port) //TODO: Fix this
+        },
+        onSuccess          : { HttpEntity entity ->
+            def json = LowLevelAPI.Responses.parseJson(entity)
+            json as String
+        }
+    )
+
+    private static final CliRestCommand LIST_PROJECTS = new CliRestCommand(
+        name               : 'list_projects',
+        description        : 'list the projects stored in the remote server',
+        //TODO add pagination options
+        httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+        requestBuilder     : { String host, int port ->
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            return LowLevelAPI.Projects.getProjects(token, user, host, port) //TODO: Fix this
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
@@ -168,7 +196,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_DOOP_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART        
-        PING, LOGIN, LIST_BUNDLES, POST_DOOP_BUNDLE
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, POST_DOOP_BUNDLE
     ].collectEntries {
         [(it.name):it]
     }

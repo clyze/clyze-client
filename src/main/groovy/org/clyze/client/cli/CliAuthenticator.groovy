@@ -5,6 +5,7 @@ import org.apache.log4j.Logger
 
 class CliAuthenticator {
 
+    private static String username
     private static String token
 
     //TODO: Unsafe, yet convenient for the time being
@@ -13,22 +14,32 @@ class CliAuthenticator {
         String fileName = "${userHome}/.clue-client"
         try {
             File f = FileOps.findFileOrThrow(fileName, "File invalid: $fileName")
-            token = f.text.trim()
-        }
-        catch(any) {
+            def data = f.text.trim().split('\n')
+            username = data[0]
+            token = data[1]
+        }  catch(any) {
             Logger.getRootLogger().debug(any.getMessage())
         }
     }
 
-    static String getUserToken() {
-        return token
+    enum Selector { TOKEN, USERNAME }
+    static String getUserInfo(Selector s) {
+        if (s == Selector.TOKEN) {
+            return token
+        } else if (s == Selector.USERNAME) {
+            return username
+        } else {
+            throw new RuntimeException('Internal error: selector is invalid: ' + s)
+        }
     }
 
-    static void setUserToken(String token) {
+    static void setUserInfo(String username, String token) {
+        CliAuthenticator.username = username
         CliAuthenticator.token = token
         try {
             String userHome = System.getProperty("user.home")
-            FileOps.writeToFile(new File("${userHome}/.clue-client"), token)
+            String data = username + '\n' + token
+            FileOps.writeToFile(new File("${userHome}/.clue-client"), data)
         }
         catch(e) {
             Logger.getRootLogger().error(e.getMessage(), e)
