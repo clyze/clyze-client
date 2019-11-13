@@ -142,7 +142,9 @@ class CliRestClient {
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
-            return LowLevelAPI.Bundles.listBundles(token, null, null, host, port) //TODO: Fix this
+            String user  = getUserName(false, host, port)
+            String project = System.console().readLine("Project: ")
+            return LowLevelAPI.Bundles.listBundles(token, user, project, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
@@ -158,7 +160,7 @@ class CliRestClient {
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            return LowLevelAPI.Projects.getProjects(token, user, host, port) //TODO: Fix this
+            return LowLevelAPI.Projects.getProjects(token, user, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)

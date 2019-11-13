@@ -51,8 +51,8 @@ class CliAuthenticator {
         Console console = System.console()
         if (console) {
             def credentials = [:] as Map<String, String>
-            credentials.username = console.readLine("Username:")
-            credentials.password = new String(console.readPassword("Password:"))
+            credentials.username = console.readLine("Username: ")
+            credentials.password = new String(console.readPassword("Password: "))
             return credentials
         }
         else {
