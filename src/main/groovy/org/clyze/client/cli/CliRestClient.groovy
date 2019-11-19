@@ -180,7 +180,7 @@ class CliRestClient {
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         optionsBuilder     : { String host, int port ->
             def json = ClientHelper.createCommandForOptionsDiscovery("BUNDLE", new DefaultHttpClientLifeCycle()).execute(host, port)
-            return ClientHelper.convertJsonEncodedOptionsToCliOptions(json.options as List)
+            return ClientHelper.convertJsonEncodedOptionsToCliOptions(json)
         },
         requestBuilder     : { String host, int port ->            
             PostState post = new PostState()

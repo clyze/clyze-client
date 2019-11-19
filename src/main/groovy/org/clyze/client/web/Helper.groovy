@@ -119,39 +119,44 @@ class Helper {
         )            
     }
 
-    static List<Option> convertJsonEncodedOptionsToCliOptions(List<Object> jsonList) {
-        jsonList.collect { option ->            
-            String description = option.description
-            if (!description) {
-                description = "<no description>"
-            }
-            if (option.validValues) {                
-                description = "${description}\nAllowed values: ${option.validValues.join(', ')}"
-            }
-            if (option.defaultValue) {
-                description = "${description}\nDefault value: ${option.defaultValue}"
-            }
-            if (option.isMandatory) {
-                description = "${description}\nMandatory option."
-            }
-            if (option.multipleValues) {
-                description = "${description}\nRepeatable option."
-            }
-
-            Option o = new Option(null, option.id?.toLowerCase(), !option.isBoolean, description)                    
-            if (option.multipleValues) {
-                o.setArgs(Option.UNLIMITED_VALUES)
-                if (option.isFile) {
-                    o.setArgName("files")    
+    static List<Option> convertJsonEncodedOptionsToCliOptions(Object json) {
+        if (!json?.results) {
+            return []
+        }
+        List<Option> ret = new LinkedList<>()
+        json.results.each { result ->
+            List<Option> opts = result.options.collect { option ->
+                String description = option.description
+                if (!description) {
+                    description = "<no description>"
                 }
-            }
-            else {
-                if (option.isFile) {
+                if (option.validValues) {
+                    description = "${description}\nAllowed values: ${option.validValues.join(', ')}"
+                }
+                if (option.defaultValue) {
+                    description = "${description}\nDefault value: ${option.defaultValue}"
+                }
+                if (option.isMandatory) {
+                    description = "${description}\nMandatory option."
+                }
+                if (option.multipleValues) {
+                    description = "${description}\nRepeatable option."
+                }
+
+                Option o = new Option(null, option.id?.toLowerCase(), !option.isBoolean, description)
+                if (option.multipleValues) {
+                    o.setArgs(Option.UNLIMITED_VALUES)
+                    if (option.isFile) {
+                        o.setArgName("files")
+                    }
+                } else if (option.isFile) {
                     o.setArgName("file")
                 }
-            }                   
-            return o            
+                return o
+            }
+            ret.addAll(opts)
         }
+        return ret
     }     
 
     public static Closure<Boolean> checkFileEmpty = { String f ->

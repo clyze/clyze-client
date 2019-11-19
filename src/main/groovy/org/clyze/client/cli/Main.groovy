@@ -38,14 +38,11 @@ class Main {
                     exitWithError()
                 }
             }
-
             if (cli.h) {
                 if (command) {                    
-
                     List<Option> options = []
-
                     if (cli.r) {                        
-                        Remote remote = parseRemote(cli.r as String)                                        
+                        Remote remote = parseRemote(cli.r as String)
                         options = command.discoverOptions(remote.host, remote.port)
                     }
                     println "${command.name} - ${command.description}"
