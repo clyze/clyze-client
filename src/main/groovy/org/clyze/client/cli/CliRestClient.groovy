@@ -148,6 +148,12 @@ class CliRestClient {
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
+            println "== Bundles =="
+            for (def result : json.results) {
+                def arts = result.appArtifacts.collect { it.name }.toString()
+                println "* ${result.displayName} (${result.profile.id}): ${arts}"
+            }
+            println ""
             json as String
         }
     )
