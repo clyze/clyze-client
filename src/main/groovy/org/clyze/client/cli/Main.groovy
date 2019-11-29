@@ -7,6 +7,7 @@ import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 import org.clyze.utils.Helper
+import org.clyze.utils.JHelper
 
 @Log4j
 class Main {
@@ -18,7 +19,7 @@ class Main {
 
         try {
 
-            Helper.initConsoleLogging("DEBUG")            
+            JHelper.initConsoleLogging("DEBUG")
 
             CliBuilder builder = createCliBuilder()
             OptionAccessor cli = builder.parse(args)
