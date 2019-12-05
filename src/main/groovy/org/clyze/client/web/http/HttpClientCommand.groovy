@@ -64,7 +64,7 @@ class HttpClientCommand<T> implements ResponseHandler<T> {
         try {
             HttpUriRequest request = buildRequest(host, port)            
             log.debug "Executing request: ${request.getRequestLine()}"
-            return client.execute(request, this)
+            return client.execute(request, this) as T
         }
         finally {
             httpClientLifeCycle.closeHttpClient(client)

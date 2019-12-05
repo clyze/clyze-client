@@ -187,7 +187,7 @@ class CliRestClient {
 
             //options have been discovered here
             supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
-                post.addInputFromCliOption(it, cliOptions)
+                post.addInputFromCliOption(it as Option, cliOptions)
             }            
 
             String token = getUserToken(true, host, port)
