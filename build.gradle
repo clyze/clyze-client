@@ -37,13 +37,13 @@ configurations.all {
 }
 
 dependencies {    
-    compile "org.clyze:clue-common:3.18.0",                     // Clue common
-            "org.codehaus.groovy:groovy-all:2.5.5",             // Groovy
-            "log4j:log4j:1.2.14",                               // Logging implementation
-            "commons-io:commons-io:2.4",                        // IO utils
-            "commons-cli:commons-cli:1.2",                      // Command line processor
-            "org.apache.httpcomponents:httpclient:4.4",         // Used by the Rest client
-            "org.apache.httpcomponents:httpmime:4.4"            // Used by the Rest client
+    compile 'org.clyze:clue-common:3.19.1'                     // Clue common
+    compile 'org.clyze:metadata-model:1.0.0'
+    compile 'org.codehaus.groovy:groovy-all:2.5.5'             // Groovy
+    compile 'log4j:log4j:1.2.14'                               // Logging implementation
+    compile 'commons-io:commons-io:2.4'                        // IO utils
+    compile 'org.apache.httpcomponents:httpclient:4.4'         // Used by the Rest client
+    compile 'org.apache.httpcomponents:httpmime:4.4'            // Used by the Rest client
 }
 
 run {
