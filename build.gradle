@@ -36,10 +36,13 @@ configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 }
 
+def groovyVersion='2.5.7'
 dependencies {    
-    compile 'org.clyze:clue-common:3.19.1'                     // Clue common
-    compile 'org.clyze:metadata-model:1.0.0'
-    compile 'org.codehaus.groovy:groovy-all:2.5.5'             // Groovy
+    compile 'org.clyze:clue-common:3.19.2'                     // Clue common
+    compile 'org.clyze:metadata-model:1.0.1'
+    compile "org.codehaus.groovy:groovy:${groovyVersion}"      // Groovy
+    compile "org.codehaus.groovy:groovy-json:${groovyVersion}"
+    compile "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"
     compile 'log4j:log4j:1.2.14'                               // Logging implementation
     compile 'commons-io:commons-io:2.4'                        // IO utils
     compile 'org.apache.httpcomponents:httpclient:4.4'         // Used by the Rest client
