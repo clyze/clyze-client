@@ -38,7 +38,7 @@ configurations.all {
 
 def groovyVersion='2.5.7'
 dependencies {    
-    compile 'org.clyze:clue-common:3.19.2'                     // Clue common
+    compile 'org.clyze:clue-common:3.20.2'                     // Clue common
     compile 'org.clyze:metadata-model:1.0.1'
     compile "org.codehaus.groovy:groovy:${groovyVersion}"      // Groovy
     compile "org.codehaus.groovy:groovy-json:${groovyVersion}"
@@ -49,9 +49,15 @@ dependencies {
     compile 'org.apache.httpcomponents:httpmime:4.4'            // Used by the Rest client
 }
 
+jar {
+    manifest {
+        attributes 'Implementation-Version' : version
+    }
+}
+
 run {
     //runs the Rest client
-    if(project.hasProperty("args")) {
+    if (project.hasProperty("args")) {
         args project.property("args").split()
     }
 }

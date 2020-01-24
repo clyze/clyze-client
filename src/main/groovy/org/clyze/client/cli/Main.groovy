@@ -8,6 +8,7 @@ import org.apache.commons.cli.Option
 import org.apache.log4j.Logger
 import org.clyze.utils.Helper
 import org.clyze.utils.JHelper
+import org.clyze.utils.VersionInfo
 
 @Log4j
 class Main {
@@ -28,6 +29,11 @@ class Main {
 
             if (!cli || !args) {
                 builder.usage()
+                return
+            }
+
+            if (cli['v']) {
+                println VersionInfo.getVersionInfo(Main.class)
                 return
             }
 
@@ -111,6 +117,7 @@ class Main {
             r(longOpt: 'remote', "The remote server.", args:1, argName: "[hostname|ip]:[port]")
             c(longOpt: 'command', "The command to execute via the remote server. Available commands: \
                                   ${availableCommands}.", args:1, argName: "command")
+            v(longOpt: 'version', 'Display version and exit.')
         }
 
         return cli
