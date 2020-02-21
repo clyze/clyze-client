@@ -177,15 +177,15 @@ class Helper {
         return remote
     }
 
-    static void doPost(String host, int port, String username, String password, String clueProject, String profile, PostState bundlePostState) {
+    static void doPost(String host, int port, String username, String password, String projectName, String profile, PostState bundlePostState) {
         Remote remote = connect(host, port, username, password)
 
-        if (!clueProject) {
-            throw new RuntimeException("Clue project missing")
+        if (!projectName) {
+            throw new RuntimeException("Missing project name")
         }
 
-        println "Submitting bundle in ${clueProject}..."
-        String bundleId = remote.createBundle(username, clueProject, profile, bundlePostState)
+        println "Submitting bundle in ${projectName}..."
+        String bundleId = remote.createBundle(username, projectName, profile, bundlePostState)
         println "Done (new bundle $bundleId)."
     }
 }
