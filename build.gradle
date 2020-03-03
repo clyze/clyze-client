@@ -1,4 +1,5 @@
 plugins {
+    id 'java-library'
     id 'groovy'
     id 'application'
     id 'maven-publish'
@@ -38,15 +39,13 @@ configurations.all {
 
 def groovyVersion='2.5.7'
 dependencies {    
-    compile 'org.clyze:clue-common:3.20.2'                     // Clue common
-    compile 'org.clyze:metadata-model:1.0.1'
-    compile "org.codehaus.groovy:groovy:${groovyVersion}"      // Groovy
-    compile "org.codehaus.groovy:groovy-json:${groovyVersion}"
-    compile "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"
-    compile 'log4j:log4j:1.2.14'                               // Logging implementation
-    compile 'commons-io:commons-io:2.4'                        // IO utils
-    compile 'org.apache.httpcomponents:httpclient:4.4'         // Used by the Rest client
-    compile 'org.apache.httpcomponents:httpmime:4.4'            // Used by the Rest client
+    api 'org.clyze:clue-common:3.20.7'
+    api 'org.clyze:metadata-model:1.0.1'
+    api "org.codehaus.groovy:groovy:${groovyVersion}"
+    api "org.codehaus.groovy:groovy-json:${groovyVersion}"
+    api "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"
+    api 'org.apache.httpcomponents:httpclient:4.4'     // Used by the Rest client
+    api 'org.apache.httpcomponents:httpmime:4.4'       // Used by the Rest client
 }
 
 jar {
