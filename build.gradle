@@ -44,8 +44,8 @@ dependencies {
     api "org.codehaus.groovy:groovy:${groovyVersion}"
     api "org.codehaus.groovy:groovy-json:${groovyVersion}"
     api "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"
-    api 'org.apache.httpcomponents:httpclient:4.4'     // Used by the Rest client
-    api 'org.apache.httpcomponents:httpmime:4.4'       // Used by the Rest client
+    api 'org.apache.httpcomponents:httpclient:4.4'     // Used by the Rest client, Apache 2.0
+    api 'org.apache.httpcomponents:httpmime:4.4'       // Used by the Rest client, Apache 2.0
 }
 
 jar {
