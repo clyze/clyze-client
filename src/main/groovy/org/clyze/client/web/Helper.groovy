@@ -184,7 +184,7 @@ class Helper {
             throw new RuntimeException("Missing project name")
         }
 
-        println "Submitting bundle in ${projectName}..."
+        println "Submitting bundle in project '${projectName}'..."
         String bundleId = remote.createBundle(username, projectName, profile, bundlePostState)
         println "Done (new bundle $bundleId)."
     }
