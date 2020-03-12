@@ -168,7 +168,7 @@ class Helper {
     }
 
     static Remote connect(String host, int port, String username, String password) {
-        println "Connecting to server at ${host}:${port}"
+        println "Connecting to ${host}:${port}"
         Remote remote = Remote.at(host, port)
 
         println "Logging in as ${username}"
