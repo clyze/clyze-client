@@ -28,6 +28,10 @@ class LowLevelAPI {
             return new Endpoints(host, port).pingEndpoint()
         }
 
+        static final HttpGet diagnose(String host, int port) {
+            return new Endpoints(host, port).diagnoseEndpoint()
+        }
+
         static final HttpPost cleanDeploy(String host, int port) {
             return new Endpoints(host, port).cleanDeployEndpoint()
         }
@@ -201,6 +205,10 @@ class LowLevelAPI {
 
         HttpGet pingEndpoint() {
             return new HttpGet(createUrl(host, port, API_PATH, "/ping"))
+        }
+
+        HttpGet diagnoseEndpoint() {
+            return new HttpGet(createUrl(host, port, BASE_PATH, "/diagnose"))
         }
 
         HttpPost cleanDeployEndpoint() {

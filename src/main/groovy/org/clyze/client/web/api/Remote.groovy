@@ -41,6 +41,14 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	Map<String, String> diagnose() {
+		new HttpClientCommand(
+			httpClientLifeCycle: httpClientLifeCycle,
+			requestBuilder: LowLevelAPI.Requests.&diagnose,
+			onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port) as Map<String, String>
+	}
+
 	def cleanDeploy() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
