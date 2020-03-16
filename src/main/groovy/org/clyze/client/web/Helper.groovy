@@ -5,6 +5,7 @@ import java.awt.*
 import java.util.List
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
+import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
@@ -167,7 +168,7 @@ class Helper {
         !isEmpty
     }
 
-    static Remote connect(String host, int port, String username, String password) {
+    static Remote connect(String host, int port, String username, String password) throws HttpHostConnectException {
         println "Connecting to ${host}:${port}"
         Remote remote = Remote.at(host, port)
 
@@ -177,7 +178,7 @@ class Helper {
         return remote
     }
 
-    static void doPost(String host, int port, String username, String password, String projectName, String profile, PostState bundlePostState) {
+    static void doPost(String host, int port, String username, String password, String projectName, String profile, PostState bundlePostState) throws HttpHostConnectException {
         Remote remote = connect(host, port, username, password)
 
         if (!projectName) {

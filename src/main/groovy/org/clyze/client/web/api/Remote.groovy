@@ -4,6 +4,7 @@ import org.clyze.client.web.PostState
 import org.clyze.client.web.http.*
 import org.apache.http.HttpEntity
 import org.apache.http.client.ClientProtocolException
+import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.impl.client.CloseableHttpClient
 
 class Remote {
@@ -33,7 +34,7 @@ class Remote {
 		return (token != null)
 	}
 
-	def ping() {
+	def ping() throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&ping,
@@ -41,7 +42,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	Map<String, String> diagnose() {
+	Map<String, String> diagnose() throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&diagnose,
@@ -57,7 +58,7 @@ class Remote {
 		).execute(host, port)		
 	}		
 
-	def login(String username, String password) {
+	def login(String username, String password) throws HttpHostConnectException {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
@@ -88,7 +89,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def createBundle(String owner, String projectName, String profile, PostState ps) {
+	def createBundle(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Bundles.&createBundle.curry(token, owner, projectName, profile, ps.asMultipart()),
