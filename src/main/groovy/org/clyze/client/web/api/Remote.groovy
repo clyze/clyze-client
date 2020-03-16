@@ -105,7 +105,7 @@ class Remote {
 		).execute(host, port)
 	}
 
-	def <T> T repackageBundleForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) {
+	def <T> T repackageBundleForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Projects.&repackageBundleForCI.curry(token, owner, projectName, ps.asMultipart()),
