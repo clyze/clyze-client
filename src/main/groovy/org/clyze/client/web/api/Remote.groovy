@@ -42,12 +42,12 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	Map<String, String> diagnose() throws HttpHostConnectException {
+	Map<String, Object> diagnose() throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&diagnose,
 			onSuccess: LowLevelAPI.Responses.&parseJson
-		).execute(host, port) as Map<String, String>
+		).execute(host, port) as Map<String, Object>
 	}
 
 	def cleanDeploy() {
