@@ -3,6 +3,7 @@ package org.clyze.client.web
 import groovy.cli.commons.OptionAccessor
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.transform.TypeChecked
 import groovy.util.logging.Log4j
 import org.apache.commons.cli.Option
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -13,6 +14,7 @@ import org.clyze.persistent.model.Item
 import static org.apache.commons.io.FileUtils.copyFileToDirectory
 
 @Log4j
+@TypeChecked
 class PostState implements Item {
 
     String id
@@ -38,11 +40,33 @@ class PostState implements Item {
         return JsonOutput.toJson(toMap())
     }
 
+    /**
+     * Generate JSON with file paths made relative to a
+     * given prefix. Paths that do not start with the
+     * prefix are ignored.
+     * @param prefix   the path prefix to remove
+     */
+    String toJSONWithRelativePaths(final String prefix) {
+        final int prefixLen = prefix.length() + File.pathSeparator.length()
+        Set<Input> inputs0 = inputs.each {
+            if (it instanceof Input) {
+                Input i0 = (Input)it
+                if (i0.isFile) {
+                    String path = i0.value
+                    if (path.startsWith(prefix))
+                        it.value = path.substring(prefixLen)
+                }
+            }
+            return it
+        }
+        return JsonOutput.toJson([inputs: inputs0] as Map<String, Object>)
+    }
+
     @Override
     Map<String, Object> toMap() {
         return [            
             inputs: inputs
-        ]
+        ] as Map<String, Object>
     }
 
     @Override
