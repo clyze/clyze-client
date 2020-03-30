@@ -5,10 +5,12 @@ import java.awt.*
 import java.util.List
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
+import org.apache.http.client.ClientProtocolException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
+import org.clyze.client.web.api.AttachmentHandler
 import org.clyze.client.web.api.LowLevelAPI
 import org.clyze.client.web.api.Remote
 import org.clyze.client.web.http.HttpClientCommand
@@ -198,6 +200,27 @@ class Helper {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
             }
         }
+    }
+
+    /**
+     * Invokes the automated repackaging endpoint.
+     *
+     * @param host         the server host name
+     * @param port         the server port
+     * @param username     the user name
+     * @param password     the user password
+     * @param projectName  the project to post the bundle
+     * @param ps           the bundle representation
+     * @param handler      a handler of the resulting file returned by the server
+     * @throws ClientProtocolException  if the server encountered an error
+     */
+    static void repackageBundleForCI(String host, int port, String username, String password,
+                                     String projectName, PostState ps,
+                                     AttachmentHandler<String> handler)
+    throws ClientProtocolException {
+        Remote remote = connect(host, port, username, password);
+        ensureProjectExists(remote, projectName);
+        remote.repackageBundleForCI(username, projectName, ps, handler);
     }
 
     /**
