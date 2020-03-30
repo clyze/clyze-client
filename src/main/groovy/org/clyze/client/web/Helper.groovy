@@ -200,7 +200,20 @@ class Helper {
         }
     }
 
-    static void doPost(String host, int port, String username, String password, String projectName, String profile, PostState bundlePostState) throws HttpHostConnectException {
+    /**
+     * Invokes the endpoint that creates/posts a bundle.
+     *
+     * @param host              the server host name
+     * @param port              the server port
+     * @param username          the user name
+     * @param password          the user password
+     * @param projectName       the project to post the bundle
+     * @param profile           the profile to use in the server
+     * @param bundlePostState   the bundle object
+     */
+    static void postBundle(String host, int port, String username, String password,
+                           String projectName, String profile, PostState bundlePostState)
+    throws HttpHostConnectException {
         Remote remote = connect(host, port, username, password)
 
         ensureProjectExists(remote, projectName)
