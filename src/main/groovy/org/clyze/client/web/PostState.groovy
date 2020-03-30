@@ -54,7 +54,7 @@ class PostState implements Item {
                 if (i0.isFile) {
                     String path = i0.value
                     if (path.startsWith(prefix))
-                        it.value = path.substring(prefixLen)
+                        return new Input(key:i0.key, value:path.substring(prefixLen), isFile:i0.isFile)
                 }
             }
             return it
