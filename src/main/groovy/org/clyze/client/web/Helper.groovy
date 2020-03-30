@@ -163,7 +163,7 @@ class Helper {
     public static Closure<Boolean> checkFileEmpty = { String f ->
         boolean isEmpty = (new File(f)).length() == 0
         if (isEmpty) {
-            println "Skipping empty file ${n}"
+            println "Skipping empty file ${f}"
         }
         !isEmpty
     }
