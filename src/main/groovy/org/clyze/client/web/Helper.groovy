@@ -178,12 +178,32 @@ class Helper {
         return remote
     }
 
+    /**
+     * Check if the project exists and attempt to create it if it is missing.
+     *
+     * @param remote        the Remote object to use for the connection to the server
+     * @param projectName   the project name
+     */
+    static void ensureProjectExists(Remote remote, String projectName) {
+        if (!projectName)
+            throw new RuntimeException("Missing project name")
+
+        try {
+            remote.getProject(remote.currentUser(), projectName)
+        } catch (Exception ex1) {
+            try {
+                remote.createProject(projectName)
+                println "Project '${projectName}' created."
+            } catch (Exception ex2) {
+                throw new RuntimeException("Could not create project '${projectName}'.", ex2)
+            }
+        }
+    }
+
     static void doPost(String host, int port, String username, String password, String projectName, String profile, PostState bundlePostState) throws HttpHostConnectException {
         Remote remote = connect(host, port, username, password)
 
-        if (!projectName) {
-            throw new RuntimeException("Missing project name")
-        }
+        ensureProjectExists(remote, projectName)
 
         println "Submitting bundle in project '${projectName}'..."
         String bundleId = remote.createBundle(username, projectName, profile, bundlePostState)

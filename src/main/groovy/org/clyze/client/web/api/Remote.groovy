@@ -225,7 +225,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def getProject(String owner, String name) {
+	def getProject(String owner, String name) throws ClientProtocolException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Projects.&getProject.curry(token, owner, name),
