@@ -110,6 +110,23 @@ class PostState implements Item {
         }        
     }
 
+    /**
+     * Loads a PostState containing relative paths from a directory, making
+     * the paths absolute by prepending the directory path.
+     *
+     * @param dir  the directory containing the data
+     * @return     a PostState object with absolute paths
+     */
+    PostState loadAndTranslatePathsFrom(File dir) {
+        PostState ps = loadFrom(dir)
+        ps.inputs.findAll { it.isFile }.each {
+            // Ignore full paths on Unix.
+            if (!it.value.startsWith(File.separator))
+                it.value = (new File(dir, it.value)).canonicalPath
+        }
+        return ps
+    }
+
     void addStringInput(String key, String value) {
         inputs.add(new Input(key:key, value:value))
     }

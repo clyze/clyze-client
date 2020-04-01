@@ -372,4 +372,19 @@ class Helper {
         return Remote.at(options.host, options.port).diagnose()
     }
 
+    static void postCachedBundle(PostOptions options, File fromDir,
+                                 String bundleId, List<Message> messages,
+                                 boolean debug) {
+        PostState bundlePostState
+        try {
+            // Check if a bundle post state exists.
+            bundlePostState = new PostState(id: bundleId)
+            bundlePostState.loadAndTranslatePathsFrom(fromDir)
+        } catch (any) {
+            Message.print(messages, "Error bundling state: ${any.message}" as String)
+            return
+        }
+
+        post(bundlePostState, options, messages, null, null, debug)
+    }
 }
