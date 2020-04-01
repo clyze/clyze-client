@@ -95,7 +95,8 @@ class PostState implements Item {
             }
         }   
         File json = new File(dir, id + ".json")
-        json.text = toJSON()
+        // json.text = toJSON()
+        json.text = toJSONWithRelativePaths(dir.canonicalPath)
 
         return this
     }
