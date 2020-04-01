@@ -306,7 +306,7 @@ class Helper {
      *                    messages for reason)
      * @throws HttpHostConnectException if the server did not respond
      */
-    public static boolean isServerCapable(PostOptions options, List<Message> messages)
+    static boolean isServerCapable(PostOptions options, List<Message> messages)
         throws HttpHostConnectException {
 
         if (options.dry)
@@ -323,7 +323,7 @@ class Helper {
         } else {
             String sv = getServerVersion(diag)
             String expected = "1.0.3"
-            if (!sv.equals(expected))
+            if (sv != expected)
                 Message.warn(messages, "WARNING: Server version not compatible: " + sv + " (expected: " + expected + ")")
         }
         return true
@@ -336,7 +336,7 @@ class Helper {
      * @param diag   the JSON output of the server endpoint (as a Map)
      * @return       true if the server supports Android apps, false otherwise
      */
-    public static boolean isAndroidSupported(Map<String, Object> diag) {
+    static boolean isAndroidSupported(Map<String, Object> diag) {
         Boolean androidSDK_OK = (Boolean)diag.get("ANDROID_SDK_OK")
         return (androidSDK_OK == null) || androidSDK_OK
     }
@@ -347,7 +347,7 @@ class Helper {
      * @param   diag the output of the 'diagnose' endpoint
      * @return  the contents of the server version field
      */
-    public static String getServerVersion(Map<String, Object> diag) {
+    static String getServerVersion(Map<String, Object> diag) {
         return (String)diag.get("SERVER_VERSION")
     }
 
@@ -357,7 +357,7 @@ class Helper {
      * @param   diag the output of the 'diagnose' endpoint
      * @return  true if the server supports automated repackaging
      */
-    public static boolean supportsAutomatedRepackaging(Map<String, Object> diag) {
+    static boolean supportsAutomatedRepackaging(Map<String, Object> diag) {
         return (Boolean)diag.get("AUTOMATED_REPACKAGING")
     }
 
