@@ -19,6 +19,7 @@ class PostState implements Item {
 
     String id
     Set<Input> inputs = new HashSet<>()
+    String profile
 
     static class Input {
         String key
@@ -59,13 +60,14 @@ class PostState implements Item {
             }
             return it
         }
-        return JsonOutput.toJson([inputs: inputs0] as Map<String, Object>)
+        return JsonOutput.toJson([inputs: inputs0, profile: profile] as Map<String, Object>)
     }
 
     @Override
     Map<String, Object> toMap() {
         return [            
-            inputs: inputs
+            inputs: inputs,
+            profile: profile
         ] as Map<String, Object>
     }
 
@@ -78,6 +80,7 @@ class PostState implements Item {
                 addStringInput(it.key as String, it.value)
             }
         }
+        profile = map.profile
     }
 
     PostState saveTo(File dir) {
