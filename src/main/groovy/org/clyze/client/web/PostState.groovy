@@ -48,7 +48,7 @@ class PostState implements Item {
      */
     String toJSONWithRelativePaths(final String prefix) {
         final int prefixLen = prefix.length() + File.pathSeparator.length()
-        Set<Input> inputs0 = inputs.each {
+        List<Input> inputs0 = inputs.collect {
             if (it instanceof Input) {
                 Input i0 = (Input)it
                 if (i0.isFile) {
