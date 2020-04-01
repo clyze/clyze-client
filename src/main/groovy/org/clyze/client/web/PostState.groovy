@@ -88,9 +88,8 @@ class PostState implements Item {
             if (f.exists()) {
                 String name = f.getName()
                 File dest = new File(dir, name)
-                if (dest.exists()) {
-                    throw new RuntimeException("File $name already exists in $dir")
-                }
+                if (dest.exists())
+                    log.warn "WARNING: overwriting $name in $dir"
                 copyFileToDirectory(f, dir)
                 input.value = new File(dir, name).canonicalPath
             }
