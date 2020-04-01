@@ -185,7 +185,7 @@ class Remote {
 		).execute(host, port)		
 	}		
 
-	def listUsers() {
+	def listUsers() throws ClientProtocolException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&getUsers.curry(token),
