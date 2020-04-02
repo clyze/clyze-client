@@ -20,6 +20,7 @@ import org.apache.http.HttpEntity
  *     <li>list_bundles      - list the available bundles.
  *     <li>post_bundle       - create a new bundle.
  *     <li>list_samples      - list the available sample bundles.
+ *     <li>post_sample       - create a new bundle, based on a given sample.
  *     <li>list              - list the available analyses.
  *     <li>post_doop         - create a new doop analysis.
  *     <li>post_cclyzer      - create a new cclyzer analysis.
@@ -225,14 +226,34 @@ class CliRestClient {
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
             return id
         }
-    )    
+    )
+
+    private static final CliRestCommand POST_SAMPLE = new CliRestCommand(
+            name               : 'post_sample',
+            description        : 'posts a new bundle to the remote server, based on a sample',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                final String DEFAULT_SAMPLES_PROJECT = 'scrap'
+                String project = System.console().readLine("Project (default: '${DEFAULT_SAMPLES_PROJECT})': ")
+                if ('' == project)
+                    project = DEFAULT_SAMPLES_PROJECT
+                String sampleName = System.console().readLine("Sample name: ")
+                return LowLevelAPI.Bundles.createBundleFromSample(token, user, project, sampleName, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
+                return id
+            }
+    )
 
     /**
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, POST_SAMPLE
     ].collectEntries {
         [(it.name):it]
     }

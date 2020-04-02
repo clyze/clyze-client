@@ -107,6 +107,14 @@ class Remote {
 		).execute(host, port)
 	}
 
+	def createBundleFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Bundles.&createBundleFromSample.curry(token, owner, projectName, sampleName),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
 	def getBundle(String owner, String projectName, String bundleName) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,

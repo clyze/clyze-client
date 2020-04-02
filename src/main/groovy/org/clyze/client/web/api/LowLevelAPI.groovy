@@ -169,6 +169,10 @@ class LowLevelAPI {
         static final HttpGet listSamples(String userToken, String host, int port) {
             return new Endpoints(host, port, userToken).listSamplesEndpoint()
         }
+
+        static final HttpPost createBundleFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).createBundleFromSampleEndpoint(sampleName)
+        }
     }
 
     static final class Responses {
@@ -271,6 +275,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix()))) as HttpGet
         }
 
+        HttpPost createBundleFromSampleEndpoint(String sampleName) {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}"))) as HttpPost
+        }
+
         private HttpRequestBase withTokenHeader(HttpRequestBase req) {
             if (userToken) req.addHeader(HEADER_TOKEN, userToken)
             return req
@@ -303,8 +311,8 @@ class LowLevelAPI {
             return "${bundlesSuffix()}/$bundleName"
         }
 
-        static String samplesSuffix() {
-            return "/samples"
+        String samplesSuffix() {
+            return "${projectSuffix()}/samples"
         }
 
         static final String createUrl(String host, int port, String path, String endPoint) {
