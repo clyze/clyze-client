@@ -1,5 +1,6 @@
 package org.clyze.client.web.api
 
+//import groovy.transform.CompileStatic
 import org.clyze.client.web.PostState
 import org.clyze.client.web.http.*
 import org.apache.http.HttpEntity
@@ -7,6 +8,7 @@ import org.apache.http.client.ClientProtocolException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.impl.client.CloseableHttpClient
 
+//@CompileStatic
 class Remote {
 
 	private final String host
@@ -95,6 +97,14 @@ class Remote {
 			requestBuilder: LowLevelAPI.Bundles.&createBundle.curry(token, owner, projectName, profile, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
+	}
+
+	def listSamples()  {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Bundles.&listSamples.curry(token),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
 	}
 
 	def getBundle(String owner, String projectName, String bundleName) {

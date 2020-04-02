@@ -165,6 +165,10 @@ class LowLevelAPI {
             entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(profile))
             return createBundle(userToken, owner, projectName, profile, entityBuilder, host, port)
         }
+
+        static final HttpGet listSamples(String userToken, String host, int port) {
+            return new Endpoints(host, port, userToken).listSamplesEndpoint()
+        }
     }
 
     static final class Responses {
@@ -263,6 +267,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundlesSuffix() + "?profile=${profile}"))) as HttpPost
         }
 
+        HttpGet listSamplesEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix()))) as HttpGet
+        }
+
         private HttpRequestBase withTokenHeader(HttpRequestBase req) {
             if (userToken) req.addHeader(HEADER_TOKEN, userToken)
             return req
@@ -293,6 +301,10 @@ class LowLevelAPI {
         String bundleSuffix() {
             if (!bundleName) throw new RuntimeException("No bundle name")
             return "${bundlesSuffix()}/$bundleName"
+        }
+
+        String samplesSuffix() {
+            return "/samples"
         }
 
         static final String createUrl(String host, int port, String path, String endPoint) {

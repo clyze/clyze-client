@@ -19,6 +19,7 @@ import org.apache.http.HttpEntity
  *     <li>list_projects     - list the available projects.
  *     <li>list_bundles      - list the available bundles.
  *     <li>post_bundle       - create a new bundle.
+ *     <li>list_samples      - list the available sample bundles.
  *     <li>list              - list the available analyses.
  *     <li>post_doop         - create a new doop analysis.
  *     <li>post_cclyzer      - create a new cclyzer analysis.
@@ -158,6 +159,26 @@ class CliRestClient {
         }
     )
 
+    private static final CliRestCommand LIST_SAMPLES = new CliRestCommand(
+            name               : 'list_samples',
+            description        : 'list the sample bundles available in the remote server',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                return LowLevelAPI.Bundles.listSamples(token, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                println "== Samples =="
+                for (def result : json.samples) {
+                    println "* ${result}"
+                }
+                println ""
+                json as String
+            }
+    )
+
     private static final CliRestCommand LIST_PROJECTS = new CliRestCommand(
         name               : 'list_projects',
         description        : 'list the projects stored in the remote server',
@@ -211,7 +232,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, POST_BUNDLE
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE
     ].collectEntries {
         [(it.name):it]
     }
