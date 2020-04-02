@@ -50,6 +50,7 @@ dependencies {
 
 jar {
     manifest {
+        //noinspection GrDeprecatedAPIUsage
         attributes 'Implementation-Version' : version
     }
 }

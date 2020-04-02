@@ -303,7 +303,7 @@ class LowLevelAPI {
             return "${bundlesSuffix()}/$bundleName"
         }
 
-        String samplesSuffix() {
+        static String samplesSuffix() {
             return "/samples"
         }
 

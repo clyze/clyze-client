@@ -290,6 +290,8 @@ class Helper {
                            options.password, options.project, options.profile, ps)
         } catch (HttpHostConnectException ex) {
             Message.print(messages, "ERROR: Cannot post bundle, is the server running?")
+            if (debug)
+                ex.printStackTrace()
         } catch (Exception ex) {
             Message.print(messages, "ERROR: Cannot post bundle: " + ex.getMessage())
             if (debug)
