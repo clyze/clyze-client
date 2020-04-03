@@ -37,7 +37,7 @@ configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 }
 
-def groovyVersion='3.0.1'
+def groovyVersion='2.5.7'
 dependencies {    
     api 'org.clyze:clue-common:3.20.8'
     api 'org.clyze:metadata-model:1.0.1'
