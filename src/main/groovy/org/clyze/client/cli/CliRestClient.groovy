@@ -17,6 +17,7 @@ import org.apache.http.HttpEntity
  *     <li>login             - authenticate user.
  *     <li>ping              - check connection with server.
  *     <li>list_projects     - list the available projects.
+ *     <li>get_config        - get a configuration
  *     <li>list_bundles      - list the available bundles.
  *     <li>post_bundle       - create a new bundle.
  *     <li>list_samples      - list the available sample bundles.
@@ -250,17 +251,43 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand GET_CONFIGURATION = new CliRestCommand(
+            name               : 'get_config',
+            description        : 'list the projects stored in the remote server',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                String config = readConfigFromConsole()
+                return LowLevelAPI.Bundles.getConfig(token, user, project, bundle, config, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static String readProjectFromConsole() {
         final String DEFAULT_PROJECT = 'scrap'
         String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
         return ('' == project) ? DEFAULT_PROJECT : project
     }
+
+    private static String readConfigFromConsole() {
+        final String DEFAULT_CONFIG = 'optimize.clue'
+        String config = System.console().readLine("Configuration (default: '${DEFAULT_CONFIG})': ")
+        return ('' == config) ? DEFAULT_CONFIG : config
+    }
+
     /**
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, POST_SAMPLE
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, POST_SAMPLE, GET_CONFIGURATION
     ].collectEntries {
         [(it.name):it]
     }

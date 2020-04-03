@@ -173,6 +173,10 @@ class LowLevelAPI {
         static final HttpPost createBundleFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).createBundleFromSampleEndpoint(sampleName)
         }
+
+        static final HttpGet getConfig(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigEndpoint()
+        }
     }
 
     static final class Responses {
@@ -201,14 +205,17 @@ class LowLevelAPI {
         String username
         String projectName
         String bundleName
+        String config
 
-        Endpoints(String host, int port, String userToken=null, String username=null, String projectName=null, String bundleName=null) {
+        Endpoints(String host, int port, String userToken=null, String username=null,
+                  String projectName=null, String bundleName=null, String config=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
             this.username    = username
             this.projectName = projectName
             this.bundleName  = bundleName
+            this.config      = config
         }
 
         HttpGet pingEndpoint() {
@@ -275,6 +282,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix()))) as HttpGet
         }
 
+        HttpGet getConfigEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix()))) as HttpGet
+        }
+
         HttpPost createBundleFromSampleEndpoint(String sampleName) {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}"))) as HttpPost
         }
@@ -309,6 +320,11 @@ class LowLevelAPI {
         String bundleSuffix() {
             if (!bundleName) throw new RuntimeException("No bundle name")
             return "${bundlesSuffix()}/$bundleName"
+        }
+
+        String bundleConfigSuffix() {
+            if (!config) throw new RuntimeException("No config")
+            return "${bundleSuffix()}/configs/${config}"
         }
 
         String samplesSuffix() {
