@@ -238,7 +238,10 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String sampleName = System.console().readLine("Sample name: ")
+                final String DEFAULT_SAMPLE_NAME = 'apps-android-wikipedia'
+                String sampleName = System.console().readLine("Sample name (default: '${DEFAULT_SAMPLE_NAME}'): ")
+                if ('' == sampleName)
+                    sampleName = DEFAULT_SAMPLE_NAME
                 return LowLevelAPI.Bundles.createBundleFromSample(token, user, project, sampleName, host, port)
             },
             onSuccess          : { HttpEntity entity ->
