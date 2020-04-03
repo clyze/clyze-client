@@ -99,10 +99,10 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def listSamples()  {
+	def listSamples(String owner, String projectName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&listSamples.curry(token),
+				requestBuilder: LowLevelAPI.Bundles.&listSamples.curry(token, owner, projectName),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
