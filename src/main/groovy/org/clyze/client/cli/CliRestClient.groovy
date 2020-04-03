@@ -145,7 +145,7 @@ class CliRestClient {
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            String project = System.console().readLine("Project: ")
+            String project = readProjectFromConsole()
             return LowLevelAPI.Bundles.listBundles(token, user, project, host, port)
         },
         onSuccess          : { HttpEntity entity ->
@@ -167,7 +167,9 @@ class CliRestClient {
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
-                return LowLevelAPI.Bundles.listSamples(token, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                return LowLevelAPI.Bundles.listSamples(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -214,7 +216,7 @@ class CliRestClient {
 
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            String project = System.console().readLine("Project: ")
+            String project = readProjectFromConsole()
             String DEFAULT_PROFILE = 'apiTargetAndroid25'
             String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
             if ((profile == null) || (profile == "")) {
@@ -235,10 +237,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                final String DEFAULT_SAMPLES_PROJECT = 'scrap'
-                String project = System.console().readLine("Project (default: '${DEFAULT_SAMPLES_PROJECT})': ")
-                if ('' == project)
-                    project = DEFAULT_SAMPLES_PROJECT
+                String project = readProjectFromConsole()
                 String sampleName = System.console().readLine("Sample name: ")
                 return LowLevelAPI.Bundles.createBundleFromSample(token, user, project, sampleName, host, port)
             },
@@ -248,6 +247,11 @@ class CliRestClient {
             }
     )
 
+    private static String readProjectFromConsole() {
+        final String DEFAULT_PROJECT = 'scrap'
+        String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
+        return ('' == project) ? DEFAULT_PROJECT : project
+    }
     /**
      * The map of available commands.
      */

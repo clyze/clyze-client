@@ -166,8 +166,8 @@ class LowLevelAPI {
             return createBundle(userToken, owner, projectName, profile, entityBuilder, host, port)
         }
 
-        static final HttpGet listSamples(String userToken, String host, int port) {
-            return new Endpoints(host, port, userToken).listSamplesEndpoint()
+        static final HttpGet listSamples(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).listSamplesEndpoint()
         }
 
         static final HttpPost createBundleFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
