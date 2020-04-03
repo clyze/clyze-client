@@ -217,7 +217,7 @@ class CliRestClient {
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectFromConsole()
-            String DEFAULT_PROFILE = 'apiTargetAndroid25'
+            String DEFAULT_PROFILE = 'proAndroid'
             String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
             if ((profile == null) || (profile == "")) {
                 profile = DEFAULT_PROFILE
