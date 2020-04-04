@@ -174,8 +174,12 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName).createBundleFromSampleEndpoint(sampleName)
         }
 
-        static final HttpGet getConfig(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigEndpoint()
+        static final HttpGet listConfigurations(String userToken, String owner, String projectName, String bundleName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName).listConfigurationsEndpoint()
+        }
+
+        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
         }
     }
 
@@ -205,17 +209,17 @@ class LowLevelAPI {
         String username
         String projectName
         String bundleName
-        String config
+        String configOrOutput
 
         Endpoints(String host, int port, String userToken=null, String username=null,
-                  String projectName=null, String bundleName=null, String config=null) {
+                  String projectName=null, String bundleName=null, String configOrOutput =null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
             this.username    = username
             this.projectName = projectName
             this.bundleName  = bundleName
-            this.config      = config
+            this.configOrOutput      = configOrOutput
         }
 
         HttpGet pingEndpoint() {
@@ -282,8 +286,12 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix()))) as HttpGet
         }
 
-        HttpGet getConfigEndpoint() {
+        HttpGet getConfigurationEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix()))) as HttpGet
+        }
+
+        HttpGet listConfigurationsEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigsSuffix()))) as HttpGet
         }
 
         HttpPost createBundleFromSampleEndpoint(String sampleName) {
@@ -322,9 +330,13 @@ class LowLevelAPI {
             return "${bundlesSuffix()}/$bundleName"
         }
 
+        String bundleConfigsSuffix() {
+            return "${bundleSuffix()}/configs"
+        }
+
         String bundleConfigSuffix() {
-            if (!config) throw new RuntimeException("No config")
-            return "${bundleSuffix()}/configs/${config}"
+            if (!configOrOutput) throw new RuntimeException("No config")
+            return "${bundleConfigsSuffix()}/${configOrOutput}"
         }
 
         String samplesSuffix() {

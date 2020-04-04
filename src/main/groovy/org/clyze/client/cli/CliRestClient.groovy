@@ -18,6 +18,7 @@ import org.apache.http.HttpEntity
  *     <li>ping              - check connection with server.
  *     <li>list_projects     - list the available projects.
  *     <li>get_config        - get a configuration
+ *     <li>list_configurations - list the available configurations.
  *     <li>list_bundles      - list the available bundles.
  *     <li>post_bundle       - create a new bundle.
  *     <li>list_samples      - list the available sample bundles.
@@ -251,6 +252,23 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand LIST_CONFIGURATIONS = new CliRestCommand(
+            name               : 'list_configurations',
+            description        : 'list the configurations of a bundle',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                return LowLevelAPI.Bundles.listConfigurations(token, user, project, bundle, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand GET_CONFIGURATION = new CliRestCommand(
             name               : 'get_config',
             description        : 'get a bundle configuration',
@@ -261,7 +279,7 @@ class CliRestClient {
                 String project = readProjectFromConsole()
                 String bundle = System.console().readLine("Bundle: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.getConfig(token, user, project, bundle, config, host, port)
+                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -286,7 +304,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, POST_SAMPLE, GET_CONFIGURATION
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, POST_SAMPLE, GET_CONFIGURATION, LIST_CONFIGURATIONS
     ].collectEntries {
         [(it.name):it]
     }
