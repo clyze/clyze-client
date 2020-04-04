@@ -182,6 +182,10 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
         }
 
+        static final HttpGet getOutput(String userToken, String owner, String projectName, String bundleName, String config, String output, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config, output).getOutputEndpoint()
+        }
+
         static final HttpPost analyze(String userToken, String owner, String projectName, String bundleName, String config, String profile, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName, bundleName, config).analyzeEndpoint(profile)
             // Use empty multipart
@@ -216,17 +220,20 @@ class LowLevelAPI {
         String username
         String projectName
         String bundleName
-        String configOrOutput
+        String config
+        String output
 
         Endpoints(String host, int port, String userToken=null, String username=null,
-                  String projectName=null, String bundleName=null, String configOrOutput =null) {
+                  String projectName=null, String bundleName=null, String config=null,
+                  String output=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
             this.username    = username
             this.projectName = projectName
             this.bundleName  = bundleName
-            this.configOrOutput      = configOrOutput
+            this.config      = config
+            this.output      = output
         }
 
         HttpGet pingEndpoint() {
@@ -305,6 +312,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundleConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
         }
 
+        HttpGet getOutputEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, outputSuffix()))) as HttpGet
+        }
+
         HttpPost createBundleFromSampleEndpoint(String sampleName) {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}"))) as HttpPost
         }
@@ -346,8 +357,13 @@ class LowLevelAPI {
         }
 
         String bundleConfigSuffix() {
-            if (!configOrOutput) throw new RuntimeException("No config")
-            return "${bundleConfigsSuffix()}/${configOrOutput}"
+            if (!config) throw new RuntimeException("No config")
+            return "${bundleConfigsSuffix()}/${config}"
+        }
+
+        String outputSuffix() {
+            if (!output) throw new RuntimeException("No output")
+            return "${bundleConfigSuffix()}/outputs/${output}"
         }
 
         String samplesSuffix() {

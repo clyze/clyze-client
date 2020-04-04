@@ -19,6 +19,7 @@ import org.apache.http.HttpEntity
  *     <li>list_projects     - list the available projects.
  *     <li>analyze           - run an analysis
  *     <li>get_config        - get a configuration
+ *     <li>get_output        - get an analysis output
  *     <li>list_configurations - list the available configurations.
  *     <li>list_bundles      - list the available bundles.
  *     <li>post_bundle       - create a new bundle.
@@ -302,6 +303,25 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand GET_OUTPUT = new CliRestCommand(
+            name               : 'get_output',
+            description        : 'get a bundle output',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                String config = readConfigFromConsole()
+                String output = System.console().readLine("Output: ")
+                return LowLevelAPI.Bundles.getOutput(token, user, project, bundle, config, output, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static String readProjectFromConsole() {
         final String DEFAULT_PROJECT = 'scrap'
         String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
@@ -332,7 +352,7 @@ class CliRestClient {
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
         PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, ANALYZE,
-        POST_SAMPLE, GET_CONFIGURATION, LIST_CONFIGURATIONS
+        POST_SAMPLE, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS
     ].collectEntries {
         [(it.name):it]
     }
