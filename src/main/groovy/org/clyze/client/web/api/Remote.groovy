@@ -123,6 +123,22 @@ class Remote {
 		).execute(host, port)
 	}
 
+	def listConfigurations(String owner, String projectName, String bundleName)  {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Bundles.&listConfigurations.curry(token, owner, projectName, bundleName),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	def analyze(String owner, String projectName, String bundleName, String config, String profile)  {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Bundles.&analyze.curry(token, owner, projectName, bundleName, config, profile),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
 	def <T> T repackageBundleForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
