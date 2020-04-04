@@ -253,8 +253,7 @@ class CliRestClient {
 
     private static final CliRestCommand GET_CONFIGURATION = new CliRestCommand(
             name               : 'get_config',
-            description        : 'list the projects stored in the remote server',
-            //TODO add pagination options
+            description        : 'get a bundle configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
