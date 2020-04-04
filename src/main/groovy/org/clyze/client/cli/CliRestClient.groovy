@@ -1,6 +1,6 @@
 package org.clyze.client.cli
 
-import groovy.transform.TypeChecked
+
 import org.clyze.client.cli.CliAuthenticator.Selector
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
@@ -17,6 +17,7 @@ import org.apache.http.HttpEntity
  *     <li>login             - authenticate user.
  *     <li>ping              - check connection with server.
  *     <li>list_projects     - list the available projects.
+ *     <li>analyze           - run an analysis
  *     <li>get_config        - get a configuration
  *     <li>list_configurations - list the available configurations.
  *     <li>list_bundles      - list the available bundles.
@@ -27,7 +28,6 @@ import org.apache.http.HttpEntity
  *     <li>post_doop         - create a new doop analysis.
  *     <li>post_cclyzer      - create a new cclyzer analysis.
  *     <li>get               - retrieves an analysis.
- *     <li>start             - start an analysis.
  *     <li>stop              - stop an analysis.
  *     <li>query             - query a complete analysis.
  *     <li>delete            - delete an analysis.
@@ -219,11 +219,7 @@ class CliRestClient {
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectFromConsole()
-            String DEFAULT_PROFILE = 'proAndroid'
-            String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
-            if ((profile == null) || (profile == "")) {
-                profile = DEFAULT_PROFILE
-            }
+            String profile = readBundleProfileFromConsole()
             return LowLevelAPI.Bundles.createBundle(token, user, project, profile, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
@@ -287,10 +283,41 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand ANALYZE = new CliRestCommand(
+            name               : 'analyze',
+            description        : 'run an analysis on a code bundle',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                String config = readConfigFromConsole()
+                String profile = readAnalysisProfileFromConsole()
+                return LowLevelAPI.Bundles.analyze(token, user, project, bundle, config, profile, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static String readProjectFromConsole() {
         final String DEFAULT_PROJECT = 'scrap'
         String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
         return ('' == project) ? DEFAULT_PROJECT : project
+    }
+
+    private static String readBundleProfileFromConsole() {
+        final String DEFAULT_PROFILE = 'proAndroid'
+        String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
+        return ((profile == null) || (profile == "")) ? DEFAULT_PROFILE : profile
+    }
+
+    private static String readAnalysisProfileFromConsole() {
+        final String DEFAULT_ANALYSIS_PROFILE = 'r8'
+        String profile = System.console().readLine("Profile (default is '${DEFAULT_ANALYSIS_PROFILE}'): ")
+        return ((profile == null) || (profile == "")) ? DEFAULT_ANALYSIS_PROFILE : profile
     }
 
     private static String readConfigFromConsole() {
@@ -303,8 +330,9 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, START, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, POST_SAMPLE, GET_CONFIGURATION, LIST_CONFIGURATIONS
+        //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, ANALYZE,
+        POST_SAMPLE, GET_CONFIGURATION, LIST_CONFIGURATIONS
     ].collectEntries {
         [(it.name):it]
     }

@@ -74,27 +74,6 @@ class Helper {
         Desktop.getDesktop().browse(html.toURI())
     }
 
-//    /**
-//     * Creates a start analysis command (without authenticator and onSuccess handlers).
-//     */
-//    static HttpClientCommand<Void> createStartCommand(String id) {
-//        return new HttpClientCommand<Void>(
-//            endPoint: "analyses",
-//            requestBuilder: {String url ->
-//                return new HttpPut("${url}/${id}/action/start")
-//            }
-//        )
-//    }
-
-//    /**
-//     * Creates a start analysis command (with authenticator).
-//     */
-//    private static HttpClientCommand<Void> createStartCommandAuth(String id, Closure authenticator) {
-//        HttpClientCommand<Void> command = createStartCommand(id)
-//        command.authenticator = authenticator
-//        return command
-//    }
-
 //    private static HttpClientCommand<String> createAutoLoginTokenCommand(Closure authenticator) {
 //        return new HttpClientCommand<String>(
 //            endPoint: "token",

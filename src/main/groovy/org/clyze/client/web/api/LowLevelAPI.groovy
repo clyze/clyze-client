@@ -181,6 +181,13 @@ class LowLevelAPI {
         static final HttpGet getConfiguration(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
         }
+
+        static final HttpPost analyze(String userToken, String owner, String projectName, String bundleName, String config, String profile, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, bundleName, config).analyzeEndpoint(profile)
+            // Use empty multipart
+            post.setEntity(MultipartEntityBuilder.create().build())
+            return post
+        }
     }
 
     static final class Responses {
@@ -292,6 +299,10 @@ class LowLevelAPI {
 
         HttpGet listConfigurationsEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigsSuffix()))) as HttpGet
+        }
+
+        HttpPost analyzeEndpoint(String profile) {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundleConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
         }
 
         HttpPost createBundleFromSampleEndpoint(String sampleName) {
