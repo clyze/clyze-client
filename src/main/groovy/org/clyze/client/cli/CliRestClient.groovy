@@ -18,6 +18,7 @@ import org.apache.http.HttpEntity
  *     <li>ping              - check connection with server.
  *     <li>list_projects     - list the available projects.
  *     <li>analyze           - run an analysis
+ *     <li>runtime           - check the runtime status of an analysis
  *     <li>get_config        - get a configuration
  *     <li>get_output        - get an analysis output
  *     <li>list_configurations - list the available configurations.
@@ -303,6 +304,24 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand RUNTIME = new CliRestCommand(
+            name               : 'runtime',
+            description        : 'show runtime stats for an analysis',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                String config = readConfigFromConsole()
+                return LowLevelAPI.Bundles.getRuntime(token, user, project, bundle, config, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand GET_OUTPUT = new CliRestCommand(
             name               : 'get_output',
             description        : 'get a bundle output',
@@ -352,7 +371,7 @@ class CliRestClient {
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
         PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, ANALYZE,
-        POST_SAMPLE, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS
+        POST_SAMPLE, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS, RUNTIME
     ].collectEntries {
         [(it.name):it]
     }

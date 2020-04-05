@@ -182,6 +182,10 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
         }
 
+        static final HttpGet getRuntime(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getRuntimeEndpoint()
+        }
+
         static final HttpGet getOutput(String userToken, String owner, String projectName, String bundleName, String config, String output, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName, config, output).getOutputEndpoint()
         }
@@ -302,6 +306,10 @@ class LowLevelAPI {
 
         HttpGet getConfigurationEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix()))) as HttpGet
+        }
+
+        HttpGet getRuntimeEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix() + "/analysis/runtime"))) as HttpGet
         }
 
         HttpGet listConfigurationsEndpoint() {
