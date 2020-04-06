@@ -124,7 +124,7 @@ class Main {
     }
 
     static String getAvailableCommands() {
-        return CliRestClient.COMMANDS.keySet().join(', ')
+        return CliRestClient.COMMANDS.keySet().sort().join(', ')
     }
 
     static Remote parseRemote(String remoteDef) {        
