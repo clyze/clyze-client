@@ -139,12 +139,12 @@ class Remote {
 		).execute(host, port)
 	}
 
-	def exportConfiguration(String owner, String projectName, String bundleName, String config) {
+	String exportConfiguration(String owner, String projectName, String bundleName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Bundles.&exportConfiguration.curry(token, owner, projectName, bundleName, config),
-				onSuccess: LowLevelAPI.Responses.&parseJson
-		).execute(host, port)
+				onSuccess: LowLevelAPI.Responses.&asString
+		).execute(host, port) as String
 	}
 
 	def analyze(String owner, String projectName, String bundleName, String config, String profile)  {
