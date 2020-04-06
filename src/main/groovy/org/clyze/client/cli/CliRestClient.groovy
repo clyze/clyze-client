@@ -278,7 +278,7 @@ class CliRestClient {
                 String project = readProjectFromConsole()
                 String bundle = System.console().readLine("Bundle: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, false, host, port)
+                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -296,11 +296,14 @@ class CliRestClient {
                 String project = readProjectFromConsole()
                 String bundle = System.console().readLine("Bundle: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, true, host, port)
+                return LowLevelAPI.Bundles.exportConfiguration(token, user, project, bundle, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
-                def json = LowLevelAPI.Responses.parseJson(entity)
-                json as String
+                String conf = LowLevelAPI.Responses.asString(entity)
+                File f = File.createTempFile("exported-configuration", null)
+                f.text = conf
+                println "Configuration written to ${f}"
+                conf
             }
     )
 
