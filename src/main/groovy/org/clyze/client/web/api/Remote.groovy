@@ -131,10 +131,10 @@ class Remote {
 		).execute(host, port)
 	}
 
-	def getConfiguration(String owner, String projectName, String bundleName, String config) {
+	def getConfiguration(String owner, String projectName, String bundleName, String config, boolean export) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&getConfiguration.curry(token, owner, projectName, bundleName, config),
+				requestBuilder: LowLevelAPI.Bundles.&getConfiguration.curry(token, owner, projectName, bundleName, config, export),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}

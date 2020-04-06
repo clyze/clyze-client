@@ -20,6 +20,7 @@ import org.apache.http.HttpEntity
  *     <li>analyze           - run an analysis
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>get_config        - get a configuration
+ *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
  *     <li>list_configurations - list the available configurations.
  *     <li>list_bundles      - list the available bundles.
@@ -277,7 +278,25 @@ class CliRestClient {
                 String project = readProjectFromConsole()
                 String bundle = System.console().readLine("Bundle: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, host, port)
+                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, false, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
+    private static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand(
+            name               : 'export_config',
+            description        : 'export a bundle configuration',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                String config = readConfigFromConsole()
+                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, true, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -371,7 +390,7 @@ class CliRestClient {
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
         PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, ANALYZE,
-        POST_SAMPLE, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS, RUNTIME
+        POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS, RUNTIME
     ].collectEntries {
         [(it.name):it]
     }

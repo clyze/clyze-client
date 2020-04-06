@@ -178,8 +178,8 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName).listConfigurationsEndpoint()
         }
 
-        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
+        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String bundleName, String config, boolean export, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint(export)
         }
 
         static final HttpGet getRuntime(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
@@ -304,8 +304,9 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix()))) as HttpGet
         }
 
-        HttpGet getConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix()))) as HttpGet
+        HttpGet getConfigurationEndpoint(boolean export) {
+            String expSuffix = export ? '/export' : ''
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix() + expSuffix))) as HttpGet
         }
 
         HttpGet getRuntimeEndpoint() {
