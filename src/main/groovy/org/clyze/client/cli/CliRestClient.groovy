@@ -24,6 +24,7 @@ import org.apache.http.HttpEntity
  *     <li>get_output        - get an analysis output
  *     <li>list_configurations - list the available configurations.
  *     <li>list_bundles      - list the available bundles.
+ *     <li>get_bundle        - get a bundle
  *     <li>post_bundle       - create a new bundle.
  *     <li>list_samples      - list the available sample bundles.
  *     <li>post_sample       - create a new bundle, based on a given sample.
@@ -201,6 +202,23 @@ class CliRestClient {
             def json = LowLevelAPI.Responses.parseJson(entity)
             json as String
         }
+    )
+
+    private static final CliRestCommand GET_BUNDLE = new CliRestCommand(
+            name               : 'get_bundle',
+            description        : 'get a bundle',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                return LowLevelAPI.Bundles.getBundle(token, user, project, bundle, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
     )
 
     private static final CliRestCommand POST_BUNDLE = new CliRestCommand(
@@ -392,7 +410,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, POST_BUNDLE, ANALYZE,
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, GET_BUNDLE, POST_BUNDLE, ANALYZE,
         POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS, RUNTIME
     ].collectEntries {
         [(it.name):it]
