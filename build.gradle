@@ -39,7 +39,7 @@ configurations.all {
 
 def groovyVersion='2.5.7'
 dependencies {    
-    api 'org.clyze:clue-common:3.20.8'
+    api 'org.clyze:clue-common:3.20.12'
     api 'org.clyze:metadata-model:1.0.1'
     api "org.codehaus.groovy:groovy:${groovyVersion}"
     api "org.codehaus.groovy:groovy-json:${groovyVersion}"
