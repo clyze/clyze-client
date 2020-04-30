@@ -382,7 +382,7 @@ class CliRestClient {
     )
 
     private static String readProjectFromConsole() {
-        final String DEFAULT_PROJECT = 'scrap'
+        final String DEFAULT_PROJECT = 'samples'
         String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
         return ('' == project) ? DEFAULT_PROJECT : project
     }
