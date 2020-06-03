@@ -267,10 +267,10 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def createProject(String name) {
+	def createProject(String name, String platform) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Projects.&createProject.curry(token, currentUser(), name),
+			requestBuilder: LowLevelAPI.Projects.&createProject.curry(token, currentUser(), name, platform),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
