@@ -168,16 +168,19 @@ class Helper {
      *
      * @param remote        the Remote object to use for the connection to the server
      * @param projectName   the project name
+     * @param platform      the project platform
      */
-    static void ensureProjectExists(Remote remote, String projectName) {
+    static void ensureProjectExists(Remote remote, String projectName, String platform) {
         if (!projectName)
             throw new RuntimeException("Missing project name")
+        else if (!platform)
+            throw new RuntimeException("Missing project platform")
 
         try {
             remote.getProject(remote.currentUser(), projectName)
         } catch (Exception ex1) {
             try {
-                remote.createProject(projectName)
+                remote.createProject(projectName, platform)
                 println "Project '${projectName}' created."
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
@@ -193,16 +196,17 @@ class Helper {
      * @param username     the user name
      * @param password     the user password
      * @param projectName  the project to post the bundle
+     * @param platform     the project platform (Android/Java)
      * @param ps           the bundle representation
      * @param handler      a handler of the resulting file returned by the server
      * @throws ClientProtocolException  if the server encountered an error
      */
     static void repackageBundleForCI(String host, int port, String username, String password,
-                                     String projectName, PostState ps,
+                                     String projectName, String platform, PostState ps,
                                      AttachmentHandler<String> handler)
     throws ClientProtocolException {
         Remote remote = connect(host, port, username, password)
-        ensureProjectExists(remote, projectName)
+        ensureProjectExists(remote, projectName, platform)
         remote.repackageBundleForCI(username, projectName, ps, handler)
     }
 
@@ -214,15 +218,16 @@ class Helper {
      * @param username          the user name
      * @param password          the user password
      * @param projectName       the project to post the bundle
+     * @param platform          the project platform (Android/Java)
      * @param profile           the profile to use in the server
      * @param bundlePostState   the bundle object
      */
     static void postBundle(String host, int port, String username, String password,
-                           String projectName, String profile, PostState bundlePostState)
+                           String projectName, String platform, String profile, PostState bundlePostState)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
-        ensureProjectExists(remote, projectName)
+        ensureProjectExists(remote, projectName, platform)
 
         println "Submitting bundle in project '${projectName}'..."
         String bundleId = remote.createBundle(username, projectName, profile, bundlePostState)
@@ -266,7 +271,8 @@ class Helper {
 
             if (!options.dry)
                 postBundle(options.host, options.port, options.username,
-                           options.password, options.project, options.profile, ps)
+                           options.password, options.project, options.platform,
+                           options.profile, ps)
         } catch (HttpHostConnectException ex) {
             Message.print(messages, "ERROR: Cannot post bundle, is the server running?")
             if (debug)
