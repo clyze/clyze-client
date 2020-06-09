@@ -267,7 +267,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def createProject(String name, String platform) {
+	Map<String, Object> createProject(String name, String platform) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Projects.&createProject.curry(token, currentUser(), name, platform),
@@ -275,7 +275,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def getProject(String owner, String name) throws ClientProtocolException {
+	Map<String, Object> getProject(String owner, String name) throws ClientProtocolException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Projects.&getProject.curry(token, owner, name),

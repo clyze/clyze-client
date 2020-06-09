@@ -176,16 +176,22 @@ class Helper {
         else if (!platform)
             throw new RuntimeException("Missing project platform")
 
+        Map<String, Object> proj = null
         try {
-            remote.getProject(remote.currentUser(), projectName)
+            proj = remote.getProject(remote.currentUser(), projectName)
         } catch (Exception ex1) {
             try {
-                remote.createProject(projectName, platform)
+                proj = remote.createProject(projectName, platform)
                 println "Project '${projectName}' created."
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
             }
         }
+
+        // Check that the project to use matches the intended platform.
+        String projPlatform = proj?.get('platform')
+        if (projPlatform != platform)
+            throw new RuntimeException("Project '${projectName}' is of type '${projPlatform}' != '${platform}'")
     }
 
     /**
