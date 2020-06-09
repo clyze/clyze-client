@@ -14,27 +14,28 @@ import org.apache.http.HttpEntity
  *
  * The client can execute the following commands via the remote server:
  * <ul>
- *     <li>login             - authenticate user.
- *     <li>ping              - check connection with server.
- *     <li>list_projects     - list the available projects.
+ *     <li>login             - authenticate user
+ *     <li>ping              - check connection with server
+ *     <li>list_projects     - list the available projects
+ *     <li>get_project       - get a project
  *     <li>analyze           - run an analysis
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>get_config        - get a configuration
  *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
- *     <li>list_configurations - list the available configurations.
- *     <li>list_bundles      - list the available bundles.
+ *     <li>list_configurations - list the available configurations
+ *     <li>list_bundles      - list the available bundles
  *     <li>get_bundle        - get a bundle
- *     <li>post_bundle       - create a new bundle.
- *     <li>list_samples      - list the available sample bundles.
- *     <li>post_sample       - create a new bundle, based on a given sample.
- *     <li>list              - list the available analyses.
- *     <li>post_doop         - create a new doop analysis.
- *     <li>post_cclyzer      - create a new cclyzer analysis.
- *     <li>get               - retrieves an analysis.
- *     <li>stop              - stop an analysis.
- *     <li>query             - query a complete analysis.
- *     <li>delete            - delete an analysis.
+ *     <li>post_bundle       - create a new bundle
+ *     <li>list_samples      - list the available sample bundles
+ *     <li>post_sample       - create a new bundle, based on a given sample
+ *     <li>list              - list the available analyses
+ *     <li>post_doop         - create a new doop analysis
+ *     <li>post_cclyzer      - create a new cclyzer analysis
+ *     <li>get               - retrieves an analysis
+ *     <li>stop              - stop an analysis
+ *     <li>query             - query a complete analysis
+ *     <li>delete            - delete an analysis
  * </ul>
  *
  * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
@@ -202,6 +203,23 @@ class CliRestClient {
             def json = LowLevelAPI.Responses.parseJson(entity)
             json as String
         }
+    )
+
+    private static final CliRestCommand GET_PROJECT = new CliRestCommand(
+            name               : 'get_project',
+            description        : 'get project stored in the remote server',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                return LowLevelAPI.Projects.getProject(token, user, project, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
     )
 
     private static final CliRestCommand GET_BUNDLE = new CliRestCommand(
@@ -409,8 +427,8 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        //PING, LOGIN, LIST_BUNDLES, POST_BUNDLE, POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, GET_BUNDLE, POST_BUNDLE, ANALYZE,
+        // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, GET_PROJECT, GET_BUNDLE, POST_BUNDLE, ANALYZE,
         POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS, RUNTIME
     ].collectEntries {
         [(it.name):it]
