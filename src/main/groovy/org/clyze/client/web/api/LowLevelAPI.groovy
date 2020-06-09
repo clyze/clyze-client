@@ -183,6 +183,10 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
         }
 
+        static final HttpGet getRules(String userToken, String owner, String projectName, String bundleName, String config, String originType, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config, originType).getRulesEndpoint()
+        }
+
         static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).exportConfigurationEndpoint()
         }
@@ -234,11 +238,11 @@ class LowLevelAPI {
         String projectName
         String bundleName
         String config
-        String output
+        String extra
 
         Endpoints(String host, int port, String userToken=null, String username=null,
                   String projectName=null, String bundleName=null, String config=null,
-                  String output=null) {
+                  String extra=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
@@ -246,7 +250,7 @@ class LowLevelAPI {
             this.projectName = projectName
             this.bundleName  = bundleName
             this.config      = config
-            this.output      = output
+            this.extra       = extra
         }
 
         HttpGet pingEndpoint() {
@@ -317,6 +321,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix()))) as HttpGet
         }
 
+        HttpGet getRulesEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpGet
+        }
+
         HttpGet exportConfigurationEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix() + '/export'))) as HttpGet
         }
@@ -383,8 +391,12 @@ class LowLevelAPI {
         }
 
         String outputSuffix() {
-            if (!output) throw new RuntimeException("No output")
-            return "${bundleConfigSuffix()}/outputs/${output}"
+            if (!extra) throw new RuntimeException("No output")
+            return "${bundleConfigSuffix()}/outputs/${extra}"
+        }
+
+        String rulesSuffix() {
+            return "${bundleConfigSuffix()}/rules" + (extra ? "?originType=${extra}" : "")
         }
 
         String samplesSuffix() {

@@ -22,6 +22,7 @@ import org.apache.http.HttpEntity
  *     <li>analyze           - run an analysis
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>get_config        - get a configuration
+ *     <li>get_rules         - get configuration rules
  *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
  *     <li>list_configurations - list the available configurations
@@ -323,6 +324,25 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand GET_RULES = new CliRestCommand(
+            name               : 'get_rules',
+            description        : 'get configuration rules',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectFromConsole()
+                String bundle = System.console().readLine("Bundle: ")
+                String config = readConfigFromConsole()
+                String origin = System.console().readLine("[Optional] Origin: ")
+                return LowLevelAPI.Bundles.getRules(token, user, project, bundle, config, origin, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand(
             name               : 'export_config',
             description        : 'export a bundle configuration',
@@ -430,7 +450,7 @@ class CliRestClient {
     public static final Map<String, CliRestCommand> COMMANDS = [
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
         PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, GET_PROJECT, GET_BUNDLE, POST_BUNDLE, ANALYZE,
-        POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, LIST_CONFIGURATIONS, RUNTIME
+        POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, GET_RULES, LIST_CONFIGURATIONS, RUNTIME
     ].collectEntries {
         [(it.name):it]
     }
