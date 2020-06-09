@@ -1,6 +1,7 @@
 package org.clyze.client.cli
 
-
+import groovy.cli.commons.OptionAccessor
+// import groovy.transform.TypeChecked
 import org.clyze.client.cli.CliAuthenticator.Selector
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
@@ -252,7 +253,7 @@ class CliRestClient {
 
             //options have been discovered here
             supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
-                post.addInputFromCliOption(it as Option, cliOptions)
+                post.addInputFromCliOption(it as Option, cliOptions as OptionAccessor)
             }            
 
             String token = getUserToken(true, host, port)

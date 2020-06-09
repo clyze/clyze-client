@@ -16,7 +16,7 @@ class HttpClientCommand<T> implements ResponseHandler<T> {
 
     public static final Closure<String> DEFAULT_ERROR = { int statusCode, HttpEntity entity ->
         String message = entity ? EntityUtils.toString(entity) : "No message"
-        return "Error $statusCode: $message"
+        return "Error $statusCode: $message" as String
     }
 
     /** The http client life cycle manager */
