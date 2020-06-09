@@ -3,7 +3,7 @@ package org.clyze.client.web
 import groovy.cli.commons.OptionAccessor
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovy.transform.TypeChecked
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.commons.cli.Option
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -14,7 +14,7 @@ import org.clyze.persistent.model.Item
 import static org.apache.commons.io.FileUtils.copyFileToDirectory
 
 @Log4j
-@TypeChecked
+@CompileStatic
 class PostState implements Item {
 
     String id

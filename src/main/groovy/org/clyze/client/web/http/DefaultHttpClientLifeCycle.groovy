@@ -1,9 +1,11 @@
 package org.clyze.client.web.http
 
+import groovy.transform.CompileStatic
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClientBuilder
 
+@CompileStatic
 class DefaultHttpClientLifeCycle implements HttpClientLifeCycle {
 
 	CloseableHttpClient createHttpClient() {

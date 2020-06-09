@@ -1,7 +1,9 @@
 package org.clyze.client.web.http
 
+import groovy.transform.CompileStatic
 import org.apache.http.impl.client.CloseableHttpClient
 
+@CompileStatic
 class SameInstanceHttpClientLifeCycle implements HttpClientLifeCycle {
 	
 	private final CloseableHttpClient client
