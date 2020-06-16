@@ -439,7 +439,7 @@ class CliRestClient {
     }
 
     private static String readConfigFromConsole() {
-        final String DEFAULT_CONFIG = 'optimize.clue'
+        final String DEFAULT_CONFIG = 'clyze.json'
         String config = System.console().readLine("Configuration (default: '${DEFAULT_CONFIG})': ")
         return ('' == config) ? DEFAULT_CONFIG : config
     }
