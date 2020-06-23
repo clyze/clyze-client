@@ -80,7 +80,7 @@ Posts a new analysis to the remote server.
 Use the -h flag to see the available options for creating a new analysis.
 
 ### Start
-Starts a analysis on the remote server.
+Starts an analysis on the remote server.
 
     $ INSTALL_DIR>./bin/clue-client -r [server:port] -c start -id [analysis-id]
 
