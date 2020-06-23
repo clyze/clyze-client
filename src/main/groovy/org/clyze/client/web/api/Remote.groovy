@@ -32,10 +32,12 @@ class Remote {
 		return username
 	}
 
+	@SuppressWarnings('unused')
 	boolean isLoggedIn() {
 		return (token != null)
 	}
 
+	@SuppressWarnings('unused')
 	def ping() throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -52,14 +54,16 @@ class Remote {
 		).execute(host, port) as Map<String, Object>
 	}
 
+	@SuppressWarnings('unused')
 	def cleanDeploy() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&cleanDeploy,
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
-	}		
+	}
 
+	@SuppressWarnings('unused')
 	def login(String username, String password) throws HttpHostConnectException {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -83,6 +87,7 @@ class Remote {
 //		).execute(host, port)
 //	}
 
+	@SuppressWarnings('unused')
 	def listBundles(String owner, String projectName)  {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -91,6 +96,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	def createBundle(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -99,6 +105,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	def listSamples(String owner, String projectName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -107,6 +114,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	def createBundleFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -115,6 +123,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	def getBundle(String owner, String projectName, String bundleName) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -123,6 +132,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	def listConfigurations(String owner, String projectName, String bundleName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -131,6 +141,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	def getConfiguration(String owner, String projectName, String bundleName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -139,6 +150,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	String exportConfiguration(String owner, String projectName, String bundleName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -147,6 +159,7 @@ class Remote {
 		).execute(host, port) as String
 	}
 
+	@SuppressWarnings('unused')
 	def analyze(String owner, String projectName, String bundleName, String config, String profile)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -155,6 +168,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	def <T> T repackageBundleForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -233,8 +247,9 @@ class Remote {
 			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(token, bundleId, analysisId, file, line, col),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
-	}		
+	}
 
+	@SuppressWarnings('unused')
 	def listUsers() throws ClientProtocolException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -259,6 +274,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	def listProjects() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -267,6 +283,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	Map<String, Object> createProject(String name, String platform) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -275,6 +292,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	Map<String, Object> getProject(String owner, String name) throws ClientProtocolException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
