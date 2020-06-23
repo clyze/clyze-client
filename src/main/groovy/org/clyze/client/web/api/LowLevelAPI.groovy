@@ -137,6 +137,13 @@ class LowLevelAPI {
             return put
         }
 
+        static final HttpPost createSampleProject(String userToken, String owner, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner).createSampleProjectEndpoint()
+            List<NameValuePair> params = new ArrayList<>(0)
+            post.setEntity(new UrlEncodedFormEntity(params))
+            return post
+        }
+
         static final HttpPost repackageBundleForCI(String userToken, String owner, String projectName, MultipartEntityBuilder entityBuilder, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBundleForCIEndpoint()
             post.setEntity(entityBuilder.build())
@@ -287,6 +294,10 @@ class LowLevelAPI {
 
         HttpPost postProjectEndpoint() {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectsSuffix()))) as HttpPost
+        }
+
+        HttpPost createSampleProjectEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, userSuffix() + "/phonograph"))) as HttpPost
         }
 
         HttpGet getProjectEndpoint() {

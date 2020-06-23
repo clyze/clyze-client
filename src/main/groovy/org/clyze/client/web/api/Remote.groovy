@@ -290,4 +290,13 @@ class Remote {
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> createSampleProject(String owner) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Projects.&createSampleProject.curry(token, owner),
+				onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
 }

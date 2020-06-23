@@ -19,6 +19,7 @@ import org.apache.http.HttpEntity
  *     <li>ping              - check connection with server
  *     <li>list_projects     - list the available projects
  *     <li>get_project       - get a project
+ *     <li>create_sample_project-create a project based on a sample
  *     <li>analyze           - run an analysis
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>get_config        - get a configuration
@@ -289,6 +290,21 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand CREATE_SAMPLE_PROJECT = new CliRestCommand(
+            name               : 'create_sample_project',
+            description        : 'creates a new project in the remote server, based on a sample',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                return LowLevelAPI.Projects.createSampleProject(token, user, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand LIST_CONFIGURATIONS = new CliRestCommand(
             name               : 'list_configurations',
             description        : 'list the configurations of a bundle',
@@ -450,7 +466,8 @@ class CliRestClient {
     public static final Map<String, CliRestCommand> COMMANDS = [
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
         PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, GET_PROJECT, GET_BUNDLE, POST_BUNDLE, ANALYZE,
-        POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, GET_RULES, LIST_CONFIGURATIONS, RUNTIME
+        POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, GET_RULES, LIST_CONFIGURATIONS, RUNTIME,
+        CREATE_SAMPLE_PROJECT
     ].collectEntries {
         [(it.name):it]
     }
