@@ -431,8 +431,7 @@ class CliRestClient {
                 return LowLevelAPI.Bundles.getOutput(token, user, project, bundle, config, output, host, port)
             },
             onSuccess          : { HttpEntity entity ->
-                def json = LowLevelAPI.Responses.parseJson(entity)
-                json as String
+                LowLevelAPI.Responses.asString(entity)
             }
     )
 
