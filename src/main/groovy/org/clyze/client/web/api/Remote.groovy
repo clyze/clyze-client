@@ -301,6 +301,15 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
+	def getOutput(String owner, String name, String bundleName, String config, String output) throws ClientProtocolException {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Bundles.&getOutput.curry(token, owner, name, bundleName, config, output),
+				onSuccess : LowLevelAPI.Responses.&asString
+		).execute(host, port)
+	}
+
 	def updateProject(String owner, String name, List<String> newMembers) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
