@@ -159,6 +159,24 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> cloneConfiguration(String owner, String projectName, String buildName, String config) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&cloneConfiguration.curry(token, owner, projectName, buildName, config),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> deleteConfiguration(String owner, String projectName, String buildName, String config) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&deleteConfiguration.curry(token, owner, projectName, buildName, config),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	String exportConfiguration(String owner, String projectName, String buildName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,

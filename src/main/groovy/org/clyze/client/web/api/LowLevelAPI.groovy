@@ -198,6 +198,14 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config).getConfigurationEndpoint()
         }
 
+        static final HttpDelete deleteConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).deleteConfigurationEndpoint()
+        }
+
+        static final HttpPost cloneConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).cloneConfigurationEndpoint()
+        }
+
         static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config, originType).getRulesEndpoint()
         }
@@ -346,6 +354,14 @@ class LowLevelAPI {
 
         HttpGet getConfigurationEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpGet
+        }
+
+        HttpDelete deleteConfigurationEndpoint() {
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpDelete
+        }
+
+        HttpPost cloneConfigurationEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + '/clone'))) as HttpPost
         }
 
         HttpGet getRulesEndpoint() {

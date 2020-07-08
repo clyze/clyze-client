@@ -28,11 +28,13 @@ import org.apache.http.HttpEntity
  *     <li>list_samples      - list the available sample builds
  *     <li>post_sample_build - create a new build, based on a given sample
  *
+ *     <li>list_configurations - list the available configurations
  *     <li>get_config        - get a configuration
+ *     <li>delete_config     - delete a configuration
+ *     <li>clone_config      - clone a configuration
  *     <li>get_rules         - get configuration rules
  *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
- *     <li>list_configurations - list the available configurations
  *
  *     <li>login             - authenticate user
  *     <li>ping              - check connection with server
@@ -399,6 +401,42 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand CLONE_CONFIGURATION = new CliRestCommand(
+            name               : 'clone_config',
+            description        : 'clone a build configuration',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                return LowLevelAPI.Builds.cloneConfiguration(token, user, project, build, config, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
+    private static final CliRestCommand DELETE_CONFIGURATION = new CliRestCommand(
+            name               : 'delete_config',
+            description        : 'delete a build configuration',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                return LowLevelAPI.Builds.deleteConfiguration(token, user, project, build, config, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand GET_RULES = new CliRestCommand(
             name               : 'get_rules',
             description        : 'get configuration rules',
@@ -537,7 +575,7 @@ class CliRestClient {
         // Builds
         LIST_BUILDS, LIST_SAMPLES, POST_BUILD, POST_SAMPLE_BUILD, GET_BUILD, DELETE_BUILD,
         // Configurations
-        LIST_CONFIGURATIONS, GET_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES,
+        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES,
         // Misc.
         PING, LOGIN, ANALYZE, GET_OUTPUT, RUNTIME
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
