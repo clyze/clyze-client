@@ -88,19 +88,19 @@ class Remote {
 //	}
 
 	@SuppressWarnings('unused')
-	def listBundles(String owner, String projectName)  {
+	def listBuilds(String owner, String projectName)  {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Bundles.&listBundles.curry(token, owner, projectName),
+			requestBuilder: LowLevelAPI.Builds.&listBuilds.curry(token, owner, projectName),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
 
 	@SuppressWarnings('unused')
-	def createBundle(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
+	def createBuild(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Bundles.&createBundle.curry(token, owner, projectName, profile, ps.asMultipart()),
+			requestBuilder: LowLevelAPI.Builds.&createBuild.curry(token, owner, projectName, profile, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
@@ -109,104 +109,104 @@ class Remote {
 	def listSamples(String owner, String projectName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&listSamples.curry(token, owner, projectName),
+				requestBuilder: LowLevelAPI.Builds.&listSamples.curry(token, owner, projectName),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
-	def createBundleFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
+	def createBuildFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&createBundleFromSample.curry(token, owner, projectName, sampleName),
+				requestBuilder: LowLevelAPI.Builds.&createBuildFromSample.curry(token, owner, projectName, sampleName),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
-	def getBundle(String owner, String projectName, String bundleName) {
+	def getBuild(String owner, String projectName, String buildName) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&getBundle.curry(token, owner, projectName, bundleName),
+				requestBuilder: LowLevelAPI.Builds.&getBuild.curry(token, owner, projectName, buildName),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
-	def listConfigurations(String owner, String projectName, String bundleName)  {
+	def listConfigurations(String owner, String projectName, String buildName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&listConfigurations.curry(token, owner, projectName, bundleName),
+				requestBuilder: LowLevelAPI.Builds.&listConfigurations.curry(token, owner, projectName, buildName),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
-	def getConfiguration(String owner, String projectName, String bundleName, String config) {
+	def getConfiguration(String owner, String projectName, String buildName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&getConfiguration.curry(token, owner, projectName, bundleName, config),
+				requestBuilder: LowLevelAPI.Builds.&getConfiguration.curry(token, owner, projectName, buildName, config),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
-	String exportConfiguration(String owner, String projectName, String bundleName, String config) {
+	String exportConfiguration(String owner, String projectName, String buildName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&exportConfiguration.curry(token, owner, projectName, bundleName, config),
+				requestBuilder: LowLevelAPI.Builds.&exportConfiguration.curry(token, owner, projectName, buildName, config),
 				onSuccess: LowLevelAPI.Responses.&asString
 		).execute(host, port) as String
 	}
 
 	@SuppressWarnings('unused')
-	def analyze(String owner, String projectName, String bundleName, String config, String profile)  {
+	def analyze(String owner, String projectName, String buildName, String config, String profile)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&analyze.curry(token, owner, projectName, bundleName, config, profile),
+				requestBuilder: LowLevelAPI.Builds.&analyze.curry(token, owner, projectName, buildName, config, profile),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
-	def <T> T repackageBundleForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
+	def <T> T repackageBuildForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Projects.&repackageBundleForCI.curry(token, owner, projectName, ps.asMultipart()),
+				requestBuilder: LowLevelAPI.Projects.&repackageBuildForCI.curry(token, owner, projectName, ps.asMultipart()),
 				onSuccess: handler.&handleAttachment
 		).execute(host, port)
 	}
 
-	String createAnalysis(String bundleId, String analysis) {
+	String createAnalysis(String buildId, String analysis) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, bundleId, analysis),
+			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, buildId, analysis),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}
 
-	String createAnalysis(String bundleId, PostState ps) {
+	String createAnalysis(String buildId, PostState ps) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, bundleId, ps.asMultipart()),
+			requestBuilder: LowLevelAPI.Requests.&createAnalysis.curry(token, buildId, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJsonAndGetAttr.curry("id")
 		).execute(host, port)		
 	}
 
-	boolean executeAnalysisAction(String bundleId, String analysisId, String action) {
+	boolean executeAnalysisAction(String buildId, String analysisId, String action) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&executeAnalysisAction.curry(token, bundleId, analysisId, action),
+			requestBuilder: LowLevelAPI.Requests.&executeAnalysisAction.curry(token, buildId, analysisId, action),
 			onSuccess: { HttpEntity entity ->
             	LowLevelAPI.Responses.parseJson(entity) != null
         	}
 		).execute(host, port)				
 	}
 
-	String getAnalysisStatus(String bundleId, String analysisId) {
+	String getAnalysisStatus(String buildId, String analysisId) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getAnalysisStatus.curry(token, bundleId, analysisId),
+			requestBuilder: LowLevelAPI.Requests.&getAnalysisStatus.curry(token, buildId, analysisId),
 			onSuccess : { HttpEntity entity ->
 				def json = LowLevelAPI.Responses.parseJson(entity)
 				return json.analysis.state
@@ -214,7 +214,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	String waitForAnalysisStatus(Set<String> statusSet, String bundleId, String analysisId, int minutes) {
+	String waitForAnalysisStatus(Set<String> statusSet, String buildId, String analysisId, int minutes) {
 
 		long millis = minutes * 60 * 1000
 		long expireAt = System.currentTimeMillis() + millis
@@ -223,7 +223,7 @@ class Remote {
 		
 		while(!Thread.currentThread().isInterrupted() && !statusSet.contains(state) && System.currentTimeMillis() < expireAt) {
 			try {
-				state = getAnalysisStatus(bundleId, analysisId)			
+				state = getAnalysisStatus(buildId, analysisId)
 				Thread.sleep(15000)
 			}
 			catch(InterruptedException ie) {
@@ -240,11 +240,11 @@ class Remote {
 		state
 	}
 
-	def getSymbolAt(String bundleId, String analysisId, String file, int line, int col) {		
+	def getSymbolAt(String buildId, String analysisId, String file, int line, int col) {
 		String fileEncoded = URLEncoder.encode(file, "UTF-8")		
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(token, bundleId, analysisId, file, line, col),
+			requestBuilder: LowLevelAPI.Requests.&getSymbolAt.curry(token, buildId, analysisId, file, line, col),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}
@@ -302,10 +302,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def getOutput(String owner, String name, String bundleName, String config, String output) throws ClientProtocolException {
+	def getOutput(String owner, String name, String buildName, String config, String output) throws ClientProtocolException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Bundles.&getOutput.curry(token, owner, name, bundleName, config, output),
+				requestBuilder: LowLevelAPI.Builds.&getOutput.curry(token, owner, name, buildName, config, output),
 				onSuccess : LowLevelAPI.Responses.&asString
 		).execute(host, port)
 	}

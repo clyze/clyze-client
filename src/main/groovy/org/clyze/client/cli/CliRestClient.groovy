@@ -27,11 +27,11 @@ import org.apache.http.HttpEntity
  *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
  *     <li>list_configurations - list the available configurations
- *     <li>list_bundles      - list the available bundles
- *     <li>get_bundle        - get a bundle
- *     <li>post_bundle       - create a new bundle
- *     <li>list_samples      - list the available sample bundles
- *     <li>post_sample       - create a new bundle, based on a given sample
+ *     <li>list_builds       - list the available builds
+ *     <li>get_build         - get a build
+ *     <li>post_build        - create a new build
+ *     <li>list_samples      - list the available sample builds
+ *     <li>post_sample       - create a new build, based on a given sample
  *     <li>list              - list the available analyses
  *     <li>post_doop         - create a new doop analysis
  *     <li>post_cclyzer      - create a new cclyzer analysis
@@ -74,7 +74,7 @@ class CliRestClient {
     }
 
     /*
-    //Used by list analyses and list bundles commands
+    //Used by comands to list analyses and builds
     private static final Closure<HttpUriRequest> LIST_REQUEST_BUILDER = { String url ->
         Integer start = 0
         Integer count = DEFAULT_LIST_SIZE
@@ -147,20 +147,20 @@ class CliRestClient {
         }
     )    
 
-    private static final CliRestCommand LIST_BUNDLES = new CliRestCommand(
-        name               : 'list_bundles',
-        description        : 'list the bundles stored in the remote server',
+    private static final CliRestCommand LIST_BUILDS = new CliRestCommand(
+        name               : 'list_builds',
+        description        : 'list the builds stored in the remote server',
         //TODO add pagination options
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectFromConsole()
-            return LowLevelAPI.Bundles.listBundles(token, user, project, host, port)
+            return LowLevelAPI.Builds.listBuilds(token, user, project, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
-            println "== Bundles =="
+            println "== Builds =="
             for (def result : json.results) {
                 def arts = result.appArtifacts.collect { it.name }.toString()
                 println "* ${result.displayName} (${result.profile.id}): ${arts}"
@@ -172,14 +172,14 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_SAMPLES = new CliRestCommand(
             name               : 'list_samples',
-            description        : 'list the sample bundles available in the remote server',
+            description        : 'list the sample builds available in the remote server',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                return LowLevelAPI.Bundles.listSamples(token, user, project, host, port)
+                return LowLevelAPI.Builds.listSamples(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -225,16 +225,16 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand GET_BUNDLE = new CliRestCommand(
-            name               : 'get_bundle',
-            description        : 'get a bundle',
+    private static final CliRestCommand GET_BUILD = new CliRestCommand(
+            name               : 'get_build',
+            description        : 'get a build',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
-                return LowLevelAPI.Bundles.getBundle(token, user, project, bundle, host, port)
+                String build = System.console().readLine("Build: ")
+                return LowLevelAPI.Builds.getBuild(token, user, project, build, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -242,12 +242,12 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand POST_BUNDLE = new CliRestCommand(
-        name               : 'post_bundle',
-        description        : 'posts a new bundle to the remote server',
+    private static final CliRestCommand POST_BUILD = new CliRestCommand(
+        name               : 'post_build',
+        description        : 'posts a new build to the remote server',
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         optionsBuilder     : { String host, int port ->
-            def json = ClientHelper.createCommandForOptionsDiscovery("BUNDLE", new DefaultHttpClientLifeCycle()).execute(host, port)
+            def json = ClientHelper.createCommandForOptionsDiscovery("BUILD", new DefaultHttpClientLifeCycle()).execute(host, port)
             return ClientHelper.convertJsonEncodedOptionsToCliOptions(json)
         },
         requestBuilder     : { String host, int port ->            
@@ -261,8 +261,8 @@ class CliRestClient {
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectFromConsole()
-            String profile = readBundleProfileFromConsole()
-            return LowLevelAPI.Bundles.createBundle(token, user, project, profile, post.asMultipart(), host, port)
+            String profile = readBuildProfileFromConsole()
+            return LowLevelAPI.Builds.createBuild(token, user, project, profile, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -272,7 +272,7 @@ class CliRestClient {
 
     private static final CliRestCommand POST_SAMPLE = new CliRestCommand(
             name               : 'post_sample',
-            description        : 'posts a new bundle to the remote server, based on a sample',
+            description        : 'posts a new build to the remote server, based on a sample',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
@@ -282,7 +282,7 @@ class CliRestClient {
                 String sampleName = System.console().readLine("Sample name (default: '${DEFAULT_SAMPLE_NAME}'): ")
                 if ('' == sampleName)
                     sampleName = DEFAULT_SAMPLE_NAME
-                return LowLevelAPI.Bundles.createBundleFromSample(token, user, project, sampleName, host, port)
+                return LowLevelAPI.Builds.createBuildFromSample(token, user, project, sampleName, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -307,14 +307,14 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_CONFIGURATIONS = new CliRestCommand(
             name               : 'list_configurations',
-            description        : 'list the configurations of a bundle',
+            description        : 'list the configurations of a build',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
-                return LowLevelAPI.Bundles.listConfigurations(token, user, project, bundle, host, port)
+                String build = System.console().readLine("Build: ")
+                return LowLevelAPI.Builds.listConfigurations(token, user, project, build, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -324,15 +324,15 @@ class CliRestClient {
 
     private static final CliRestCommand GET_CONFIGURATION = new CliRestCommand(
             name               : 'get_config',
-            description        : 'get a bundle configuration',
+            description        : 'get a build configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
+                String build = System.console().readLine("Build: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.getConfiguration(token, user, project, bundle, config, host, port)
+                return LowLevelAPI.Builds.getConfiguration(token, user, project, build, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -348,10 +348,10 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
+                String build = System.console().readLine("Build: ")
                 String config = readConfigFromConsole()
                 String origin = System.console().readLine("[Optional] Origin: ")
-                return LowLevelAPI.Bundles.getRules(token, user, project, bundle, config, origin, host, port)
+                return LowLevelAPI.Builds.getRules(token, user, project, build, config, origin, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -361,15 +361,15 @@ class CliRestClient {
 
     private static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand(
             name               : 'export_config',
-            description        : 'export a bundle configuration',
+            description        : 'export a build configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
+                String build = System.console().readLine("Build: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.exportConfiguration(token, user, project, bundle, config, host, port)
+                return LowLevelAPI.Builds.exportConfiguration(token, user, project, build, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String conf = LowLevelAPI.Responses.asString(entity)
@@ -382,16 +382,16 @@ class CliRestClient {
 
     private static final CliRestCommand ANALYZE = new CliRestCommand(
             name               : 'analyze',
-            description        : 'run an analysis on a code bundle',
+            description        : 'run an analysis on a code build',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
+                String build = System.console().readLine("Build: ")
                 String config = readConfigFromConsole()
                 String profile = readAnalysisProfileFromConsole()
-                return LowLevelAPI.Bundles.analyze(token, user, project, bundle, config, profile, host, port)
+                return LowLevelAPI.Builds.analyze(token, user, project, build, config, profile, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -407,9 +407,9 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
+                String build = System.console().readLine("Build: ")
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Bundles.getRuntime(token, user, project, bundle, config, host, port)
+                return LowLevelAPI.Builds.getRuntime(token, user, project, build, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -419,16 +419,16 @@ class CliRestClient {
 
     private static final CliRestCommand GET_OUTPUT = new CliRestCommand(
             name               : 'get_output',
-            description        : 'get a bundle output',
+            description        : 'get a build output',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectFromConsole()
-                String bundle = System.console().readLine("Bundle: ")
+                String build = System.console().readLine("Build: ")
                 String config = readConfigFromConsole()
                 String output = System.console().readLine("Output: ")
-                return LowLevelAPI.Bundles.getOutput(token, user, project, bundle, config, output, host, port)
+                return LowLevelAPI.Builds.getOutput(token, user, project, build, config, output, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 LowLevelAPI.Responses.asString(entity)
@@ -441,7 +441,7 @@ class CliRestClient {
         return ('' == project) ? DEFAULT_PROJECT : project
     }
 
-    private static String readBundleProfileFromConsole() {
+    private static String readBuildProfileFromConsole() {
         final String DEFAULT_PROFILE = 'proAndroid'
         String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
         return ((profile == null) || (profile == "")) ? DEFAULT_PROFILE : profile
@@ -464,7 +464,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUNDLES, LIST_SAMPLES, GET_PROJECT, GET_BUNDLE, POST_BUNDLE, ANALYZE,
+        PING, LOGIN, LIST_PROJECTS, LIST_BUILDS, LIST_SAMPLES, GET_PROJECT, GET_BUILD, POST_BUILD, ANALYZE,
         POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, GET_RULES, LIST_CONFIGURATIONS, RUNTIME,
         CREATE_SAMPLE_PROJECT
     ].collectEntries {

@@ -54,34 +54,34 @@ class LowLevelAPI {
         */
 
 
-        static final HttpPost createAnalysis(String userToken, String bundleId, String analysis, String host, int port) {
+        static final HttpPost createAnalysis(String userToken, String buildId, String analysis, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
             entityBuilder.addPart(InputConstants.ANALYSIS, new StringBody(analysis))
-            return createAnalysis(userToken, bundleId, entityBuilder, host, port)
+            return createAnalysis(userToken, buildId, entityBuilder, host, port)
         }
 
-        static final HttpPost createAnalysis(String userToken, String bundleId, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new HttpPost(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${bundleId}/analyses"))
+        static final HttpPost createAnalysis(String userToken, String buildId, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new HttpPost(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/analyses"))
             if (userToken) post.addHeader(Endpoints.HEADER_TOKEN, userToken)
             post.setEntity(entityBuilder.build())
             return post
         }
 
-        static final HttpPut executeAnalysisAction(String userToken, String bundleId, String analysis, String action, String host, int port) {
-            HttpPut put = new HttpPut(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${bundleId}/analyses/${analysis}/action/${action}"))
+        static final HttpPut executeAnalysisAction(String userToken, String buildId, String analysis, String action, String host, int port) {
+            HttpPut put = new HttpPut(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/analyses/${analysis}/action/${action}"))
             if (userToken) put.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return put
         }
 
-        static final HttpGet getAnalysisStatus(String userToken, String bundleId, String analysis, String host, int port) {
-            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${bundleId}/analyses/${analysis}"))
+        static final HttpGet getAnalysisStatus(String userToken, String buildId, String analysis, String host, int port) {
+            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/analyses/${analysis}"))
             if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return get
         }
 
-        static final HttpGet getSymbolAt(String userToken, String bundleId, String analysisId, String file, int line, int col, String host, int port) {
+        static final HttpGet getSymbolAt(String userToken, String buildId, String analysisId, String file, int line, int col, String host, int port) {
             String fileEncoded = URLEncoder.encode(file, "UTF-8")       
-            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${bundleId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
+            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
             if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return get
         }        
@@ -144,70 +144,70 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPost repackageBundleForCI(String userToken, String owner, String projectName, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBundleForCIEndpoint()
+        static final HttpPost repackageBuildForCI(String userToken, String owner, String projectName, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBuildForCIEndpoint()
             post.setEntity(entityBuilder.build())
             return post
         }
     }
 
-    static final class Bundles {
+    static final class Builds {
 
-        static final HttpGet listBundles(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).listBundlesEndpoint()
+        static final HttpGet listBuilds(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).listBuildsEndpoint()
         }
 
-        static final HttpGet getBundle(String userToken, String owner, String projectName, String bundleName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName).getBundleEndpoint()
+        static final HttpGet getBuild(String userToken, String owner, String projectName, String buildName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName).getBuildEndpoint()
         }
 
-        static final HttpPost createBundle(String userToken, String owner, String projectName, String profile, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postBundleEndpoint(profile)
+        static final HttpPost createBuild(String userToken, String owner, String projectName, String profile, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postBuildEndpoint(profile)
             post.setEntity(entityBuilder.build())
             return post
         }
 
-        static final HttpPost createBundle(String userToken, String owner, String projectName, String profile, String bundleResolvableByServer, String host, int port) {
+        static final HttpPost createBuild(String userToken, String owner, String projectName, String profile, String buildResolvableByServer, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(bundleResolvableByServer))
+            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(buildResolvableByServer))
             entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(profile))
-            return createBundle(userToken, owner, projectName, profile, entityBuilder, host, port)
+            return createBuild(userToken, owner, projectName, profile, entityBuilder, host, port)
         }
 
         static final HttpGet listSamples(String userToken, String owner, String projectName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).listSamplesEndpoint()
         }
 
-        static final HttpPost createBundleFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).createBundleFromSampleEndpoint(sampleName)
+        static final HttpPost createBuildFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).createBuildFromSampleEndpoint(sampleName)
         }
 
-        static final HttpGet listConfigurations(String userToken, String owner, String projectName, String bundleName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName).listConfigurationsEndpoint()
+        static final HttpGet listConfigurations(String userToken, String owner, String projectName, String buildName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName).listConfigurationsEndpoint()
         }
 
-        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getConfigurationEndpoint()
+        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).getConfigurationEndpoint()
         }
 
-        static final HttpGet getRules(String userToken, String owner, String projectName, String bundleName, String config, String originType, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config, originType).getRulesEndpoint()
+        static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, originType).getRulesEndpoint()
         }
 
-        static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).exportConfigurationEndpoint()
+        static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).exportConfigurationEndpoint()
         }
 
-        static final HttpGet getRuntime(String userToken, String owner, String projectName, String bundleName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config).getRuntimeEndpoint()
+        static final HttpGet getRuntime(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).getRuntimeEndpoint()
         }
 
-        static final HttpGet getOutput(String userToken, String owner, String projectName, String bundleName, String config, String output, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, bundleName, config, output).getOutputEndpoint()
+        static final HttpGet getOutput(String userToken, String owner, String projectName, String buildName, String config, String output, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, output).getOutputEndpoint()
         }
 
-        static final HttpPost analyze(String userToken, String owner, String projectName, String bundleName, String config, String profile, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, bundleName, config).analyzeEndpoint(profile)
+        static final HttpPost analyze(String userToken, String owner, String projectName, String buildName, String config, String profile, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, buildName, config).analyzeEndpoint(profile)
             // Use empty multipart
             post.setEntity(MultipartEntityBuilder.create().build())
             return post
@@ -243,19 +243,19 @@ class LowLevelAPI {
         String userToken
         String username
         String projectName
-        String bundleName
+        String buildName
         String config
         String extra
 
         Endpoints(String host, int port, String userToken=null, String username=null,
-                  String projectName=null, String bundleName=null, String config=null,
+                  String projectName=null, String buildName=null, String config=null,
                   String extra=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
             this.username    = username
             this.projectName = projectName
-            this.bundleName  = bundleName
+            this.buildName   = buildName
             this.config      = config
             this.extra       = extra
         }
@@ -308,20 +308,20 @@ class LowLevelAPI {
             withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix()))) as HttpPut
         }
 
-        HttpPost repackageBundleForCIEndpoint() {
+        HttpPost repackageBuildForCIEndpoint() {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage"))) as HttpPost
         }
 
-        HttpGet listBundlesEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundlesSuffix()))) as HttpGet
+        HttpGet listBuildsEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildsSuffix()))) as HttpGet
         }
 
-        HttpGet getBundleEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleSuffix()))) as HttpGet
+        HttpGet getBuildEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildSuffix()))) as HttpGet
         }
 
-        HttpPost postBundleEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundlesSuffix() + "?profile=${profile}"))) as HttpPost
+        HttpPost postBuildEndpoint(String profile) {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildsSuffix() + "?profile=${profile}"))) as HttpPost
         }
 
         HttpGet listSamplesEndpoint() {
@@ -329,7 +329,7 @@ class LowLevelAPI {
         }
 
         HttpGet getConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpGet
         }
 
         HttpGet getRulesEndpoint() {
@@ -337,26 +337,26 @@ class LowLevelAPI {
         }
 
         HttpGet exportConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix() + '/export'))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix() + '/export'))) as HttpGet
         }
 
         HttpGet getRuntimeEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigSuffix() + "/analysis/runtime"))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix() + "/analysis/runtime"))) as HttpGet
         }
 
         HttpGet listConfigurationsEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, bundleConfigsSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigsSuffix()))) as HttpGet
         }
 
         HttpPost analyzeEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, bundleConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
         }
 
         HttpGet getOutputEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, outputSuffix()))) as HttpGet
         }
 
-        HttpPost createBundleFromSampleEndpoint(String sampleName) {
+        HttpPost createBuildFromSampleEndpoint(String sampleName) {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}"))) as HttpPost
         }
 
@@ -383,31 +383,31 @@ class LowLevelAPI {
             return "${projectsSuffix()}/$projectName"
         }
 
-        String bundlesSuffix() {
+        String buildsSuffix() {
             return "${projectSuffix()}/bundles"
         }
 
-        String bundleSuffix() {
-            if (!bundleName) throw new RuntimeException("No bundle name")
-            return "${bundlesSuffix()}/$bundleName"
+        String buildSuffix() {
+            if (!buildName) throw new RuntimeException("No build name")
+            return "${buildsSuffix()}/$buildName"
         }
 
-        String bundleConfigsSuffix() {
-            return "${bundleSuffix()}/configs"
+        String buildConfigsSuffix() {
+            return "${buildSuffix()}/configs"
         }
 
-        String bundleConfigSuffix() {
+        String buildConfigSuffix() {
             if (!config) throw new RuntimeException("No config")
-            return "${bundleConfigsSuffix()}/${config}"
+            return "${buildConfigsSuffix()}/${config}"
         }
 
         String outputSuffix() {
             if (!extra) throw new RuntimeException("No output")
-            return "${bundleConfigSuffix()}/outputs/${extra}"
+            return "${buildConfigSuffix()}/outputs/${extra}"
         }
 
         String rulesSuffix() {
-            return "${bundleConfigSuffix()}/rules" + (extra ? "?originType=${extra}" : "")
+            return "${buildConfigSuffix()}/rules" + (extra ? "?originType=${extra}" : "")
         }
 
         String samplesSuffix() {
