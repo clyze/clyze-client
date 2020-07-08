@@ -137,6 +137,10 @@ class LowLevelAPI {
             return put
         }
 
+        static final HttpDelete deleteProject(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).deleteProjectEndpoint()
+        }
+
         static final HttpPost createSampleProject(String userToken, String owner, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner).createSampleProjectEndpoint()
             List<NameValuePair> params = new ArrayList<>(0)
@@ -180,6 +184,10 @@ class LowLevelAPI {
 
         static final HttpPost createBuildFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).createBuildFromSampleEndpoint(sampleName)
+        }
+
+        static final HttpDelete deleteBuild(String userToken, String owner, String projectName, String buildName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, buildName).deleteBuildEndpoint()
         }
 
         static final HttpGet listConfigurations(String userToken, String owner, String projectName, String buildName, String host, int port) {
@@ -296,6 +304,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectsSuffix()))) as HttpPost
         }
 
+        HttpDelete deleteProjectEndpoint() {
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, projectSuffix()))) as HttpDelete
+        }
+
         HttpPost createSampleProjectEndpoint() {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, userSuffix() + "/phonograph"))) as HttpPost
         }
@@ -322,6 +334,10 @@ class LowLevelAPI {
 
         HttpPost postBuildEndpoint(String profile) {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildsSuffix() + "?profile=${profile}"))) as HttpPost
+        }
+
+        HttpDelete deleteBuildEndpoint() {
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, buildSuffix()))) as HttpDelete
         }
 
         HttpGet listSamplesEndpoint() {

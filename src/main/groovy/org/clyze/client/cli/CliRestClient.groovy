@@ -19,6 +19,7 @@ import org.apache.http.HttpEntity
  *     <li>ping              - check connection with server
  *     <li>list_projects     - list the available projects
  *     <li>get_project       - get a project
+ *     <li>delete_project    - delete a project
  *     <li>create_sample_project-create a project based on a sample
  *     <li>analyze           - run an analysis
  *     <li>runtime           - check the runtime status of an analysis
@@ -30,6 +31,7 @@ import org.apache.http.HttpEntity
  *     <li>list_builds       - list the available builds
  *     <li>get_build         - get a build
  *     <li>post_build        - create a new build
+ *     <li>delete_build      - delete a build
  *     <li>list_samples      - list the available sample builds
  *     <li>post_sample       - create a new build, based on a given sample
  *     <li>list              - list the available analyses
@@ -155,7 +157,7 @@ class CliRestClient {
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            String project = readProjectFromConsole()
+            String project = readProjectNameFromConsole()
             return LowLevelAPI.Builds.listBuilds(token, user, project, host, port)
         },
         onSuccess          : { HttpEntity entity ->
@@ -178,7 +180,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
+                String project = readProjectNameFromConsole()
                 return LowLevelAPI.Builds.listSamples(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -216,8 +218,25 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
+                String project = readProjectNameFromConsole()
                 return LowLevelAPI.Projects.getProject(token, user, project, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
+    private static final CliRestCommand DELETE_PROJECT = new CliRestCommand(
+            name               : 'delete_project',
+            description        : 'delete project stored in the remote server',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                return LowLevelAPI.Projects.deleteProject(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -232,8 +251,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 return LowLevelAPI.Builds.getBuild(token, user, project, build, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -260,7 +279,7 @@ class CliRestClient {
 
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            String project = readProjectFromConsole()
+            String project = readProjectNameFromConsole()
             String profile = readBuildProfileFromConsole()
             return LowLevelAPI.Builds.createBuild(token, user, project, profile, post.asMultipart(), host, port)
         },
@@ -270,6 +289,24 @@ class CliRestClient {
         }
     )
 
+    private static final CliRestCommand DELETE_BUILD = new CliRestCommand(
+            name               : 'delete_build',
+            description        : 'delete build stored in the remote server',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token   = getUserToken(true, host, port)
+                String user    = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build   = readBuildNameFromConsole()
+                return LowLevelAPI.Builds.deleteBuild(token, user, project, build, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand POST_SAMPLE = new CliRestCommand(
             name               : 'post_sample',
             description        : 'posts a new build to the remote server, based on a sample',
@@ -277,7 +314,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
+                String project = readProjectNameFromConsole()
                 final String DEFAULT_SAMPLE_NAME = 'apps-android-wikipedia'
                 String sampleName = System.console().readLine("Sample name (default: '${DEFAULT_SAMPLE_NAME}'): ")
                 if ('' == sampleName)
@@ -312,8 +349,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 return LowLevelAPI.Builds.listConfigurations(token, user, project, build, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -329,8 +366,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Builds.getConfiguration(token, user, project, build, config, host, port)
             },
@@ -347,8 +384,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 String origin = System.console().readLine("[Optional] Origin: ")
                 return LowLevelAPI.Builds.getRules(token, user, project, build, config, origin, host, port)
@@ -366,8 +403,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Builds.exportConfiguration(token, user, project, build, config, host, port)
             },
@@ -387,8 +424,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 String profile = readAnalysisProfileFromConsole()
                 return LowLevelAPI.Builds.analyze(token, user, project, build, config, profile, host, port)
@@ -406,8 +443,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Builds.getRuntime(token, user, project, build, config, host, port)
             },
@@ -424,8 +461,8 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectFromConsole()
-                String build = System.console().readLine("Build: ")
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 String output = System.console().readLine("Output: ")
                 return LowLevelAPI.Builds.getOutput(token, user, project, build, config, output, host, port)
@@ -435,10 +472,14 @@ class CliRestClient {
             }
     )
 
-    private static String readProjectFromConsole() {
+    private static String readProjectNameFromConsole() {
         final String DEFAULT_PROJECT = 'samples'
         String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
         return ('' == project) ? DEFAULT_PROJECT : project
+    }
+
+    private static String readBuildNameFromConsole() {
+        return System.console().readLine("Build: ")
     }
 
     private static String readBuildProfileFromConsole() {
@@ -464,9 +505,9 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUILDS, LIST_SAMPLES, GET_PROJECT, GET_BUILD, POST_BUILD, ANALYZE,
+        PING, LOGIN, LIST_PROJECTS, LIST_BUILDS, LIST_SAMPLES, GET_PROJECT, GET_BUILD, POST_BUILD, DELETE_BUILD, ANALYZE,
         POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, GET_RULES, LIST_CONFIGURATIONS, RUNTIME,
-        CREATE_SAMPLE_PROJECT
+        CREATE_SAMPLE_PROJECT, DELETE_PROJECT
     ].collectEntries {
         [(it.name):it]
     }

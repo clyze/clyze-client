@@ -133,6 +133,14 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> deleteBuild(String owner, String projectName, String buildName) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&deleteBuild.curry(token, owner, projectName, buildName),
+				onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+	@SuppressWarnings('unused')
 	Map<String, Object> listConfigurations(String owner, String projectName, String buildName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
@@ -299,6 +307,15 @@ class Remote {
 			requestBuilder: LowLevelAPI.Projects.&getProject.curry(token, owner, name),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
+	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> deleteProject(String owner, String projectName) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Projects.&deleteProject.curry(token, owner, projectName),
+				onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')
