@@ -38,7 +38,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def ping() throws HttpHostConnectException {
+	Map<String, Object> ping() throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&ping,
@@ -55,7 +55,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def cleanDeploy() {
+	Map<String, Object> cleanDeploy() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&cleanDeploy,
@@ -64,7 +64,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def login(String username, String password) throws HttpHostConnectException {
+	Map<String, Object> login(String username, String password) throws HttpHostConnectException {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
@@ -88,7 +88,7 @@ class Remote {
 //	}
 
 	@SuppressWarnings('unused')
-	def listBuilds(String owner, String projectName)  {
+	Map<String, Object> listBuilds(String owner, String projectName)  {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Builds.&listBuilds.curry(token, owner, projectName),
@@ -97,7 +97,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def createBuild(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
+	Map<String, Object> createBuild(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Builds.&createBuild.curry(token, owner, projectName, profile, ps.asMultipart()),
@@ -106,7 +106,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def listSamples(String owner, String projectName)  {
+	Map<String, Object> listSamples(String owner, String projectName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Builds.&listSamples.curry(token, owner, projectName),
@@ -115,7 +115,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def createBuildFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
+	Map<String, Object> createBuildFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Builds.&createBuildFromSample.curry(token, owner, projectName, sampleName),
@@ -124,7 +124,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def getBuild(String owner, String projectName, String buildName) {
+	Map<String, Object> getBuild(String owner, String projectName, String buildName) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Builds.&getBuild.curry(token, owner, projectName, buildName),
@@ -133,7 +133,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def listConfigurations(String owner, String projectName, String buildName)  {
+	Map<String, Object> listConfigurations(String owner, String projectName, String buildName)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Builds.&listConfigurations.curry(token, owner, projectName, buildName),
@@ -142,7 +142,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def getConfiguration(String owner, String projectName, String buildName, String config) {
+	Map<String, Object> getConfiguration(String owner, String projectName, String buildName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Builds.&getConfiguration.curry(token, owner, projectName, buildName, config),
@@ -160,7 +160,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def analyze(String owner, String projectName, String buildName, String config, String profile)  {
+	Map<String, Object> analyze(String owner, String projectName, String buildName, String config, String profile)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
 				requestBuilder: LowLevelAPI.Builds.&analyze.curry(token, owner, projectName, buildName, config, profile),
@@ -240,7 +240,7 @@ class Remote {
 		state
 	}
 
-	def getSymbolAt(String buildId, String analysisId, String file, int line, int col) {
+	Map<String, Object> getSymbolAt(String buildId, String analysisId, String file, int line, int col) {
 		String fileEncoded = URLEncoder.encode(file, "UTF-8")		
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -250,7 +250,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def listUsers() throws ClientProtocolException {
+	Map<String, Object> listUsers() throws ClientProtocolException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&getUsers.curry(token),
@@ -258,7 +258,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def createUser(String username, String password) {
+	Map<String, Object> createUser(String username, String password) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&createUser.curry(token, username, password),
@@ -266,7 +266,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
-	def deleteUser(String username) {
+	Map<String, Object> deleteUser(String username) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&deleteUser.curry(token, username),
@@ -275,7 +275,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def listProjects() {
+	Map<String, Object> listProjects() {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Projects.&getProjects.curry(token, currentUser()),
@@ -310,7 +310,7 @@ class Remote {
 		).execute(host, port)
 	}
 
-	def updateProject(String owner, String name, List<String> newMembers) {
+	Map<String, Object> updateProject(String owner, String name, List<String> newMembers) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Projects.&updateProject.curry(token, owner, name, newMembers),
