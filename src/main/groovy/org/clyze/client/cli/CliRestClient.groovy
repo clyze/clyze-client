@@ -15,25 +15,29 @@ import org.apache.http.HttpEntity
  *
  * The client can execute the following commands via the remote server:
  * <ul>
- *     <li>login             - authenticate user
- *     <li>ping              - check connection with server
  *     <li>list_projects     - list the available projects
+ *     <li>create_project    - create a project
+ *     <li>create_sample_project-create a project based on a sample
  *     <li>get_project       - get a project
  *     <li>delete_project    - delete a project
- *     <li>create_sample_project-create a project based on a sample
- *     <li>analyze           - run an analysis
- *     <li>runtime           - check the runtime status of an analysis
- *     <li>get_config        - get a configuration
- *     <li>get_rules         - get configuration rules
- *     <li>export_config     - export a configuration
- *     <li>get_output        - get an analysis output
- *     <li>list_configurations - list the available configurations
+ *
  *     <li>list_builds       - list the available builds
  *     <li>get_build         - get a build
  *     <li>post_build        - create a new build
  *     <li>delete_build      - delete a build
  *     <li>list_samples      - list the available sample builds
- *     <li>post_sample       - create a new build, based on a given sample
+ *     <li>post_sample_build - create a new build, based on a given sample
+ *
+ *     <li>get_config        - get a configuration
+ *     <li>get_rules         - get configuration rules
+ *     <li>export_config     - export a configuration
+ *     <li>get_output        - get an analysis output
+ *     <li>list_configurations - list the available configurations
+ *
+ *     <li>login             - authenticate user
+ *     <li>ping              - check connection with server
+ *     <li>analyze           - run an analysis
+ *     <li>runtime           - check the runtime status of an analysis
  *     <li>list              - list the available analyses
  *     <li>post_doop         - create a new doop analysis
  *     <li>post_cclyzer      - create a new cclyzer analysis
@@ -210,6 +214,24 @@ class CliRestClient {
         }
     )
 
+    private static final CliRestCommand CREATE_PROJECT = new CliRestCommand(
+            name               : 'create_project',
+            description        : 'create an empty project in the remote server',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token    = getUserToken(true, host, port)
+                String user     = getUserName(false, host, port)
+                String project  = readProjectNameFromConsole()
+                String platform = readPlatformFromConsole()
+                return LowLevelAPI.Projects.createProject(token, user, project, platform, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand GET_PROJECT = new CliRestCommand(
             name               : 'get_project',
             description        : 'get project stored in the remote server',
@@ -307,8 +329,8 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand POST_SAMPLE = new CliRestCommand(
-            name               : 'post_sample',
+    private static final CliRestCommand POST_SAMPLE_BUILD = new CliRestCommand(
+            name               : 'post_sample_build',
             description        : 'posts a new build to the remote server, based on a sample',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
@@ -482,6 +504,12 @@ class CliRestClient {
         return System.console().readLine("Build: ")
     }
 
+    private static String readPlatformFromConsole() {
+        final String DEFAULT_PLATFORM = 'ANDROID'
+        String platform = System.console().readLine("Project (default: '${DEFAULT_PLATFORM})': ")
+        return ('' == platform) ? DEFAULT_PLATFORM : platform
+    }
+
     private static String readBuildProfileFromConsole() {
         final String DEFAULT_PROFILE = 'proAndroid'
         String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
@@ -504,10 +532,15 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
+        // Projects
+        LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT,
+        // Builds
+        LIST_BUILDS, LIST_SAMPLES, POST_BUILD, POST_SAMPLE_BUILD, GET_BUILD, DELETE_BUILD,
+        // Configurations
+        LIST_CONFIGURATIONS, GET_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES,
+        // Misc.
+        PING, LOGIN, ANALYZE, GET_OUTPUT, RUNTIME
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
-        PING, LOGIN, LIST_PROJECTS, LIST_BUILDS, LIST_SAMPLES, GET_PROJECT, GET_BUILD, POST_BUILD, DELETE_BUILD, ANALYZE,
-        POST_SAMPLE, EXPORT_CONFIGURATION, GET_CONFIGURATION, GET_OUTPUT, GET_RULES, LIST_CONFIGURATIONS, RUNTIME,
-        CREATE_SAMPLE_PROJECT, DELETE_PROJECT
     ].collectEntries {
         [(it.name):it]
     }

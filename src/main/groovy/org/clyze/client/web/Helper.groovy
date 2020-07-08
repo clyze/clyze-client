@@ -181,7 +181,7 @@ class Helper {
             proj = remote.getProject(remote.currentUser(), projectName)
         } catch (Exception ex1) {
             try {
-                proj = remote.createProject(projectName, platform)
+                proj = remote.createProject(remote.currentUser(), projectName, platform)
                 println "Project '${projectName}' created."
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
