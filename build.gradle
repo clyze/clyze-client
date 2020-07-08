@@ -22,14 +22,18 @@ wrapper {
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "${artifactory_contextUrl}/plast-public" }
-    maven {
-        credentials {
-            username artifactory_user
-            password artifactory_password
-        }
+    maven { url 'https://dl.bintray.com/gfour/plast-lab' }
+    // Experimental repositories for custom dependencies.
+    if (project.hasProperty('artifactory_contextUrl')) {
+        maven { url "${artifactory_contextUrl}/plast-public" }
+        maven {
+            credentials {
+                username artifactory_user
+                password artifactory_password
+            }
 
-        url "${artifactory_contextUrl}/plast-private"
+            url "${artifactory_contextUrl}/plast-private"
+        }
     }
 }
 
@@ -39,8 +43,8 @@ configurations.all {
 
 def groovyVersion='2.5.10'
 dependencies {    
-    api 'org.clyze:clue-common:3.21.2'
-    api 'org.clyze:metadata-model:1.0.1'
+    api 'org.clyze:clue-common:3.22.3'
+    api 'org.clyze:metadata-model:1.0.2'
     api "org.codehaus.groovy:groovy:${groovyVersion}"
     api "org.codehaus.groovy:groovy-json:${groovyVersion}"
     api "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"

@@ -38,7 +38,7 @@ class SourceProcessor {
             if (it.name.endsWith(".java")) {
                 sourceFiles << it.canonicalPath
                 if (convertUTF8) {
-                    JHelper.ensureUTF8(it.canonicalPath)
+                    JHelper.ensureUTF8(it.canonicalPath, false)
                 }
                 def lines = (new File(it.canonicalPath)).readLines()
                 for (String l : lines) {
