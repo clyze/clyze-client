@@ -203,6 +203,7 @@ class Remote {
 		).execute(host, port)
 	}
 
+	@SuppressWarnings('unused')
 	String createAnalysis(String buildId, String analysis) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -219,6 +220,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	boolean executeAnalysisAction(String buildId, String analysisId, String action) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
@@ -240,6 +242,7 @@ class Remote {
 		).execute(host, port)		
 	}
 
+	@SuppressWarnings('unused')
 	String waitForAnalysisStatus(Set<String> statusSet, String buildId, String analysisId, int minutes) {
 
 		long millis = minutes * 60 * 1000
@@ -266,6 +269,7 @@ class Remote {
 		state
 	}
 
+	@SuppressWarnings('unused')
 	Map<String, Object> getSymbolAt(String buildId, String analysisId, String file, int line, int col) {
 		String fileEncoded = URLEncoder.encode(file, "UTF-8")		
 		new HttpClientCommand(
