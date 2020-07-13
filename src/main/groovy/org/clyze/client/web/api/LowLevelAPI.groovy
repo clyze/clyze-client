@@ -206,6 +206,27 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config).cloneConfigurationEndpoint()
         }
 
+        static final HttpPut updateConfiguration(String userToken, String owner, String projectName, String buildName,
+                                                 String config, List<Tuple2<String, Object>> settings, String host, int port) {
+            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config).updateConfigurationEndpoint()
+            List<NameValuePair> params = new ArrayList<>()
+            settings?.each {
+                def value = it.second
+                String value1
+                if (value instanceof Boolean)
+                    value1 = value ? "on" : "off"
+                else if (value instanceof String)
+                    value1 = value
+                else {
+                    value1 = value.toString()
+                    println "Unhandled form data element: ${value1} of type ${value.class}"
+                }
+                params.add(new BasicNameValuePair(it.first, value1))
+            }
+            put.setEntity(new UrlEncodedFormEntity(params))
+            return put
+        }
+
         static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config, originType).getRulesEndpoint()
         }
@@ -358,6 +379,10 @@ class LowLevelAPI {
 
         HttpDelete deleteConfigurationEndpoint() {
             withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpDelete
+        }
+
+        HttpPut updateConfigurationEndpoint() {
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpPut
         }
 
         HttpPost cloneConfigurationEndpoint() {

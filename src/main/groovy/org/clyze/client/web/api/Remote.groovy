@@ -168,6 +168,16 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> updateConfiguration(String owner, String projectName, String buildName, String config,
+											List<Tuple2<String, Object>> settings) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&updateConfiguration.curry(token, owner, projectName, buildName, config, settings),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> deleteConfiguration(String owner, String projectName, String buildName, String config) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
