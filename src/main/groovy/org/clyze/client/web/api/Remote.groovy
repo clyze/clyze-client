@@ -1,6 +1,6 @@
 package org.clyze.client.web.api
 
-//import groovy.transform.CompileStatic
+import groovy.transform.CompileStatic
 import org.clyze.client.web.PostState
 import org.clyze.client.web.http.*
 import org.apache.http.HttpEntity
@@ -8,7 +8,7 @@ import org.apache.http.client.ClientProtocolException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.impl.client.CloseableHttpClient
 
-//@CompileStatic
+@CompileStatic
 class Remote {
 
 	private final String host
@@ -69,9 +69,9 @@ class Remote {
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
 			onSuccess: { HttpEntity entity ->
-				def data = LowLevelAPI.Responses.parseJson(entity)
-				this.token    = data.token
-				this.username = data.username
+				Map<String, Object> data = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
+				this.token    = data.get('token')
+				this.username = data.get('username')
 				return data
 			}
 		).execute(host, port)		
@@ -234,8 +234,8 @@ class Remote {
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Requests.&getAnalysisStatus.curry(token, buildId, analysisId),
 			onSuccess : { HttpEntity entity ->
-				def json = LowLevelAPI.Responses.parseJson(entity)
-				return json.analysis.state
+				Map<String, Object> json = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
+				return (json.get('analysis') as Map<String, Object>).get('state')
 			}
 		).execute(host, port)		
 	}
