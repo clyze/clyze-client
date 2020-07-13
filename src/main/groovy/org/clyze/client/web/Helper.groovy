@@ -170,7 +170,8 @@ class Helper {
      * @param projectName   the project name
      * @param platform      the project platform
      */
-    static void ensureProjectExists(Remote remote, String projectName, String platform) {
+    static void ensureProjectExists(Remote remote, String projectName,
+                                    String platform, boolean debug) {
         if (!projectName)
             throw new RuntimeException("Missing project name")
         else if (!platform)
@@ -180,6 +181,8 @@ class Helper {
         try {
             proj = remote.getProject(remote.currentUser(), projectName)
         } catch (Exception ex1) {
+            if (debug)
+                ex1.printStackTrace()
             try {
                 proj = remote.createProject(remote.currentUser(), projectName, platform)
                 println "Project '${projectName}' created."
@@ -212,7 +215,7 @@ class Helper {
                                     AttachmentHandler<String> handler)
     throws ClientProtocolException {
         Remote remote = connect(host, port, username, password)
-        ensureProjectExists(remote, projectName, platform)
+        ensureProjectExists(remote, projectName, platform, false)
         remote.repackageBuildForCI(username, projectName, ps, handler)
     }
 
@@ -233,7 +236,7 @@ class Helper {
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
-        ensureProjectExists(remote, projectName, platform)
+        ensureProjectExists(remote, projectName, platform, false)
 
         println "Submitting build in project '${projectName}'..."
         String buildId = remote.createBuild(username, projectName, profile, buildPostState)
