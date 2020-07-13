@@ -1,6 +1,6 @@
 package org.clyze.client
 
-import groovy.transform.TypeChecked
+import groovy.transform.CompileStatic
 import static groovy.io.FileType.FILES
 import org.clyze.utils.JHelper
 
@@ -11,7 +11,7 @@ import org.clyze.utils.JHelper
  * conversion addresses the issue of feeding sources with different
  * encodings to the jcPlugin.
  */
-@TypeChecked
+@CompileStatic
 class SourceProcessor {
 
     /**
