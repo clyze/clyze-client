@@ -168,6 +168,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> pasteConfigurationRules(String owner, String projectName, String buildName, String config, String fromConfig) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&pasteConfigurationRules.curry(token, owner, projectName, buildName, config, fromConfig),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> updateConfiguration(String owner, String projectName, String buildName, String config,
 											List<Tuple2<String, Object>> settings) {
 		new HttpClientCommand(

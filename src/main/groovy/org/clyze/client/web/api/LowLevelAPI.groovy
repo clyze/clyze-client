@@ -206,6 +206,15 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config).cloneConfigurationEndpoint()
         }
 
+        static final HttpPost pasteConfigurationRules(String userToken, String owner, String projectName, String buildName,
+                                                      String config, String fromConfig, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, buildName, config).pasteConfigurationRulesEndpoint()
+            List<NameValuePair> params = new ArrayList<>()
+            params.add(new BasicNameValuePair('name', fromConfig))
+            post.setEntity(new UrlEncodedFormEntity(params))
+            return post
+        }
+
         static final HttpPut updateConfiguration(String userToken, String owner, String projectName, String buildName,
                                                  String config, List<Tuple2<String, Object>> settings, String host, int port) {
             HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config).updateConfigurationEndpoint()
@@ -387,6 +396,10 @@ class LowLevelAPI {
 
         HttpPost cloneConfigurationEndpoint() {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + '/clone'))) as HttpPost
+        }
+
+        HttpPost pasteConfigurationRulesEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + '/pasteRules'))) as HttpPost
         }
 
         HttpGet getRulesEndpoint() {

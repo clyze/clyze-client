@@ -33,6 +33,7 @@ import org.apache.http.HttpEntity
  *     <li>delete_config     - delete a configuration
  *     <li>clone_config      - clone a configuration
  *     <li>get_rules         - get configuration rules
+ *     <li>paste_rules       - paste configuration rules
  *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
  *
@@ -419,6 +420,25 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand PASTE_CONFIGURATION_RULES = new CliRestCommand(
+            name               : 'paste_rules',
+            description        : 'pastes rules from a build configuration to another configuration',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                String fromConfig = readConfigFromConsole('config2.json')
+                return LowLevelAPI.Builds.pasteConfigurationRules(token, user, project, build, config, fromConfig, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand DELETE_CONFIGURATION = new CliRestCommand(
             name               : 'delete_config',
             description        : 'delete a build configuration',
@@ -560,10 +580,9 @@ class CliRestClient {
         return ((profile == null) || (profile == "")) ? DEFAULT_ANALYSIS_PROFILE : profile
     }
 
-    private static String readConfigFromConsole() {
-        final String DEFAULT_CONFIG = 'clyze.json'
-        String config = System.console().readLine("Configuration (default: '${DEFAULT_CONFIG})': ")
-        return ('' == config) ? DEFAULT_CONFIG : config
+    private static String readConfigFromConsole(String defaultConfig = 'clyze.json') {
+        String config = System.console().readLine("Configuration (default: '${defaultConfig})': ")
+        return ('' == config) ? defaultConfig : config
     }
 
     /**
@@ -575,7 +594,7 @@ class CliRestClient {
         // Builds
         LIST_BUILDS, LIST_SAMPLES, POST_BUILD, POST_SAMPLE_BUILD, GET_BUILD, DELETE_BUILD,
         // Configurations
-        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES,
+        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, PASTE_CONFIGURATION_RULES,
         // Misc.
         PING, LOGIN, ANALYZE, GET_OUTPUT, RUNTIME
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
