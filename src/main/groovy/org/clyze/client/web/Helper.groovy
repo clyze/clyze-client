@@ -180,6 +180,9 @@ class Helper {
         Map<String, Object> proj = null
         try {
             proj = remote.getProject(remote.currentUser(), projectName)
+            String projPlatform = proj.get('platform')
+            if (projPlatform != platform)
+                throw new RuntimeException("Project ${projectName} already exists but has platform '${projPlatform}', not '${platform}'.")
         } catch (Exception ex1) {
             if (debug)
                 ex1.printStackTrace()
