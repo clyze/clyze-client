@@ -236,6 +236,15 @@ class LowLevelAPI {
             return put
         }
 
+        static final HttpPut renameConfiguration(String userToken, String owner, String projectName, String buildName,
+                                                 String config, String newName, String host, int port) {
+            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config).renameConfigurationEndpoint()
+            List<NameValuePair> params = new ArrayList<>(1)
+            params.add(new BasicNameValuePair('name', newName))
+            put.setEntity(new UrlEncodedFormEntity(params))
+            return put
+        }
+
         static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config, originType).getRulesEndpoint()
         }
@@ -392,6 +401,10 @@ class LowLevelAPI {
 
         HttpPut updateConfigurationEndpoint() {
             withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpPut
+        }
+
+        HttpPut renameConfigurationEndpoint() {
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, buildConfigSuffix() + '/name'))) as HttpPut
         }
 
         HttpPost cloneConfigurationEndpoint() {
