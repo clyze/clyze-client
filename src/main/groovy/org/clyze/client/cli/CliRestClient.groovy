@@ -487,8 +487,8 @@ class CliRestClient {
                 String project = readProjectNameFromConsole()
                 String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
-                String origin = System.console().readLine("[Optional] Origin: ")
-                return LowLevelAPI.Builds.getRules(token, user, project, build, config, origin, host, port)
+                String originType = System.console().readLine("[Optional] Origin type: ")
+                return LowLevelAPI.Builds.getRules(token, user, project, build, config, originType, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)

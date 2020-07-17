@@ -177,6 +177,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> getRules(String owner, String projectName, String buildName, String config, String originType) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&getRules.curry(token, owner, projectName, buildName, config, originType),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> pasteConfigurationRules(String owner, String projectName, String buildName, String config, String fromConfig) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
