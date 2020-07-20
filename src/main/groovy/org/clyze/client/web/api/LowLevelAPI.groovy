@@ -10,6 +10,7 @@ import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 
 import groovy.transform.CompileStatic
+import org.clyze.client.web.HttpDeleteWithBody
 
 @CompileStatic
 class LowLevelAPI {
@@ -250,6 +251,14 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).getRulesEndpoint()
         }
 
+        static final HttpDeleteWithBody deleteRules(String userToken, String owner, String projectName, String buildName, String config, Collection<String> ids, String host, int port) {
+            HttpDeleteWithBody delete = new Endpoints(host, port, userToken, owner, projectName, buildName, config).deleteRulesEndpoint()
+            List<NameValuePair> params = new LinkedList<>()
+            ids.forEach { String id -> params.add(new BasicNameValuePair('ids', id)) }
+            delete.setEntity(new UrlEncodedFormEntity(params))
+            return delete
+        }
+
         static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config).exportConfigurationEndpoint()
         }
@@ -420,6 +429,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpGet
         }
 
+        HttpDeleteWithBody deleteRulesEndpoint() {
+            withTokenHeader(new HttpDeleteWithBody(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpDeleteWithBody
+        }
+
         HttpGet exportConfigurationEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix() + '/export'))) as HttpGet
         }
@@ -493,18 +506,21 @@ class LowLevelAPI {
 
         String rulesSuffix() {
             // Unpack additional parameters.
-            List<String> q = new LinkedList<>()
-            String originType = extraParams.get(0) as String
-            if (originType != null)
-                q.add('originType=' + originType)
-            Integer start = extraParams.get(1) as Integer
-            if (start != null)
-                q.add('_start=' + start)
-            Integer count = extraParams.get(2) as Integer
-            if (count != null)
-                q.add('_count=' + count)
+            String query = ''
+            if (extraParams && extraParams.size() > 0) {
+                List<String> q = new LinkedList<>()
+                String originType = extraParams.get(0) as String
+                if (originType != null)
+                    q.add('originType=' + originType)
+                Integer start = extraParams.get(1) as Integer
+                if (start != null)
+                    q.add('_start=' + start)
+                Integer count = extraParams.get(2) as Integer
+                if (count != null)
+                    q.add('_count=' + count)
 
-            String query = q.size() == 0 ? '' : '?' + q.join('&')
+                query = q.size() == 0 ? '' : '?' + q.join('&')
+            }
             return "${buildConfigSuffix()}/rules" + query
         }
 

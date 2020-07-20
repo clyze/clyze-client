@@ -34,6 +34,7 @@ import org.apache.http.HttpEntity
  *     <li>clone_config      - clone a configuration
  *     <li>rename_config     - rename a configuration
  *     <li>get_rules         - get configuration rules
+ *     <li>delete_rules      - delete configuration rules
  *     <li>paste_rules       - paste configuration rules
  *     <li>export_config     - export a configuration
  *     <li>get_output        - get an analysis output
@@ -477,6 +478,26 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand DELETE_RULES = new CliRestCommand(
+            name               : 'delete_rules',
+            description        : 'delete configuration rules',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                String idsLine = System.console().readLine('Rule IDs, separated by comma: ')
+                List<String> ids = idsLine.tokenize(',')
+                return LowLevelAPI.Builds.deleteRules(token, user, project, build, config, ids, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand GET_RULES = new CliRestCommand(
             name               : 'get_rules',
             description        : 'get configuration rules',
@@ -660,7 +681,7 @@ class CliRestClient {
         // Builds
         LIST_BUILDS, LIST_SAMPLES, POST_BUILD, POST_SAMPLE_BUILD, GET_BUILD, DELETE_BUILD,
         // Configurations
-        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, PASTE_CONFIGURATION_RULES,
+        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, DELETE_RULES, PASTE_CONFIGURATION_RULES,
         // Misc.
         PING, LOGIN, ANALYZE, GET_OUTPUT, RUNTIME
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
