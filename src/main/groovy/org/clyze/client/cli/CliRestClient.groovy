@@ -488,7 +488,13 @@ class CliRestClient {
                 String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 String originType = System.console().readLine("[Optional] Origin type: ")
-                return LowLevelAPI.Builds.getRules(token, user, project, build, config, originType, host, port)
+                if (originType == '')
+                    originType = null
+                String start = System.console().readLine("[Optional] Pagination/start: ")
+                Integer _start = start == '' ? null : Integer.valueOf(start)
+                String count = System.console().readLine("[Optional] Pagination/count: ")
+                Integer _count = count == '' ? null : Integer.valueOf(count)
+                return LowLevelAPI.Builds.getRules(token, user, project, build, config, originType, _start, _count, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)

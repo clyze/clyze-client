@@ -245,8 +245,9 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, originType).getRulesEndpoint()
+        static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, Integer start, Integer count, String host, int port) {
+            List<Object> extraParams = [originType, start, count] as List<Object>
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).getRulesEndpoint()
         }
 
         static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
@@ -258,7 +259,7 @@ class LowLevelAPI {
         }
 
         static final HttpGet getOutput(String userToken, String owner, String projectName, String buildName, String config, String output, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, output).getOutputEndpoint()
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, [output] as List<Object>).getOutputEndpoint()
         }
 
         static final HttpPost analyze(String userToken, String owner, String projectName, String buildName, String config, String profile, String host, int port) {
@@ -300,11 +301,11 @@ class LowLevelAPI {
         String projectName
         String buildName
         String config
-        String extra
+        List<Object> extraParams
 
         Endpoints(String host, int port, String userToken=null, String username=null,
                   String projectName=null, String buildName=null, String config=null,
-                  String extra=null) {
+                  List<Object> extraParams=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
@@ -312,7 +313,7 @@ class LowLevelAPI {
             this.projectName = projectName
             this.buildName   = buildName
             this.config      = config
-            this.extra       = extra
+            this.extraParams = extraParams
         }
 
         HttpGet pingEndpoint() {
@@ -485,12 +486,26 @@ class LowLevelAPI {
         }
 
         String outputSuffix() {
-            if (!extra) throw new RuntimeException("No output")
-            return "${buildConfigSuffix()}/outputs/${extra}"
+            String output = extraParams.get(0) as String
+            if (!output) throw new RuntimeException("No output")
+            return "${buildConfigSuffix()}/outputs/${output}"
         }
 
         String rulesSuffix() {
-            return "${buildConfigSuffix()}/rules" + (extra ? "?originType=${extra}" : "")
+            // Unpack additional parameters.
+            List<String> q = new LinkedList<>()
+            String originType = extraParams.get(0) as String
+            if (originType != null)
+                q.add('originType=' + originType)
+            Integer start = extraParams.get(1) as Integer
+            if (start != null)
+                q.add('_start=' + start)
+            Integer count = extraParams.get(2) as Integer
+            if (count != null)
+                q.add('_count=' + count)
+
+            String query = q.size() == 0 ? '' : '?' + q.join('&')
+            return "${buildConfigSuffix()}/rules" + query
         }
 
         String samplesSuffix() {
