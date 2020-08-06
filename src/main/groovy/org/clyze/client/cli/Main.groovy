@@ -77,7 +77,12 @@ class Main {
                 }
                 List<Option> options = command.discoverOptions(remote.host, remote.port)
                 if (options) {
-                    options.each { Option option -> builder << option }
+                    options.each { Option option ->
+                        builder << option
+                        if (cli.d) {
+                            println "* Registering discovered option:\n${option}"
+                        }
+                    }
                     //reparse the args
                     cli = builder.parse(args)
                 }
@@ -117,6 +122,7 @@ class Main {
             r(longOpt: 'remote', "The remote server.", args:1, argName: "[hostname|ip]:[port]")
             c(longOpt: 'command', "The command to execute via the remote server. Available commands: \
                                   ${availableCommands}.", args:1, argName: "command")
+            d(longOpt: 'discover', "Show discovered options.")
             v(longOpt: 'version', 'Display version and exit.')
         }
 
