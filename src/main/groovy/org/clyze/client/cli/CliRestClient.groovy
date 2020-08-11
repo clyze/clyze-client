@@ -301,6 +301,7 @@ class CliRestClient {
 
             //options have been discovered here
             supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
+                println "Reading option: [${it}]"
                 post.addInputFromCliOption(it as Option, cliOptions as OptionAccessor)
             }            
 
