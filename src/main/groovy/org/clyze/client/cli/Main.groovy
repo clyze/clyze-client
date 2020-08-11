@@ -75,7 +75,7 @@ class Main {
                 if (!command) {
                     throw new RuntimeException("ERROR: 'command' not properly initialized in: ${cmd}")
                 }
-                List<Option> options = command.discoverOptions(remote.host, remote.port)
+                Set<Option> options = command.discoverOptions(remote.host, remote.port)
                 if (options) {
                     options.each { Option option ->
                         builder << option

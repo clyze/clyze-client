@@ -633,11 +633,10 @@ class CliRestClient {
         return ('' == config) ? defaultConfig : config
     }
 
-    private static List<Option> convertJsonEncodedOptionsToCliOptions(Object json) {
-        if (!json?.results) {
-            return []
-        }
-        List<Option> ret = new LinkedList<>()
+    private static Set<Option> convertJsonEncodedOptionsToCliOptions(Object json) {
+        if (!json?.results)
+            return new HashSet<>()
+        Set<Option> ret = new HashSet<>()
         json.results.each { result ->
             List<Option> opts = result.options.collect { option ->
                 String description = option.description
