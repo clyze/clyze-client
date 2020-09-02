@@ -1,12 +1,14 @@
-package org.clyze.client.cli
+package com.clyze.client.cli
 
+import com.clyze.client.web.PostState
+import com.clyze.client.web.api.LowLevelAPI
+import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 import groovy.cli.commons.OptionAccessor
 // import groovy.transform.TypeChecked
-import org.clyze.client.cli.CliAuthenticator.Selector
+import com.clyze.client.cli.CliAuthenticator.Selector
 import org.clyze.client.web.http.*
 import org.clyze.client.web.api.*
-import org.clyze.client.web.Helper as ClientHelper
-import org.clyze.client.web.PostState
+import com.clyze.client.web.Helper as ClientHelper
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
 

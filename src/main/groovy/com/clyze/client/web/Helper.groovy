@@ -1,5 +1,9 @@
-package org.clyze.client.web
+package com.clyze.client.web
 
+import com.clyze.client.web.api.AttachmentHandler
+import com.clyze.client.web.api.LowLevelAPI
+import com.clyze.client.web.api.Remote
+import com.clyze.client.web.http.HttpClientLifeCycle
 import groovy.transform.CompileStatic
 import java.awt.*
 import java.util.List
@@ -9,12 +13,8 @@ import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
-import org.clyze.client.Message
-import org.clyze.client.web.api.AttachmentHandler
-import org.clyze.client.web.api.LowLevelAPI
-import org.clyze.client.web.api.Remote
-import org.clyze.client.web.http.HttpClientCommand
-import org.clyze.client.web.http.HttpClientLifeCycle
+import com.clyze.client.Message
+import com.clyze.client.web.http.HttpClientCommand
 
 @CompileStatic
 class Helper {
@@ -87,7 +87,7 @@ class Helper {
 //        )
 //    }
 
-    static HttpClientCommand<Object> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {     
+    static HttpClientCommand<Object> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {
 
         new HttpClientCommand(
             httpClientLifeCycle: httpClientLifeCycle,

@@ -1,4 +1,4 @@
-package org.clyze.client.web.api
+package com.clyze.client.web.api
 
 import groovy.json.JsonSlurper
 import org.apache.http.HttpEntity
@@ -10,7 +10,7 @@ import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 
 import groovy.transform.CompileStatic
-import org.clyze.client.web.HttpDeleteWithBody
+import com.clyze.client.web.HttpDeleteWithBody
 
 @CompileStatic
 class LowLevelAPI {

@@ -1,4 +1,4 @@
-package org.clyze.client;
+package com.clyze.client;
 
 import java.util.List;
 

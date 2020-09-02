@@ -1,4 +1,4 @@
-package org.clyze.client.web;
+package com.clyze.client.web;
 
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import java.net.URI;

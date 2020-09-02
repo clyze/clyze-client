@@ -1,8 +1,11 @@
-package org.clyze.client.web.api
+package com.clyze.client.web.api
 
+import com.clyze.client.web.PostState
+import com.clyze.client.web.http.DefaultHttpClientLifeCycle
+import com.clyze.client.web.http.HttpClientCommand
+import com.clyze.client.web.http.HttpClientLifeCycle
+import com.clyze.client.web.http.SameInstanceHttpClientLifeCycle
 import groovy.transform.CompileStatic
-import org.clyze.client.web.PostState
-import org.clyze.client.web.http.*
 import org.apache.http.HttpEntity
 import org.apache.http.client.ClientProtocolException
 import org.apache.http.conn.HttpHostConnectException
@@ -13,7 +16,7 @@ class Remote {
 
 	private final String host
 	private final Integer port
-	private final HttpClientLifeCycle httpClientLifeCycle	
+	private final HttpClientLifeCycle httpClientLifeCycle
 	private String token    = null
 	private String username = null
 

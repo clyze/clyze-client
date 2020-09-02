@@ -1,4 +1,4 @@
-package org.clyze.client.web.http
+package com.clyze.client.web.http
 
 import org.apache.http.impl.client.CloseableHttpClient
 

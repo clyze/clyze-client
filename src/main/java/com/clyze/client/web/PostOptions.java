@@ -1,4 +1,4 @@
-package org.clyze.client.web;
+package com.clyze.client.web;
 
 /**
  * The options that drive the interaction with the server.

@@ -1,4 +1,4 @@
-package org.clyze.client.cli
+package com.clyze.client.cli
 
 import groovy.cli.commons.CliBuilder
 import groovy.cli.commons.OptionAccessor

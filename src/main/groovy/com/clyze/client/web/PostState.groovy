@@ -1,4 +1,4 @@
-package org.clyze.client.web
+package com.clyze.client.web
 
 import groovy.cli.commons.OptionAccessor
 import groovy.json.JsonOutput

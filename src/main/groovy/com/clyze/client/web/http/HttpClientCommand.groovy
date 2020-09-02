@@ -1,4 +1,4 @@
-package org.clyze.client.web.http
+package com.clyze.client.web.http
 
 //import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j

@@ -1,4 +1,4 @@
-package org.clyze.client.cli
+package com.clyze.client.cli
 
 import groovy.transform.CompileStatic
 import org.clyze.utils.FileOps

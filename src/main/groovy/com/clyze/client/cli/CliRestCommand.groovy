@@ -1,8 +1,8 @@
-package org.clyze.client.cli
+package com.clyze.client.cli
 
 import groovy.cli.commons.OptionAccessor
 import org.apache.commons.cli.Option
-import org.clyze.client.web.http.HttpClientCommand
+import com.clyze.client.web.http.HttpClientCommand
 
 /**
  * A CLI Rest Client command.

@@ -1,4 +1,4 @@
-package org.clyze.client.web.api
+package com.clyze.client.web.api
 
 import org.apache.http.HttpEntity
 
