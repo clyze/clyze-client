@@ -11,10 +11,10 @@ plugins {
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
-project.group = "org.clyze"
+project.group = "com.clyze"
 
 applicationName = project.name
-mainClassName = 'org.clyze.client.cli.Main'
+mainClassName = 'com.clyze.client.cli.Main'
 
 wrapper {
     gradleVersion = '6.2'
