@@ -42,6 +42,7 @@ import org.apache.http.HttpEntity
  *     <li>login             - authenticate user
  *     <li>ping              - check connection with server
  *     <li>analyze           - run an analysis
+ *     <li>repackage         - run automated repackaging
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>list              - list the available analyses
  *     <li>post_doop         - create a new doop analysis
@@ -296,15 +297,9 @@ class CliRestClient {
             def json = ClientHelper.createCommandForOptionsDiscovery("BUILD", new DefaultHttpClientLifeCycle()).execute(host, port)
             return convertJsonEncodedOptionsToCliOptions(json)
         },
-        requestBuilder     : { String host, int port ->            
-            PostState post = new PostState()
-
+        requestBuilder     : { String host, int port ->
             //options have been discovered here
-            supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
-                println "Reading option: [${it}]"
-                post.addInputFromCliOption(it as Option, cliOptions as OptionAccessor)
-            }            
-
+            PostState post = newPostStateFromOptions(supportedOptions, cliOptions)
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole()
@@ -315,6 +310,29 @@ class CliRestClient {
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
             return id
         }
+    )
+
+    private static final CliRestCommand REPACKAGE = new CliRestCommand(
+            name               : 'repackage',
+            description        : 'automated repackaging endpoint',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            optionsBuilder     : { String host, int port ->
+                def json = ClientHelper.createCommandForOptionsDiscovery("BUILD", new DefaultHttpClientLifeCycle()).execute(host, port)
+                return convertJsonEncodedOptionsToCliOptions(json)
+            },
+            requestBuilder     : { String host, int port ->
+                //options have been discovered here
+                PostState post = newPostStateFromOptions(supportedOptions, cliOptions)
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String profile = readBuildProfileFromConsole()
+                return LowLevelAPI.Projects.repackageBuildForCI(token, user, project, profile, post.asMultipart(), host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
+                return id
+            }
     )
 
     private static final CliRestCommand DELETE_BUILD = new CliRestCommand(
@@ -600,6 +618,15 @@ class CliRestClient {
             }
     )
 
+    private static final PostState newPostStateFromOptions(def supportedOptions, def cliOptions) {
+        PostState post = new PostState()
+        supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
+            println "Reading option: [${it}]"
+            post.addInputFromCliOption(it as Option, cliOptions as OptionAccessor)
+        }
+        return post
+    }
+
     private static String readProjectNameFromConsole() {
         final String DEFAULT_PROJECT = 'samples'
         String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
@@ -620,6 +647,10 @@ class CliRestClient {
         final String DEFAULT_PROFILE = 'proAndroid'
         String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
         return ((profile == null) || (profile == "")) ? DEFAULT_PROFILE : profile
+    }
+
+    private static String readInputAppFromConsole() {
+        return System.console().readLine("App input path: ")
     }
 
     private static String readAnalysisProfileFromConsole() {
@@ -683,7 +714,7 @@ class CliRestClient {
         // Configurations
         LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, DELETE_RULES, PASTE_CONFIGURATION_RULES,
         // Misc.
-        PING, LOGIN, ANALYZE, GET_OUTPUT, RUNTIME
+        PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
     ].collectEntries {
         [(it.name):it]
