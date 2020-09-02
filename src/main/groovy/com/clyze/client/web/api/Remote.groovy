@@ -100,7 +100,8 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> createBuild(String owner, String projectName, String profile, PostState ps) throws HttpHostConnectException {
+	Map<String, Object> createBuild(String owner, String projectName, String profile, PostState ps)
+			throws ClientProtocolException, HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Builds.&createBuild.curry(token, owner, projectName, profile, ps.asMultipart()),
