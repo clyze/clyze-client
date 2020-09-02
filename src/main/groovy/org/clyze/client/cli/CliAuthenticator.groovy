@@ -10,10 +10,13 @@ class CliAuthenticator {
     private static String username
     private static String token
 
+    static File getDataFile() {
+        return new File(System.getProperty('user.home'), '.clyze-client')
+    }
+
     //TODO: Unsafe, yet convenient for the time being
     static void init(){
-        String userHome = System.getProperty("user.home")
-        String fileName = "${userHome}/.clue-client"
+        String fileName = getDataFile().canonicalPath
         try {
             File f = FileOps.findFileOrThrow(fileName, "File invalid: $fileName")
             def data = f.text.trim().split('\n')
@@ -39,9 +42,8 @@ class CliAuthenticator {
         CliAuthenticator.username = username
         CliAuthenticator.token = token
         try {
-            String userHome = System.getProperty("user.home")
             String data = username + '\n' + token
-            FileOps.writeToFile(new File("${userHome}/.clue-client"), data)
+            FileOps.writeToFile(getDataFile(), data)
         }
         catch(e) {
             Logger.getRootLogger().error(e.getMessage(), e)

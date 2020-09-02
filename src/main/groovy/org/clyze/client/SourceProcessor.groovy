@@ -6,7 +6,7 @@ import org.clyze.utils.JHelper
 
 /**
  * Analyzes the sources of a project and optionally converts them to
- * UTF-8. This class is to be used by tools using the clue-client as a
+ * UTF-8. This class is to be used by tools using the clyze-client as a
  * library (such as the Gradle plugin and the crawler). The UTF-8
  * conversion addresses the issue of feeding sources with different
  * encodings to the jcPlugin.
