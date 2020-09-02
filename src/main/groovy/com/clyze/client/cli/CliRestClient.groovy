@@ -6,8 +6,8 @@ import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 import groovy.cli.commons.OptionAccessor
 // import groovy.transform.TypeChecked
 import com.clyze.client.cli.CliAuthenticator.Selector
-import org.clyze.client.web.http.*
-import org.clyze.client.web.api.*
+import com.clyze.client.web.http.*
+import com.clyze.client.web.api.*
 import com.clyze.client.web.Helper as ClientHelper
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
