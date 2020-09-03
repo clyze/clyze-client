@@ -207,14 +207,13 @@ class Helper {
     }
 
     static void post(PostState ps, PostOptions options, List<Message> messages,
-                     String cachePostDir, File metadataDir, boolean debug = false) {
+                     File cachePostDir, File metadataDir, boolean debug = false) {
         // Optional: save state that will be uploaded.
         if (cachePostDir != null) {
             try {
-                File tmpDir = new File(cachePostDir)
-                tmpDir.mkdirs()
-                ps.saveTo(tmpDir)
-                Message.print(messages, "Saved post state in " + cachePostDir)
+                cachePostDir.mkdirs()
+                ps.saveTo(cachePostDir)
+                Message.print(messages, "Saved post state in " + cachePostDir.canonicalPath)
             } catch (Exception ex) {
                 Message.warn(messages, "WARNING: Cannot save post state: " + ex.getMessage())
                 if (debug)
