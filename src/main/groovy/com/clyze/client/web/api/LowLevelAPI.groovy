@@ -391,7 +391,7 @@ class LowLevelAPI {
         }
 
         HttpPost postBuildEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildsSuffix() + "?profile=${profile}"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildsSuffix() + "?profile=${profile}&origin=API"))) as HttpPost
         }
 
         HttpDelete deleteBuildEndpoint() {
