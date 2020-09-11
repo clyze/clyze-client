@@ -53,6 +53,17 @@ dependencies {
     api 'org.apache.httpcomponents:httpmime:4.5.12'     // Used by the Rest client, Apache 2.0
 }
 
+/**
+ * Checks for dependencies that may come from mavenLocal and can harm
+ * build reproducibility (e.g. for releases).
+ */
+project.afterEvaluate {
+    configurations.default
+	    .collect { it.canonicalPath }
+	.findAll { it.contains('.m2') }
+	.each { println "WARNING: build may be using mavenLocal(): ${it}" }
+}
+
 jar {
     manifest {
         //noinspection GrDeprecatedAPIUsage
