@@ -35,6 +35,14 @@ class Remote {
 		return username
 	}
 
+	void setUsername(String name) {
+		this.username = name
+	}
+
+	void setToken(String t) {
+		this.token = t
+	}
+
 	@SuppressWarnings('unused')
 	boolean isLoggedIn() {
 		return (token != null)
@@ -73,8 +81,8 @@ class Remote {
 			requestBuilder: LowLevelAPI.Requests.&login.curry(username, password),
 			onSuccess: { HttpEntity entity ->
 				Map<String, Object> data = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
-				this.token    = data.get('token')
-				this.username = data.get('username')
+				setToken(data.get('token') as String)
+				setUsername(data.get('username') as String)
 				return data
 			}
 		).execute(host, port)		
