@@ -6,7 +6,6 @@ import java.util.List;
  * A message returned from the core library, so that it can be fed to
  * a logger or output in the console.
  */
-@SuppressWarnings("unused")
 public final class Message {
     public final Type type;
     public final String text;
