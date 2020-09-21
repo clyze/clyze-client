@@ -328,8 +328,7 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String profile = readBuildProfileFromConsole()
-                return LowLevelAPI.Projects.repackageBuildForCI(token, user, project, profile, post.asMultipart(), host, port)
+                return LowLevelAPI.Projects.repackageBuildForCI(token, user, project, post.asMultipart(), host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String

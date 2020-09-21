@@ -174,12 +174,12 @@ class Helper {
      */
     @SuppressWarnings('unused')
     static void repackageBuildForCI(String host, int port, String username, String password,
-                                    String projectName, String platform, String profile,
+                                    String projectName, String platform,
                                     PostState ps, AttachmentHandler<String> handler)
     throws ClientProtocolException {
         Remote remote = connect(host, port, username, password)
         ensureProjectExists(remote, projectName, platform, false)
-        remote.repackageBuildForCI(username, projectName, profile, ps, handler)
+        remote.repackageBuildForCI(username, projectName, ps, handler)
     }
 
     /**

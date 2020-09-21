@@ -149,9 +149,9 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPost repackageBuildForCI(String userToken, String owner, String projectName, String profile,
+        static final HttpPost repackageBuildForCI(String userToken, String owner, String projectName,
                                                   MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBuildForCIEndpoint(profile)
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBuildForCIEndpoint()
             post.setEntity(entityBuilder.build())
             return post
         }
@@ -378,8 +378,8 @@ class LowLevelAPI {
             withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix()))) as HttpPut
         }
 
-        HttpPost repackageBuildForCIEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage?profile=${profile}"))) as HttpPost
+        HttpPost repackageBuildForCIEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage"))) as HttpPost
         }
 
         HttpGet listBuildsEndpoint() {

@@ -253,10 +253,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	<T> T repackageBuildForCI(String owner, String projectName, String profile, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
+	<T> T repackageBuildForCI(String owner, String projectName, PostState ps, AttachmentHandler<T> handler) throws ClientProtocolException {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Projects.&repackageBuildForCI.curry(token, owner, projectName, profile, ps.asMultipart()),
+				requestBuilder: LowLevelAPI.Projects.&repackageBuildForCI.curry(token, owner, projectName, ps.asMultipart()),
 				onSuccess: handler.&handleAttachment
 		).execute(host, port)
 	}
