@@ -1,6 +1,5 @@
 package com.clyze.client.web.http
 
-//import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.http.HttpEntity
 import org.apache.http.HttpResponse
@@ -10,7 +9,6 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.util.EntityUtils
 
-//@CompileStatic
 @Log4j
 class HttpClientCommand<T> implements ResponseHandler<T> {
 
