@@ -2,14 +2,17 @@ package com.clyze.client.cli
 
 import groovy.cli.commons.CliBuilder
 import groovy.cli.commons.OptionAccessor
+import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
+import org.apache.commons.cli.Options
 import org.apache.log4j.Logger
 import org.clyze.utils.Helper
 import org.clyze.utils.JHelper
 import org.clyze.utils.VersionInfo
 
+@CompileStatic
 @Log4j
 class Main {
 
@@ -37,19 +40,19 @@ class Main {
                 return
             }
 
-            if (cli.c) {
-                cmd = cli.c
+            if (cli['c']) {
+                cmd = cli['c']
                 command = CliRestClient.COMMANDS.get(cmd.toLowerCase())
                 if (!command) {
-                    println "The value of the command option is invalid: '${cmd}'. Available commands: ${availableCommands}."
+                    System.out.println "The value of the command option is invalid: '${cmd}'. Available commands: ${availableCommands}."
                     exitWithError()
                 }
             }
-            if (cli.h) {
+            if (cli['h']) {
                 if (command) {                    
-                    List<Option> options = []
-                    if (cli.r) {                        
-                        Remote remote = parseRemote(cli.r as String)
+                    Set<Option> options = []
+                    if (cli['r']) {
+                        Remote remote = parseRemote(cli['r'] as String)
                         options = command.discoverOptions(remote.host, remote.port)
                     }
                     println "${command.name} - ${command.description}"
@@ -57,7 +60,7 @@ class Main {
                     if (options) {
                         CliBuilder builder2 = new CliBuilder(usage: "-r [remote] -c ${command.name} [OPTION]...")
                         builder2.width = 120
-                        options.each { Option option -> builder2 << option }
+                        options.each { Option option -> builder2.options.addOption(option) }
                         builder2.usage()
                     } else {
                         println "Provide a valid remote to help the client dynamically discover the options supported by the command."
@@ -69,8 +72,8 @@ class Main {
                 }
             }
 
-            if (cli.r) {
-                Remote remote = parseRemote(cli.r as String)
+            if (cli['r']) {
+                Remote remote = parseRemote(cli['r'] as String)
 
                 if (!command) {
                     throw new RuntimeException("ERROR: 'command' not properly initialized in: ${cmd}")
@@ -78,8 +81,8 @@ class Main {
                 Set<Option> options = command.discoverOptions(remote.host, remote.port)
                 if (options) {
                     options.each { Option option ->
-                        builder << option
-                        if (cli.d) {
+                        builder.options.addOption(option)
+                        if (cli['d']) {
                             println "* Registering discovered option:\n${option}"
                         }
                     }
@@ -117,14 +120,16 @@ class Main {
             width : 120
         )        
 
-        cli.with {
-            h(longOpt: 'help', "Display help and exit. Combine it with a command to see the command options.")
-            r(longOpt: 'remote', "The remote server.", args:1, argName: "[hostname|ip]:[port]")
-            c(longOpt: 'command', "The command to execute via the remote server. Available commands: \
-                                  ${availableCommands}.", args:1, argName: "command")
-            d(longOpt: 'discover', "Show discovered options.")
-            v(longOpt: 'version', 'Display version and exit.')
-        }
+        Options opts = new Options()
+        opts.addOption(Option.builder('h').longOpt('help')
+                .desc('Display help and exit. Combine it with a command to see the command options.').build())
+        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('[hostname|ip]:[port]').build())
+        opts.addOption(Option.builder('c').longOpt('command')
+                .desc("The command to execute via the remote server. Available commands: ${availableCommands}.")
+                .numberOfArgs(1).argName("command").build())
+        opts.addOption(Option.builder().longOpt('discover').desc('Show discovered options.').build())
+        opts.addOption(Option.builder().longOpt('version').desc('Display version and exit.').build())
+        cli.setOptions(opts)
 
         return cli
     }
