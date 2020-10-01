@@ -42,9 +42,9 @@ configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 }
 
-def groovyVersion='2.5.10'
+def groovyVersion='3.0.6'
 dependencies {    
-    api 'org.clyze:clue-common:3.22.5'
+    api 'org.clyze:clue-common:3.23.2'
     api 'org.clyze:metadata-model:1.0.3'
     api 'commons-cli:commons-cli:1.4'
     api "org.codehaus.groovy:groovy:${groovyVersion}"
