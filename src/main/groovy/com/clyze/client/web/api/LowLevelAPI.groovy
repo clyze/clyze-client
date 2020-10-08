@@ -276,10 +276,12 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPut putRule(String userToken, String owner, String projectName, String buildName, String config, String ruleId, String comment, String host, int port) {
+        static final HttpPut putRule(String userToken, String owner, String projectName, String buildName, String config, String ruleId, String ruleBody, String comment, String host, int port) {
             Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
             HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).putRuleEndpoint()
-            List<NameValuePair> params = new ArrayList<>(1)
+            List<NameValuePair> params = new ArrayList<>(2)
+            if (ruleBody)
+                params.add(new BasicNameValuePair('ruleBody', ruleBody))
             if (comment)
                 params.add(new BasicNameValuePair('comment', comment))
             if (params.size() > 0)

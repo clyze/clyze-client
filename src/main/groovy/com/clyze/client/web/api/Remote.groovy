@@ -207,10 +207,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> putRule(String owner, String projectName, String buildName, String config, String ruleId, String comment) {
+	Map<String, Object> putRule(String owner, String projectName, String buildName, String config, String ruleId, String ruleBody, String comment) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Builds.&putRule.curry(token, owner, projectName, buildName, config, ruleId, comment),
+				requestBuilder: LowLevelAPI.Builds.&putRule.curry(token, owner, projectName, buildName, config, ruleId, ruleBody, comment),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}

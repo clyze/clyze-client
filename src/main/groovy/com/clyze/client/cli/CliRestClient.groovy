@@ -573,8 +573,9 @@ class CliRestClient {
                 String build = readBuildNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleId = System.console().readLine("Rule id: ")
+                String ruleBody = System.console().readLine("Rule body: ")
                 String comment = System.console().readLine("Rule comment: ")
-                return LowLevelAPI.Builds.putRule(token, user, project, build, config, ruleId, comment, host, port)
+                return LowLevelAPI.Builds.putRule(token, user, project, build, config, ruleId, ruleBody, comment, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
