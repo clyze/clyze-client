@@ -558,7 +558,7 @@ class LowLevelAPI {
             if (extraParams && extraParams.size() > 0) {
                 extraParams.forEach { k, v ->
                     if (v)
-                        q.add(k + '=' + URLEncoder.encode(v.toString(), StandardCharsets.UTF_8)) }
+                        q.add(k + '=' + URLEncoder.encode(v.toString(), "UTF-8" )) }
             }
             return q.size() == 0 ? '' : '?' + q.join('&')
         }
