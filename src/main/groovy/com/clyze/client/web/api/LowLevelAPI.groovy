@@ -514,7 +514,9 @@ class LowLevelAPI {
             // Unpack additional parameters.
             List<String> q = new LinkedList<>()
             if (extraParams && extraParams.size() > 0) {
-                extraParams.forEach { k, v -> q.add(k + '=' + URLEncoder.encode(v.toString(), StandardCharsets.UTF_8)) }
+                extraParams.forEach { k, v ->
+                    if (v)
+                        q.add(k + '=' + URLEncoder.encode(v.toString(), StandardCharsets.UTF_8)) }
             }
             return q.size() == 0 ? '' : '?' + q.join('&')
         }
