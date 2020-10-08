@@ -248,7 +248,11 @@ class LowLevelAPI {
         }
 
         static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, Integer start, Integer count, String host, int port) {
-            List<Object> extraParams = [originType, start, count] as List<Object>
+            Map<String, Object> extraParams = [
+                    originType: originType,
+                    _start     : start,
+                    _count     : count
+                    ] as Map<String, Object>
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).getRulesEndpoint()
         }
 
@@ -269,7 +273,8 @@ class LowLevelAPI {
         }
 
         static final HttpGet getOutput(String userToken, String owner, String projectName, String buildName, String config, String output, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, [output] as List<Object>).getOutputEndpoint()
+            Map<String, Object> extraParams = [output: output] as Map<String, Object>
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).getOutputEndpoint()
         }
 
         static final HttpPost analyze(String userToken, String owner, String projectName, String buildName, String config, String profile, String host, int port) {
@@ -311,11 +316,11 @@ class LowLevelAPI {
         String projectName
         String buildName
         String config
-        List<?> extraParams
+        Map<String, Object> extraParams
 
         Endpoints(String host, int port, String userToken=null, String username=null,
                   String projectName=null, String buildName=null, String config=null,
-                  List<?> extraParams=null) {
+                  Map<String, Object> extraParams=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
@@ -500,29 +505,22 @@ class LowLevelAPI {
         }
 
         String outputSuffix() {
-            String output = extraParams.get(0) as String
+            String output = extraParams['output'] as String
             if (!output) throw new RuntimeException("No output")
             return "${buildConfigSuffix()}/outputs/${output}"
         }
 
-        String rulesSuffix() {
+        String getQueryForExtraParams() {
             // Unpack additional parameters.
-            String query = ''
+            List<String> q = new LinkedList<>()
             if (extraParams && extraParams.size() > 0) {
-                List<String> q = new LinkedList<>()
-                String originType = extraParams.get(0) as String
-                if (originType != null)
-                    q.add('originType=' + originType)
-                Integer start = extraParams.get(1) as Integer
-                if (start != null)
-                    q.add('_start=' + start)
-                Integer count = extraParams.get(2) as Integer
-                if (count != null)
-                    q.add('_count=' + count)
-
-                query = q.size() == 0 ? '' : '?' + q.join('&')
+                extraParams.forEach { k, v -> q.add(k + '=' + URLEncoder.encode(v.toString(), StandardCharsets.UTF_8)) }
             }
-            return "${buildConfigSuffix()}/rules" + query
+            return q.size() == 0 ? '' : '?' + q.join('&')
+        }
+
+        String rulesSuffix() {
+            return "${buildConfigSuffix()}/rules" + getQueryForExtraParams()
         }
 
         String samplesSuffix() {
