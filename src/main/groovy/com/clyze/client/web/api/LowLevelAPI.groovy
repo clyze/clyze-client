@@ -222,7 +222,7 @@ class LowLevelAPI {
             HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config).updateConfigurationEndpoint()
             List<NameValuePair> params = new ArrayList<>()
             settings?.each {
-                def value = it.second
+                def value = it.v2
                 String value1
                 if (value instanceof Boolean)
                     value1 = value ? "on" : "off"
@@ -232,7 +232,7 @@ class LowLevelAPI {
                     value1 = value.toString()
                     println "Unhandled form data element: ${value1} of type ${value.class}"
                 }
-                params.add(new BasicNameValuePair(it.first, value1))
+                params.add(new BasicNameValuePair(it.v1, value1))
             }
             put.setEntity(new UrlEncodedFormEntity(params))
             return put
