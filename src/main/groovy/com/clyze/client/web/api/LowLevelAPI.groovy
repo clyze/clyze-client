@@ -1,6 +1,9 @@
 package com.clyze.client.web.api
 
+import com.clyze.client.web.HttpDeleteWithBody
 import groovy.json.JsonSlurper
+import groovy.transform.CompileStatic
+import java.nio.charset.StandardCharsets
 import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
@@ -8,9 +11,6 @@ import org.apache.http.client.methods.*
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
-
-import groovy.transform.CompileStatic
-import com.clyze.client.web.HttpDeleteWithBody
 
 @CompileStatic
 class LowLevelAPI {
@@ -264,6 +264,34 @@ class LowLevelAPI {
             return delete
         }
 
+        static final HttpPost postRule(String userToken, String owner, String projectName, String buildName, String config, String ruleBody, String doopId, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, buildName, config).postRuleEndpoint()
+            List<NameValuePair> params = new ArrayList<>(3)
+            if (ruleBody)
+                params.add(new BasicNameValuePair('ruleBody', ruleBody))
+            if (doopId)
+                params.add(new BasicNameValuePair('doopId', doopId))
+            if (params.size() > 0)
+                post.setEntity(new UrlEncodedFormEntity(params))
+            return post
+        }
+
+        static final HttpPut putRule(String userToken, String owner, String projectName, String buildName, String config, String ruleId, String comment, String host, int port) {
+            Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
+            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).putRuleEndpoint()
+            List<NameValuePair> params = new ArrayList<>(1)
+            if (comment)
+                params.add(new BasicNameValuePair('comment', comment))
+            if (params.size() > 0)
+                put.setEntity(new UrlEncodedFormEntity(params))
+            return put
+        }
+
+        static final HttpDelete deleteRule(String userToken, String owner, String projectName, String buildName, String config, String ruleId, String host, int port) {
+            Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
+            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).deleteRuleEndpoint()
+        }
+
         static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, buildName, config).exportConfigurationEndpoint()
         }
@@ -435,6 +463,18 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpGet
         }
 
+        HttpPost postRuleEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpPost
+        }
+
+        HttpPut putRuleEndpoint() {
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, ruleSuffix()))) as HttpPut
+        }
+
+        HttpDelete deleteRuleEndpoint() {
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, ruleSuffix()))) as HttpDelete
+        }
+
         HttpDeleteWithBody deleteRulesEndpoint() {
             withTokenHeader(new HttpDeleteWithBody(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpDeleteWithBody
         }
@@ -523,6 +563,12 @@ class LowLevelAPI {
 
         String rulesSuffix() {
             return "${buildConfigSuffix()}/rules" + getQueryForExtraParams()
+        }
+
+        String ruleSuffix() {
+            String ruleId = extraParams['ruleId'] as String
+            if (!ruleId) throw new RuntimeException("No rule id")
+            return "${buildConfigSuffix()}/rules/${ruleId}"
         }
 
         String samplesSuffix() {

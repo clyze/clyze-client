@@ -198,6 +198,33 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> postRule(String owner, String projectName, String buildName, String config, String ruleBody, String doopId) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&postRule.curry(token, owner, projectName, buildName, config, ruleBody, doopId),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> putRule(String owner, String projectName, String buildName, String config, String ruleId, String comment) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&putRule.curry(token, owner, projectName, buildName, config, ruleId, comment),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> deleteRule(String owner, String projectName, String buildName, String config, String ruleId) {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Builds.&deleteRule.curry(token, owner, projectName, buildName, config, ruleId),
+				onSuccess: LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> deleteRules(String owner, String projectName, String buildName, String config, Collection<String> ids) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,

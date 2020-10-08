@@ -543,6 +543,64 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand POST_RULE = new CliRestCommand(
+            name               : 'post_rule',
+            description        : 'post configuration rule',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                String ruleBody = System.console().readLine("Rule body: ")
+                return LowLevelAPI.Builds.postRule(token, user, project, build, config, ruleBody, null, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
+    private static final CliRestCommand PUT_RULE = new CliRestCommand(
+            name               : 'put_rule',
+            description        : 'put configuration rule (e.g. edit comment)',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                String ruleId = System.console().readLine("Rule id: ")
+                String comment = System.console().readLine("Rule comment: ")
+                return LowLevelAPI.Builds.putRule(token, user, project, build, config, ruleId, comment, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
+    private static final CliRestCommand DELETE_RULE = new CliRestCommand(
+            name               : 'delete_rule',
+            description        : 'delete configuration rule',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole()
+                String build = readBuildNameFromConsole()
+                String config = readConfigFromConsole()
+                String ruleId = System.console().readLine("Rule id: ")
+                return LowLevelAPI.Builds.deleteRule(token, user, project, build, config, ruleId, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand(
             name               : 'export_config',
             description        : 'export a build configuration',
@@ -635,7 +693,9 @@ class CliRestClient {
     }
 
     private static String readBuildNameFromConsole() {
-        return System.console().readLine("Build: ")
+        final String DEFAULT_BUILD = 'build1'
+        String build = System.console().readLine("Build (default: '${DEFAULT_BUILD}'): ")
+        return ('' == build) ? DEFAULT_BUILD : build
     }
 
     private static String readPlatformFromConsole() {
@@ -713,7 +773,7 @@ class CliRestClient {
         // Builds
         LIST_BUILDS, LIST_SAMPLES, POST_BUILD, POST_SAMPLE_BUILD, GET_BUILD, DELETE_BUILD,
         // Configurations
-        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, DELETE_RULES, PASTE_CONFIGURATION_RULES,
+        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
         // Misc.
         PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME
         // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
