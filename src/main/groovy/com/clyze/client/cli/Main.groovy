@@ -10,7 +10,6 @@ import org.apache.commons.cli.Options
 import org.apache.log4j.Logger
 import org.clyze.utils.Helper
 import org.clyze.utils.JHelper
-import org.clyze.utils.VersionInfo
 
 @CompileStatic
 @Log4j
@@ -36,7 +35,7 @@ class Main {
             }
 
             if (cli['v']) {
-                println VersionInfo.getVersionInfo(Main.class)
+                println JHelper.getVersionInfo(Main.class)
                 return
             }
 
