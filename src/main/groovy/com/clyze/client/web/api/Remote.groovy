@@ -399,10 +399,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> createProject(String owner, String name, String platform) {
+	Map<String, Object> createProject(String owner, String name, String[] stacks) {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Projects.&createProject.curry(token, owner, name, platform),
+			requestBuilder: LowLevelAPI.Projects.&createProject.curry(token, owner, name, stacks),
 			onSuccess : LowLevelAPI.Responses.&parseJson
 		).execute(host, port)		
 	}

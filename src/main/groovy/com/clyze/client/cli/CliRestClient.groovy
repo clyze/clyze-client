@@ -231,8 +231,8 @@ class CliRestClient {
                 String token    = getUserToken(true, host, port)
                 String user     = getUserName(false, host, port)
                 String project  = readProjectNameFromConsole()
-                String platform = readPlatformFromConsole()
-                return LowLevelAPI.Projects.createProject(token, user, project, platform, host, port)
+                String[] stacks = readStacksFromConsole()
+                return LowLevelAPI.Projects.createProject(token, user, project, stacks, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -693,16 +693,16 @@ class CliRestClient {
         return ('' == project) ? DEFAULT_PROJECT : project
     }
 
+    private static String[] readStacksFromConsole() {
+        final String DEFAULT_STACK = 'jvm'
+        String stacks = System.console().readLine("Project stacks (separated by spaces, default: '${DEFAULT_STACK})': ").trim()
+        return ('' == stacks) ? (new String[] {DEFAULT_STACK}) : (stacks.tokenize(' ') as String[])
+    }
+
     private static String readBuildNameFromConsole() {
         final String DEFAULT_BUILD = 'build1'
         String build = System.console().readLine("Build (default: '${DEFAULT_BUILD}'): ")
         return ('' == build) ? DEFAULT_BUILD : build
-    }
-
-    private static String readPlatformFromConsole() {
-        final String DEFAULT_PLATFORM = 'ANDROID'
-        String platform = System.console().readLine("Project (default: '${DEFAULT_PLATFORM})': ")
-        return ('' == platform) ? DEFAULT_PLATFORM : platform
     }
 
     private static String readBuildProfileFromConsole() {
