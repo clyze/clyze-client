@@ -15,13 +15,9 @@ import org.apache.http.message.BasicNameValuePair
 @CompileStatic
 class LowLevelAPI {
 
-
     static final class InputConstants {
-        public static final String INPUTS   = "INPUTS"
-        public static final String PLATFORM = "PLATFORM"
         public static final String ANALYSIS = "ANALYSIS"
     }
-
 
     static final class Requests {
 

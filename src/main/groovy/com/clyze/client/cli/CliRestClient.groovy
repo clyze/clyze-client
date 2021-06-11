@@ -6,7 +6,6 @@ import com.clyze.client.web.api.LowLevelAPI
 import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 // import groovy.transform.TypeChecked
 import com.clyze.client.cli.CliAuthenticator.Selector
-import com.clyze.client.web.Helper as ClientHelper
 import groovy.cli.commons.OptionAccessor
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
@@ -21,6 +20,7 @@ import org.apache.http.HttpEntity
  *     <li>create_sample_project-create a project based on a sample
  *     <li>get_project       - get a project
  *     <li>delete_project    - delete a project
+ *     <li>get_project_options - show the options of a project
  *
  *     <li>list_snapshots    - list the available snapshots
  *     <li>get_snapshot      - get a snapshot
@@ -160,7 +160,7 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_SNAPSHOTS = new CliRestCommand(
         name               : 'list_snapshots',
-        description        : 'list the snapshots stored in the remote server',
+        description        : 'list the snapshots stored in server',
         //TODO add pagination options
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
@@ -183,7 +183,7 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_SAMPLES = new CliRestCommand(
             name               : 'list_samples',
-            description        : 'list the sample snapshots available in the remote server',
+            description        : 'list the sample snapshots available in server',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
@@ -205,7 +205,7 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_PROJECTS = new CliRestCommand(
         name               : 'list_projects',
-        description        : 'list the projects stored in the remote server',
+        description        : 'list the projects',
         //TODO add pagination options
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
@@ -221,7 +221,7 @@ class CliRestClient {
 
     private static final CliRestCommand CREATE_PROJECT = new CliRestCommand(
             name               : 'create_project',
-            description        : 'create an empty project in the remote server',
+            description        : 'create an empty project',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
@@ -237,9 +237,25 @@ class CliRestClient {
             }
     )
 
+    private static final CliRestCommand GET_PROJECT_OPTIONS = new CliRestCommand(
+            name               : 'get_project_options',
+            description        : 'get options of project',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole(cliOptions)
+                return LowLevelAPI.Projects.getProjectOptions(token, user, project, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
     private static final CliRestCommand GET_PROJECT = new CliRestCommand(
             name               : 'get_project',
-            description        : 'get project stored in the remote server',
+            description        : 'get project',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
@@ -256,7 +272,7 @@ class CliRestClient {
 
     private static final CliRestCommand DELETE_PROJECT = new CliRestCommand(
             name               : 'delete_project',
-            description        : 'delete project stored in the remote server',
+            description        : 'delete project',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
@@ -324,7 +340,7 @@ class CliRestClient {
 
     private static final CliRestCommand DELETE_SNAPSHOT = new CliRestCommand(
             name               : 'delete_snapshot',
-            description        : 'delete snapshot stored in the remote server',
+            description        : 'delete snapshot',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
@@ -362,7 +378,7 @@ class CliRestClient {
 
     private static final CliRestCommand CREATE_SAMPLE_PROJECT = new CliRestCommand(
             name               : 'create_sample_project',
-            description        : 'creates a new project in the remote server, based on a sample',
+            description        : 'creates a new project based on a sample',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
@@ -763,7 +779,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
             // Projects
-            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT,
+            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS,
             // Snapshots
             LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
             // Configurations
