@@ -18,14 +18,8 @@ import static org.apache.commons.io.FileUtils.copyFileToDirectory
 class PostState implements Item {
 
     String id
-    Set<Input> inputs = new HashSet<>()
+    Set<SnapshotInput> inputs = new HashSet<>()
     String profile
-
-    static class Input {
-        String key
-        String value
-        boolean isFile = false 
-    }    
 
     PostState() { }
 
@@ -49,13 +43,13 @@ class PostState implements Item {
      */
     String toJSONWithRelativePaths(final String prefix) {
         final int prefixLen = prefix.length() + File.pathSeparator.length()
-        List<Input> inputs0 = inputs.collect {
-            if (it instanceof Input) {
-                Input i0 = (Input)it
+        List<SnapshotInput> inputs0 = inputs.collect {
+            if (it instanceof SnapshotInput) {
+                SnapshotInput i0 = (SnapshotInput)it
                 if (i0.isFile) {
                     String path = i0.value
                     if (path.startsWith(prefix))
-                        return new Input(key:i0.key, value:path.substring(prefixLen), isFile:i0.isFile)
+                        return new SnapshotInput(i0.isFile, i0.key, path.substring(prefixLen))
                 }
             }
             return it
@@ -73,7 +67,7 @@ class PostState implements Item {
 
     @Override
     void fromMap(Map<String, Object> map) {
-        (map.inputs as Set<Input>).each {
+        (map.inputs as Set<SnapshotInput>).each {
             if (it.isFile) {
                 addFileInput(it.key as String, it.value)
             } else {
@@ -85,7 +79,7 @@ class PostState implements Item {
 
     PostState saveTo(File dir) {
         //process inputs to copy all files in the given dir
-        inputs.findAll { it.isFile }.each { Input input ->
+        inputs.findAll { it.isFile }.each { SnapshotInput input ->
             log.info "Copying: ${input.value} -> ${dir}"
             File f = new File(input.value)
             if (f.exists()) {
@@ -131,11 +125,11 @@ class PostState implements Item {
     }
 
     void addStringInput(String key, String value) {
-        inputs.add(new Input(key:key, value:value))
+        inputs.add(new SnapshotInput(false, key, value))
     }
 
     void addFileInput(String key, String file) {
-        inputs.add(new Input(key:key, value:file, isFile:true))
+        inputs.add(new SnapshotInput(true, key, file))
     }
 
     void addInputFromCliOption(Option o, OptionAccessor cliOptions) {
@@ -155,7 +149,7 @@ class PostState implements Item {
 
     MultipartEntityBuilder asMultipart() {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create()              
-        inputs.each { Input input ->
+        inputs.each { SnapshotInput input ->
             if (input.isFile) {
                 File f = new File(input.value)
                 if (f.exists()) {

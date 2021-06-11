@@ -87,23 +87,6 @@ class Helper {
 //        )
 //    }
 
-    static HttpClientCommand<Object> createCommandForOptionsDiscovery(String what, HttpClientLifeCycle httpClientLifeCycle) {
-
-        new HttpClientCommand(
-            httpClientLifeCycle: httpClientLifeCycle,
-            requestBuilder     : { String host, int port ->
-                if (what == 'SNAPSHOT') {
-                    LowLevelAPI.Requests.getProfileOptions(host, port)
-                } else {
-                    throw new RuntimeException("Cannot find options for: ${what}")
-                }
-            },
-            onSuccess          : { HttpEntity entity ->
-                LowLevelAPI.Responses.parseJson(entity)
-            }
-        )            
-    }
-
     public static Closure<Boolean> checkFileEmpty = { String f ->
         boolean isEmpty = (new File(f)).length() == 0
         if (isEmpty) {

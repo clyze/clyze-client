@@ -114,7 +114,7 @@ class Remote {
 			httpClientLifeCycle: httpClientLifeCycle,
 			requestBuilder: LowLevelAPI.Snapshots.&createSnapshot.curry(token, owner, projectName, profile, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJson
-		).execute(host, port)		
+		).execute(host, port)
 	}
 
 	@SuppressWarnings('unused')

@@ -48,27 +48,11 @@ class Main {
                 }
             }
             if (cli['h']) {
-                if (command) {                    
-                    Set<Option> options = []
-                    if (cli['r']) {
-                        Remote remote = parseRemote(cli['r'] as String)
-                        options = command.discoverOptions(remote.host, remote.port)
-                    }
+                if (command)
                     println "${command.name} - ${command.description}"
-
-                    if (options) {
-                        CliBuilder builder2 = new CliBuilder(usage: "-r [remote] -c ${command.name} [OPTION]...")
-                        builder2.width = 120
-                        options.each { Option option -> builder2.options.addOption(option) }
-                        builder2.usage()
-                    } else {
-                        println "Provide a valid remote to help the client dynamically discover the options supported by the command."
-                    }
-                    return
-                } else {
+                else
                     builder.usage()
-                    return
-                }
+                return
             }
 
             if (cli['r']) {
@@ -76,17 +60,6 @@ class Main {
 
                 if (!command) {
                     throw new RuntimeException("ERROR: 'command' not properly initialized in: ${cmd}")
-                }
-                Set<Option> options = command.discoverOptions(remote.host, remote.port)
-                if (options) {
-                    options.each { Option option ->
-                        builder.options.addOption(option)
-                        if (cli['d']) {
-                            println "* Registering discovered option:\n${option}"
-                        }
-                    }
-                    //reparse the args
-                    cli = builder.parse(args)
                 }
 
                 CliAuthenticator.init()
@@ -122,12 +95,14 @@ class Main {
         Options opts = new Options()
         opts.addOption(Option.builder('h').longOpt('help')
                 .desc('Display help and exit. Combine it with a command to see the command options.').build())
-        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('[hostname|ip]:[port]').build())
+        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('[hostname|ip]:[port]').desc('Give remote server.').build())
         opts.addOption(Option.builder('c').longOpt('command')
                 .desc("The command to execute via the remote server. Available commands: ${availableCommands}.")
                 .numberOfArgs(1).argName("command").build())
         opts.addOption(Option.builder().longOpt('discover').desc('Show discovered options.').build())
         opts.addOption(Option.builder().longOpt('version').desc('Display version and exit.').build())
+        opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Give project name.').build())
+        opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Give snapshot input (examples: app@path, key=value).').build())
         cli.setOptions(opts)
 
         return cli

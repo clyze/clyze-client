@@ -1,6 +1,7 @@
 package com.clyze.client.web.api
 
 import com.clyze.client.web.HttpDeleteWithBody
+import com.clyze.client.web.PostState
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import org.apache.http.HttpEntity
@@ -86,10 +87,6 @@ class LowLevelAPI {
             return get
         }        
 
-        static final HttpGet getProfileOptions(String host, int port) {
-            return new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/options/snapshots"))
-        }        
-
         static final HttpGet getUsers(String userToken, String host, int port) {
             return new Endpoints(host, port, userToken).listUsersEndpoint()
         }
@@ -154,6 +151,10 @@ class LowLevelAPI {
             post.setEntity(entityBuilder.build())
             return post
         }
+
+        static final HttpOptions getProjectOptions(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).createProjectOptionsEndpoint()
+        }
     }
 
     static final class Snapshots {
@@ -166,20 +167,23 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getSnapshotEndpoint()
         }
 
-        static final HttpPost createSnapshot(String userToken, String owner, String projectName, String profile, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postSnapshotEndpoint(profile)
+        static final HttpPost createSnapshot(String userToken, String owner, String projectName,
+                                             PostState postState, String host, int port) {
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+            postState.inputs.each { it.addTo(entityBuilder) }
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postSnapshotEndpoint()
             post.setEntity(entityBuilder.build())
             return post
         }
 
-        static final HttpPost createSnapshot(String userToken, String owner, String projectName, String profile,
-                                             String snapshotResolvableByServer, String host, int port) {
-            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(snapshotResolvableByServer))
-            entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(profile))
-            return createSnapshot(userToken, owner, projectName, profile, entityBuilder, host, port)
-        }
-
+//        static final HttpPost createSnapshot(String userToken, String owner, String projectName, List<SnapshotInput> inputs,
+//                                             String snapshotResolvableByServer, String host, int port) {
+//            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+//            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(snapshotResolvableByServer))
+//            inputs.each { it.addTo(entityBuilder) }
+//            return createSnapshot(userToken, owner, projectName, inputs, entityBuilder, host, port)
+//        }
+//
         static final HttpGet listSamples(String userToken, String owner, String projectName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).listSamplesEndpoint()
         }
@@ -421,12 +425,16 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotsSuffix()))) as HttpGet
         }
 
+        HttpOptions createProjectOptionsEndpoint() {
+            withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsSuffix()))) as HttpOptions
+        }
+
         HttpGet getSnapshotEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix()))) as HttpGet
         }
 
-        HttpPost postSnapshotEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix() + "?profile=${profile}&origin=API"))) as HttpPost
+        HttpPost postSnapshotEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix() + "?origin=API"))) as HttpPost
         }
 
         HttpDelete deleteSnapshotEndpoint() {

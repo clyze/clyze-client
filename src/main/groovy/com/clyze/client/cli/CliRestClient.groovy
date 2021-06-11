@@ -1,12 +1,13 @@
 package com.clyze.client.cli
 
 import com.clyze.client.web.PostState
+import com.clyze.client.web.SnapshotInput
 import com.clyze.client.web.api.LowLevelAPI
 import com.clyze.client.web.http.DefaultHttpClientLifeCycle
-import groovy.cli.commons.OptionAccessor
 // import groovy.transform.TypeChecked
 import com.clyze.client.cli.CliAuthenticator.Selector
 import com.clyze.client.web.Helper as ClientHelper
+import groovy.cli.commons.OptionAccessor
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
 
@@ -57,8 +58,6 @@ import org.apache.http.HttpEntity
  */
 // @TypeChecked
 class CliRestClient {
-
-    private static final int DEFAULT_LIST_SIZE = 20
 
     private static final Option ID = Option.builder('id').hasArg().argName('id').
                                                    desc('the analysis id').build()
@@ -167,7 +166,7 @@ class CliRestClient {
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            String project = readProjectNameFromConsole()
+            String project = readProjectNameFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.listSnapshots(token, user, project, host, port)
         },
         onSuccess          : { HttpEntity entity ->
@@ -190,7 +189,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 return LowLevelAPI.Snapshots.listSamples(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -228,7 +227,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token    = getUserToken(true, host, port)
                 String user     = getUserName(false, host, port)
-                String project  = readProjectNameFromConsole()
+                String project  = readProjectNameFromConsole(cliOptions)
                 String[] stacks = readStacksFromConsole()
                 return LowLevelAPI.Projects.createProject(token, user, project, stacks, host, port)
             },
@@ -246,7 +245,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 return LowLevelAPI.Projects.getProject(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -263,7 +262,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 return LowLevelAPI.Projects.deleteProject(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -279,7 +278,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 return LowLevelAPI.Snapshots.getSnapshot(token, user, project, snapshot, host, port)
             },
@@ -293,18 +292,13 @@ class CliRestClient {
         name               : 'post_snapshot',
         description        : 'posts a new snapshot to the remote server',
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
-        optionsBuilder     : { String host, int port ->
-            def json = ClientHelper.createCommandForOptionsDiscovery("SNAPSHOT", new DefaultHttpClientLifeCycle()).execute(host, port)
-            return convertJsonEncodedOptionsToCliOptions(json)
-        },
         requestBuilder     : { String host, int port ->
-            //options have been discovered here
-            PostState post = newPostStateFromOptions(supportedOptions, cliOptions)
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
-            String project = readProjectNameFromConsole()
-            String profile = readSnapshotProfileFromConsole()
-            return LowLevelAPI.Snapshots.createSnapshot(token, user, project, profile, post.asMultipart(), host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            PostState post = new PostState()
+            post.inputs.addAll(readSnapshotInputsFromConsole(cliOptions))
+            return LowLevelAPI.Snapshots.createSnapshot(token, user, project, post, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -316,17 +310,11 @@ class CliRestClient {
             name               : 'repackage',
             description        : 'automated repackaging endpoint',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
-            optionsBuilder     : { String host, int port ->
-                def json = ClientHelper.createCommandForOptionsDiscovery("SNAPSHOT", new DefaultHttpClientLifeCycle()).execute(host, port)
-                return convertJsonEncodedOptionsToCliOptions(json)
-            },
             requestBuilder     : { String host, int port ->
-                //options have been discovered here
-                PostState post = newPostStateFromOptions(supportedOptions, cliOptions)
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
-                return LowLevelAPI.Projects.repackageSnapshotForCI(token, user, project, post.asMultipart(), host, port)
+                String project = readProjectNameFromConsole(cliOptions)
+                return LowLevelAPI.Projects.repackageSnapshotForCI(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -342,7 +330,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token   = getUserToken(true, host, port)
                 String user    = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot   = readSnapshotNameFromConsole()
                 return LowLevelAPI.Snapshots.deleteSnapshot(token, user, project, snapshot, host, port)
             },
@@ -359,7 +347,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 final String DEFAULT_SAMPLE_NAME = 'apps-android-wikipedia'
                 String sampleName = System.console().readLine("Sample name (default: '${DEFAULT_SAMPLE_NAME}'): ")
                 if ('' == sampleName)
@@ -394,7 +382,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 return LowLevelAPI.Snapshots.listConfigurations(token, user, project, snapshot, host, port)
             },
@@ -411,7 +399,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Snapshots.getConfiguration(token, user, project, snapshot, config, host, port)
@@ -429,7 +417,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Snapshots.cloneConfiguration(token, user, project, snapshot, config, host, port)
@@ -447,7 +435,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String newName = readConfigFromConsole('new-name.json')
@@ -466,7 +454,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String fromConfig = readConfigFromConsole('config2.json')
@@ -485,7 +473,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Snapshots.deleteConfiguration(token, user, project, snapshot, config, host, port)
@@ -503,7 +491,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String idsLine = System.console().readLine('Rule IDs, separated by comma: ')
@@ -523,7 +511,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String originType = System.console().readLine("[Optional] Origin type: ")
@@ -548,7 +536,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleBody = System.console().readLine("Rule body: ")
@@ -567,7 +555,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleId = System.console().readLine("Rule id: ")
@@ -588,7 +576,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleId = System.console().readLine("Rule id: ")
@@ -607,7 +595,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Snapshots.exportConfiguration(token, user, project, snapshot, config, host, port)
@@ -628,7 +616,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String profile = readAnalysisProfileFromConsole()
@@ -647,7 +635,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 return LowLevelAPI.Snapshots.getRuntime(token, user, project, snapshot, config, host, port)
@@ -665,7 +653,7 @@ class CliRestClient {
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
-                String project = readProjectNameFromConsole()
+                String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String output = System.console().readLine("Output: ")
@@ -676,19 +664,36 @@ class CliRestClient {
             }
     )
 
-    private static final PostState newPostStateFromOptions(def supportedOptions, def cliOptions) {
-        PostState post = new PostState()
-        supportedOptions.findAll { cliOptions.hasOption(it.longOpt) }.each {
-            println "Reading option: [${it}]"
-            post.addInputFromCliOption(it as Option, cliOptions as OptionAccessor)
-        }
-        return post
+    private static String readProjectNameFromConsole(OptionAccessor cliOptions) {
+        final String DEFAULT_PROJECT = 'test-project'
+        String project = cliOptions['project'] as String
+        if (project)
+            println "Assuming project = ${project}"
+        else
+            project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
+        return ('' == project) ? DEFAULT_PROJECT : project
     }
 
-    private static String readProjectNameFromConsole() {
-        final String DEFAULT_PROJECT = 'samples'
-        String project = System.console().readLine("Project (default: '${DEFAULT_PROJECT})': ")
-        return ('' == project) ? DEFAULT_PROJECT : project
+    private static List<SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
+        List<SnapshotInput> inputs = new ArrayList<>()
+        Collection<String> tokens = cliOptions['inputs']
+        if (tokens)
+            println "Assuming inputs = ${tokens}"
+        else
+            tokens = System.console().readLine("Inputs (separated by spaces, example: 'app@path.jar jvm_platform=java_8'): ").tokenize(' ') as Collection<String>
+        for (String token : tokens) {
+            int atIdx = token.indexOf('@')
+            if (atIdx > 0)
+                inputs.add(new SnapshotInput(true, token.substring(0, atIdx), token.substring(atIdx + 1)))
+            else {
+                int eqIdx = token.indexOf('=')
+                if (eqIdx > 0)
+                    inputs.add(new SnapshotInput(false, token.substring(0, eqIdx), token.substring(eqIdx + 1)))
+                else
+                    throw new RuntimeException('ERROR: Bad snapshot input: ' + token)
+            }
+        }
+        return inputs
     }
 
     private static String[] readStacksFromConsole() {
@@ -701,16 +706,6 @@ class CliRestClient {
         final String DEFAULT_SNAPSHOT = 'snapshot1'
         String snapshot = System.console().readLine("Snapshot (default: '${DEFAULT_SNAPSHOT}'): ")
         return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
-    }
-
-    private static String readSnapshotProfileFromConsole() {
-        final String DEFAULT_PROFILE = 'proAndroid'
-        String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
-        return ((profile == null) || (profile == "")) ? DEFAULT_PROFILE : profile
-    }
-
-    private static String readInputAppFromConsole() {
-        return System.console().readLine("App input path: ")
     }
 
     private static String readAnalysisProfileFromConsole() {
