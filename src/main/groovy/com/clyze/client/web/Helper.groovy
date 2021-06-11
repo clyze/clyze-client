@@ -1,20 +1,17 @@
 package com.clyze.client.web
 
 import com.clyze.client.web.api.AttachmentHandler
-import com.clyze.client.web.api.LowLevelAPI
 import com.clyze.client.web.api.Remote
-import com.clyze.client.web.http.HttpClientLifeCycle
 import groovy.transform.CompileStatic
 import java.awt.*
 import java.util.List
-import org.apache.http.HttpEntity
+
 import org.apache.http.client.ClientProtocolException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 import com.clyze.client.Message
-import com.clyze.client.web.http.HttpClientCommand
 
 @CompileStatic
 class Helper {
@@ -174,18 +171,17 @@ class Helper {
      * @param password          the user password
      * @param projectName       the project to post the snapshot
      * @param platform          the project platform (Android/Java)
-     * @param profile           the profile to use in the server
      * @param snapshotPostState the snapshot object
      */
     static void postSnapshot(String host, int port, String username, String password,
-                             String projectName, String platform, String profile, PostState snapshotPostState)
+                             String projectName, String platform, PostState snapshotPostState)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
         ensureProjectExists(remote, projectName, platform, false)
 
         println "Submitting snapshot in project '${projectName}'..."
-        String snapshotId = remote.createSnapshot(username, projectName, profile, snapshotPostState)
+        String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
         println "Done (new snapshot $snapshotId)."
     }
 
@@ -225,8 +221,7 @@ class Helper {
 
             if (!options.dry)
                 postSnapshot(options.host, options.port, options.username,
-                          options.password, options.project, options.platform,
-                          options.profile, ps)
+                        options.password, options.project, options.platform, ps)
         } catch (HttpHostConnectException ex) {
             Message.print(messages, "ERROR: Cannot post snapshot, is the server running?")
             if (debug)

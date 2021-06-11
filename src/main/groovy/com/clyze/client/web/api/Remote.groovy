@@ -108,11 +108,11 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> createSnapshot(String owner, String projectName, String profile, PostState ps)
+	Map<String, Object> createSnapshot(String owner, String projectName, PostState ps)
 			throws ClientProtocolException, HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Snapshots.&createSnapshot.curry(token, owner, projectName, profile, ps.asMultipart()),
+			requestBuilder: LowLevelAPI.Snapshots.&createSnapshot.curry(token, owner, projectName, ps.asMultipart()),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}
@@ -271,10 +271,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> analyze(String owner, String projectName, String snapshotName, String config, String profile)  {
+	Map<String, Object> analyze(String owner, String projectName, String snapshotName, String config)  {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
-				requestBuilder: LowLevelAPI.Snapshots.&analyze.curry(token, owner, projectName, snapshotName, config, profile),
+				requestBuilder: LowLevelAPI.Snapshots.&analyze.curry(token, owner, projectName, snapshotName, config),
 				onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}

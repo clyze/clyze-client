@@ -10,7 +10,6 @@ public class PostOptions {
     public String password;
     public String project;
     public String platform;
-    public String profile;
     public boolean dry;
     /** true if Android should be supported by the server */
     public boolean android;

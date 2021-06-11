@@ -307,8 +307,8 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
-        static final HttpPost analyze(String userToken, String owner, String projectName, String snapshotName, String config, String profile, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).analyzeEndpoint(profile)
+        static final HttpPost analyze(String userToken, String owner, String projectName, String snapshotName, String config, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).analyzeEndpoint()
             // Use empty multipart
             post.setEntity(MultipartEntityBuilder.create().build())
             return post
@@ -497,8 +497,8 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigsSuffix()))) as HttpGet
         }
 
-        HttpPost analyzeEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
+        HttpPost analyzeEndpoint() {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analyze"))) as HttpPost
         }
 
         HttpGet getOutputEndpoint() {

@@ -644,8 +644,7 @@ class CliRestClient {
                 String project = readProjectNameFromConsole(cliOptions)
                 String snapshot = readSnapshotNameFromConsole(cliOptions)
                 String config = readConfigFromConsole()
-                String profile = readAnalysisProfileFromConsole()
-                return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, profile, host, port)
+                return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -735,12 +734,6 @@ class CliRestClient {
         else
             snapshot = System.console().readLine("Snapshot (default: '${DEFAULT_SNAPSHOT}'): ")
         return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
-    }
-
-    private static String readAnalysisProfileFromConsole() {
-        final String DEFAULT_ANALYSIS_PROFILE = 'r8'
-        String profile = System.console().readLine("Profile (default is '${DEFAULT_ANALYSIS_PROFILE}'): ")
-        return ((profile == null) || (profile == "")) ? DEFAULT_ANALYSIS_PROFILE : profile
     }
 
     private static String readConfigFromConsole(String defaultConfig = 'clyze.json') {
