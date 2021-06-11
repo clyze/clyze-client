@@ -19,7 +19,7 @@ import com.clyze.client.web.http.HttpClientCommand
 @CompileStatic
 class Helper {
 
-    /** Default file to record metadata when posting a build. */
+    /** Default file to record metadata when posting a snapshot. */
     public static final String POST_METADATA       = "post-metadata.json"
 
     final static String ANALYSIS_JSON = "analysis.json"
@@ -92,7 +92,7 @@ class Helper {
         new HttpClientCommand(
             httpClientLifeCycle: httpClientLifeCycle,
             requestBuilder     : { String host, int port ->
-                if (what == 'BUILD') {
+                if (what == 'SNAPSHOT') {
                     LowLevelAPI.Requests.getProfileOptions(host, port)
                 } else {
                     throw new RuntimeException("Cannot find options for: ${what}")
@@ -166,44 +166,44 @@ class Helper {
      * @param port         the server port
      * @param username     the user name
      * @param password     the user password
-     * @param projectName  the project to post the build
+     * @param projectName  the project to post the snapshot
      * @param platform     the project platform (Android/Java)
-     * @param ps           the build representation
+     * @param ps           the snapshot representation
      * @param handler      a handler of the resulting file returned by the server
      * @throws ClientProtocolException  if the server encountered an error
      */
     @SuppressWarnings('unused')
-    static void repackageBuildForCI(String host, int port, String username, String password,
-                                    String projectName, String platform,
-                                    PostState ps, AttachmentHandler<String> handler)
+    static void repackageSnapshotForCI(String host, int port, String username, String password,
+                                       String projectName, String platform,
+                                       PostState ps, AttachmentHandler<String> handler)
     throws ClientProtocolException {
         Remote remote = connect(host, port, username, password)
         ensureProjectExists(remote, projectName, platform, false)
-        remote.repackageBuildForCI(username, projectName, ps, handler)
+        remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
 
     /**
-     * Invokes the endpoint that creates/posts a build.
+     * Invokes the endpoint that creates/posts a snapshot.
      *
      * @param host              the server host name
      * @param port              the server port
      * @param username          the user name
      * @param password          the user password
-     * @param projectName       the project to post the build
+     * @param projectName       the project to post the snapshot
      * @param platform          the project platform (Android/Java)
      * @param profile           the profile to use in the server
-     * @param buildPostState    the build object
+     * @param snapshotPostState the snapshot object
      */
-    static void postBuild(String host, int port, String username, String password,
-                          String projectName, String platform, String profile, PostState buildPostState)
+    static void postSnapshot(String host, int port, String username, String password,
+                             String projectName, String platform, String profile, PostState snapshotPostState)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
         ensureProjectExists(remote, projectName, platform, false)
 
-        println "Submitting build in project '${projectName}'..."
-        String buildId = remote.createBuild(username, projectName, profile, buildPostState)
-        println "Done (new build $buildId)."
+        println "Submitting snapshot in project '${projectName}'..."
+        String snapshotId = remote.createSnapshot(username, projectName, profile, snapshotPostState)
+        println "Done (new snapshot $snapshotId)."
     }
 
     static void post(PostState ps, PostOptions options, List<Message> messages,
@@ -241,15 +241,15 @@ class Helper {
                 return
 
             if (!options.dry)
-                postBuild(options.host, options.port, options.username,
+                postSnapshot(options.host, options.port, options.username,
                           options.password, options.project, options.platform,
                           options.profile, ps)
         } catch (HttpHostConnectException ex) {
-            Message.print(messages, "ERROR: Cannot post build, is the server running?")
+            Message.print(messages, "ERROR: Cannot post snapshot, is the server running?")
             if (debug)
                 ex.printStackTrace()
         } catch (Exception ex) {
-            Message.print(messages, "ERROR: Cannot post build: " + ex.getMessage())
+            Message.print(messages, "ERROR: Cannot post snapshot: " + ex.getMessage())
             if (debug)
                 ex.printStackTrace()
         }
@@ -271,9 +271,9 @@ class Helper {
             return true
 
         Map<String, Object> diag = diagnose(options)
-        // Check if the server can receive Android builds.
+        // Check if the server can receive Android snapshots.
         if (options.android && !isAndroidSupported(diag)) {
-            Message.print(messages, "ERROR: Cannot post build: Android SDK setup missing.")
+            Message.print(messages, "ERROR: Cannot post snapshot: Android SDK setup missing.")
             return false
         } else if (options.autoRepackaging && !supportsAutomatedRepackaging(diag)) {
             Message.print(messages, "ERROR: This version of the server does not support automated repackaging.")
@@ -330,19 +330,19 @@ class Helper {
         return Remote.at(options.host, options.port).diagnose()
     }
 
-    static void postCachedBuild(PostOptions options, File fromDir,
-                                String buildId, List<Message> messages,
-                                boolean debug) {
-        PostState buildPostState
+    static void postCachedSnapshot(PostOptions options, File fromDir,
+                                   String snapshotId, List<Message> messages,
+                                   boolean debug) {
+        PostState snapshotPostState
         try {
-            // Check if a build post state exists.
-            buildPostState = new PostState(id: buildId)
-            buildPostState.loadAndTranslatePathsFrom(fromDir)
+            // Check if a snapshot post state exists.
+            snapshotPostState = new PostState(id: snapshotId)
+            snapshotPostState.loadAndTranslatePathsFrom(fromDir)
         } catch (any) {
             Message.print(messages, "Error bundling state: ${any.message}" as String)
             return
         }
 
-        post(buildPostState, options, messages, null, null, debug)
+        post(snapshotPostState, options, messages, null, null, debug)
     }
 }

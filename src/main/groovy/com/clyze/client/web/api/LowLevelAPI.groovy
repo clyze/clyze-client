@@ -3,7 +3,6 @@ package com.clyze.client.web.api
 import com.clyze.client.web.HttpDeleteWithBody
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
-import java.nio.charset.StandardCharsets
 import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
@@ -55,40 +54,40 @@ class LowLevelAPI {
         */
 
 
-        static final HttpPost createAnalysis(String userToken, String buildId, String analysis, String host, int port) {
+        static final HttpPost createAnalysis(String userToken, String snapshotId, String analysis, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
             entityBuilder.addPart(InputConstants.ANALYSIS, new StringBody(analysis))
-            return createAnalysis(userToken, buildId, entityBuilder, host, port)
+            return createAnalysis(userToken, snapshotId, entityBuilder, host, port)
         }
 
-        static final HttpPost createAnalysis(String userToken, String buildId, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new HttpPost(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/analyses"))
+        static final HttpPost createAnalysis(String userToken, String snapshotId, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new HttpPost(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/analyses"))
             if (userToken) post.addHeader(Endpoints.HEADER_TOKEN, userToken)
             post.setEntity(entityBuilder.build())
             return post
         }
 
-        static final HttpPut executeAnalysisAction(String userToken, String buildId, String analysis, String action, String host, int port) {
-            HttpPut put = new HttpPut(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/analyses/${analysis}/action/${action}"))
+        static final HttpPut executeAnalysisAction(String userToken, String snapshotId, String analysis, String action, String host, int port) {
+            HttpPut put = new HttpPut(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/analyses/${analysis}/action/${action}"))
             if (userToken) put.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return put
         }
 
-        static final HttpGet getAnalysisStatus(String userToken, String buildId, String analysis, String host, int port) {
-            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/analyses/${analysis}"))
+        static final HttpGet getAnalysisStatus(String userToken, String snapshotId, String analysis, String host, int port) {
+            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/analyses/${analysis}"))
             if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return get
         }
 
-        static final HttpGet getSymbolAt(String userToken, String buildId, String analysisId, String file, int line, int col, String host, int port) {
+        static final HttpGet getSymbolAt(String userToken, String snapshotId, String analysisId, String file, int line, int col, String host, int port) {
             String fileEncoded = URLEncoder.encode(file, "UTF-8")       
-            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/bundles/${buildId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
+            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
             if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return get
         }        
 
         static final HttpGet getProfileOptions(String host, int port) {
-            return new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/options/bundles"))
+            return new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/options/snapshots"))
         }        
 
         static final HttpGet getUsers(String userToken, String host, int port) {
@@ -149,77 +148,78 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPost repackageBuildForCI(String userToken, String owner, String projectName,
-                                                  MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageBuildForCIEndpoint()
+        static final HttpPost repackageSnapshotForCI(String userToken, String owner, String projectName,
+                                                     MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageSnapshotForCIEndpoint()
             post.setEntity(entityBuilder.build())
             return post
         }
     }
 
-    static final class Builds {
+    static final class Snapshots {
 
-        static final HttpGet listBuilds(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).listBuildsEndpoint()
+        static final HttpGet listSnapshots(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).listSnapshotsEndpoint()
         }
 
-        static final HttpGet getBuild(String userToken, String owner, String projectName, String buildName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName).getBuildEndpoint()
+        static final HttpGet getSnapshot(String userToken, String owner, String projectName, String snapshotName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getSnapshotEndpoint()
         }
 
-        static final HttpPost createBuild(String userToken, String owner, String projectName, String profile, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postBuildEndpoint(profile)
+        static final HttpPost createSnapshot(String userToken, String owner, String projectName, String profile, MultipartEntityBuilder entityBuilder, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postSnapshotEndpoint(profile)
             post.setEntity(entityBuilder.build())
             return post
         }
 
-        static final HttpPost createBuild(String userToken, String owner, String projectName, String profile, String buildResolvableByServer, String host, int port) {
+        static final HttpPost createSnapshot(String userToken, String owner, String projectName, String profile,
+                                             String snapshotResolvableByServer, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
-            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(buildResolvableByServer))
+            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(snapshotResolvableByServer))
             entityBuilder.addPart(InputConstants.PLATFORM, new StringBody(profile))
-            return createBuild(userToken, owner, projectName, profile, entityBuilder, host, port)
+            return createSnapshot(userToken, owner, projectName, profile, entityBuilder, host, port)
         }
 
         static final HttpGet listSamples(String userToken, String owner, String projectName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).listSamplesEndpoint()
         }
 
-        static final HttpPost createBuildFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).createBuildFromSampleEndpoint(sampleName)
+        static final HttpPost createSnapshotFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).createSnapshotFromSampleEndpoint(sampleName)
         }
 
-        static final HttpDelete deleteBuild(String userToken, String owner, String projectName, String buildName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName).deleteBuildEndpoint()
+        static final HttpDelete deleteSnapshot(String userToken, String owner, String projectName, String snapshotName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).deleteSnapshotEndpoint()
         }
 
-        static final HttpGet listConfigurations(String userToken, String owner, String projectName, String buildName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName).listConfigurationsEndpoint()
+        static final HttpGet listConfigurations(String userToken, String owner, String projectName, String snapshotName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).listConfigurationsEndpoint()
         }
 
-        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).getConfigurationEndpoint()
+        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).getConfigurationEndpoint()
         }
 
-        static final HttpDelete deleteConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).deleteConfigurationEndpoint()
+        static final HttpDelete deleteConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).deleteConfigurationEndpoint()
         }
 
-        static final HttpPost cloneConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).cloneConfigurationEndpoint()
+        static final HttpPost cloneConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).cloneConfigurationEndpoint()
         }
 
-        static final HttpPost pasteConfigurationRules(String userToken, String owner, String projectName, String buildName,
+        static final HttpPost pasteConfigurationRules(String userToken, String owner, String projectName, String snapshotName,
                                                       String config, String fromConfig, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, buildName, config).pasteConfigurationRulesEndpoint()
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).pasteConfigurationRulesEndpoint()
             List<NameValuePair> params = new ArrayList<>()
             params.add(new BasicNameValuePair('name', fromConfig))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
         }
 
-        static final HttpPut updateConfiguration(String userToken, String owner, String projectName, String buildName,
+        static final HttpPut updateConfiguration(String userToken, String owner, String projectName, String snapshotName,
                                                  String config, List<Tuple2<String, Object>> settings, String host, int port) {
-            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config).updateConfigurationEndpoint()
+            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).updateConfigurationEndpoint()
             List<NameValuePair> params = new ArrayList<>()
             settings?.each {
                 def value = it.v2
@@ -238,34 +238,34 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpPut renameConfiguration(String userToken, String owner, String projectName, String buildName,
+        static final HttpPut renameConfiguration(String userToken, String owner, String projectName, String snapshotName,
                                                  String config, String newName, String host, int port) {
-            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config).renameConfigurationEndpoint()
+            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).renameConfigurationEndpoint()
             List<NameValuePair> params = new ArrayList<>(1)
             params.add(new BasicNameValuePair('name', newName))
             put.setEntity(new UrlEncodedFormEntity(params))
             return put
         }
 
-        static final HttpGet getRules(String userToken, String owner, String projectName, String buildName, String config, String originType, Integer start, Integer count, String host, int port) {
+        static final HttpGet getRules(String userToken, String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count, String host, int port) {
             Map<String, Object> extraParams = [
                     originType: originType,
                     _start     : start,
                     _count     : count
                     ] as Map<String, Object>
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).getRulesEndpoint()
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).getRulesEndpoint()
         }
 
-        static final HttpDeleteWithBody deleteRules(String userToken, String owner, String projectName, String buildName, String config, Collection<String> ids, String host, int port) {
-            HttpDeleteWithBody delete = new Endpoints(host, port, userToken, owner, projectName, buildName, config).deleteRulesEndpoint()
+        static final HttpDeleteWithBody deleteRules(String userToken, String owner, String projectName, String snapshotName, String config, Collection<String> ids, String host, int port) {
+            HttpDeleteWithBody delete = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).deleteRulesEndpoint()
             List<NameValuePair> params = new LinkedList<>()
             ids.forEach { String id -> params.add(new BasicNameValuePair('ids', id)) }
             delete.setEntity(new UrlEncodedFormEntity(params))
             return delete
         }
 
-        static final HttpPost postRule(String userToken, String owner, String projectName, String buildName, String config, String ruleBody, String doopId, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, buildName, config).postRuleEndpoint()
+        static final HttpPost postRule(String userToken, String owner, String projectName, String snapshotName, String config, String ruleBody, String doopId, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).postRuleEndpoint()
             List<NameValuePair> params = new ArrayList<>(3)
             if (ruleBody)
                 params.add(new BasicNameValuePair('ruleBody', ruleBody))
@@ -276,9 +276,9 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPut putRule(String userToken, String owner, String projectName, String buildName, String config, String ruleId, String ruleBody, String comment, String host, int port) {
+        static final HttpPut putRule(String userToken, String owner, String projectName, String snapshotName, String config, String ruleId, String ruleBody, String comment, String host, int port) {
             Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
-            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).putRuleEndpoint()
+            HttpPut put = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).putRuleEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
             if (ruleBody)
                 params.add(new BasicNameValuePair('ruleBody', ruleBody))
@@ -289,26 +289,26 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpDelete deleteRule(String userToken, String owner, String projectName, String buildName, String config, String ruleId, String host, int port) {
+        static final HttpDelete deleteRule(String userToken, String owner, String projectName, String snapshotName, String config, String ruleId, String host, int port) {
             Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).deleteRuleEndpoint()
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).deleteRuleEndpoint()
         }
 
-        static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).exportConfigurationEndpoint()
+        static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).exportConfigurationEndpoint()
         }
 
-        static final HttpGet getRuntime(String userToken, String owner, String projectName, String buildName, String config, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config).getRuntimeEndpoint()
+        static final HttpGet getRuntime(String userToken, String owner, String projectName, String snapshotName, String config, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).getRuntimeEndpoint()
         }
 
-        static final HttpGet getOutput(String userToken, String owner, String projectName, String buildName, String config, String output, String host, int port) {
+        static final HttpGet getOutput(String userToken, String owner, String projectName, String snapshotName, String config, String output, String host, int port) {
             Map<String, Object> extraParams = [output: output] as Map<String, Object>
-            return new Endpoints(host, port, userToken, owner, projectName, buildName, config, extraParams).getOutputEndpoint()
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
-        static final HttpPost analyze(String userToken, String owner, String projectName, String buildName, String config, String profile, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, buildName, config).analyzeEndpoint(profile)
+        static final HttpPost analyze(String userToken, String owner, String projectName, String snapshotName, String config, String profile, String host, int port) {
+            HttpPost post = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).analyzeEndpoint(profile)
             // Use empty multipart
             post.setEntity(MultipartEntityBuilder.create().build())
             return post
@@ -344,19 +344,19 @@ class LowLevelAPI {
         String userToken
         String username
         String projectName
-        String buildName
+        String snapshotName
         String config
         Map<String, Object> extraParams
 
         Endpoints(String host, int port, String userToken=null, String username=null,
-                  String projectName=null, String buildName=null, String config=null,
+                  String projectName=null, String snapshotName=null, String config=null,
                   Map<String, Object> extraParams=null) {
             this.host        = host
             this.port        = port
             this.userToken   = userToken
             this.username    = username
             this.projectName = projectName
-            this.buildName   = buildName
+            this.snapshotName= snapshotName
             this.config      = config
             this.extraParams = extraParams
         }
@@ -413,24 +413,24 @@ class LowLevelAPI {
             withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix()))) as HttpPut
         }
 
-        HttpPost repackageBuildForCIEndpoint() {
+        HttpPost repackageSnapshotForCIEndpoint() {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage"))) as HttpPost
         }
 
-        HttpGet listBuildsEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildsSuffix()))) as HttpGet
+        HttpGet listSnapshotsEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotsSuffix()))) as HttpGet
         }
 
-        HttpGet getBuildEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildSuffix()))) as HttpGet
+        HttpGet getSnapshotEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix()))) as HttpGet
         }
 
-        HttpPost postBuildEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildsSuffix() + "?profile=${profile}&origin=API"))) as HttpPost
+        HttpPost postSnapshotEndpoint(String profile) {
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix() + "?profile=${profile}&origin=API"))) as HttpPost
         }
 
-        HttpDelete deleteBuildEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, buildSuffix()))) as HttpDelete
+        HttpDelete deleteSnapshotEndpoint() {
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotSuffix()))) as HttpDelete
         }
 
         HttpGet listSamplesEndpoint() {
@@ -438,27 +438,27 @@ class LowLevelAPI {
         }
 
         HttpGet getConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix()))) as HttpGet
         }
 
         HttpDelete deleteConfigurationEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpDelete
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotConfigSuffix()))) as HttpDelete
         }
 
         HttpPut updateConfigurationEndpoint() {
-            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, buildConfigSuffix()))) as HttpPut
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, snapshotConfigSuffix()))) as HttpPut
         }
 
         HttpPut renameConfigurationEndpoint() {
-            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, buildConfigSuffix() + '/name'))) as HttpPut
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/name'))) as HttpPut
         }
 
         HttpPost cloneConfigurationEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + '/clone'))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/clone'))) as HttpPost
         }
 
         HttpPost pasteConfigurationRulesEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + '/pasteRules'))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/pasteRules'))) as HttpPost
         }
 
         HttpGet getRulesEndpoint() {
@@ -482,26 +482,26 @@ class LowLevelAPI {
         }
 
         HttpGet exportConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix() + '/export'))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/export'))) as HttpGet
         }
 
         HttpGet getRuntimeEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigSuffix() + "/analysis/runtime"))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analysis/runtime"))) as HttpGet
         }
 
         HttpGet listConfigurationsEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, buildConfigsSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigsSuffix()))) as HttpGet
         }
 
         HttpPost analyzeEndpoint(String profile) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, buildConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analyze?profile=${profile}"))) as HttpPost
         }
 
         HttpGet getOutputEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, outputSuffix()))) as HttpGet
         }
 
-        HttpPost createBuildFromSampleEndpoint(String sampleName) {
+        HttpPost createSnapshotFromSampleEndpoint(String sampleName) {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}"))) as HttpPost
         }
 
@@ -528,28 +528,28 @@ class LowLevelAPI {
             return "${projectsSuffix()}/$projectName"
         }
 
-        String buildsSuffix() {
-            return "${projectSuffix()}/bundles"
+        String snapshotsSuffix() {
+            return "${projectSuffix()}/snapshots"
         }
 
-        String buildSuffix() {
-            if (!buildName) throw new RuntimeException("No build name")
-            return "${buildsSuffix()}/$buildName"
+        String snapshotSuffix() {
+            if (!snapshotName) throw new RuntimeException("No snapshot name")
+            return "${snapshotsSuffix()}/$snapshotName"
         }
 
-        String buildConfigsSuffix() {
-            return "${buildSuffix()}/configs"
+        String snapshotConfigsSuffix() {
+            return "${snapshotSuffix()}/configs"
         }
 
-        String buildConfigSuffix() {
+        String snapshotConfigSuffix() {
             if (!config) throw new RuntimeException("No config")
-            return "${buildConfigsSuffix()}/${config}"
+            return "${snapshotConfigsSuffix()}/${config}"
         }
 
         String outputSuffix() {
             String output = extraParams['output'] as String
             if (!output) throw new RuntimeException("No output")
-            return "${buildConfigSuffix()}/outputs/${output}"
+            return "${snapshotConfigSuffix()}/outputs/${output}"
         }
 
         String getQueryForExtraParams() {
@@ -564,13 +564,13 @@ class LowLevelAPI {
         }
 
         String rulesSuffix() {
-            return "${buildConfigSuffix()}/rules" + getQueryForExtraParams()
+            return "${snapshotConfigSuffix()}/rules" + getQueryForExtraParams()
         }
 
         String ruleSuffix() {
             String ruleId = extraParams['ruleId'] as String
             if (!ruleId) throw new RuntimeException("No rule id")
-            return "${buildConfigSuffix()}/rules/${ruleId}"
+            return "${snapshotConfigSuffix()}/rules/${ruleId}"
         }
 
         String samplesSuffix() {

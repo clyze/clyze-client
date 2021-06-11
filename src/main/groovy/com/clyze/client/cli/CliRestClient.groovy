@@ -6,8 +6,6 @@ import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 import groovy.cli.commons.OptionAccessor
 // import groovy.transform.TypeChecked
 import com.clyze.client.cli.CliAuthenticator.Selector
-import com.clyze.client.web.http.*
-import com.clyze.client.web.api.*
 import com.clyze.client.web.Helper as ClientHelper
 import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
@@ -23,12 +21,12 @@ import org.apache.http.HttpEntity
  *     <li>get_project       - get a project
  *     <li>delete_project    - delete a project
  *
- *     <li>list_builds       - list the available builds
- *     <li>get_build         - get a build
- *     <li>post_build        - create a new build
- *     <li>delete_build      - delete a build
- *     <li>list_samples      - list the available sample builds
- *     <li>post_sample_build - create a new build, based on a given sample
+ *     <li>list_snapshots    - list the available snapshots
+ *     <li>get_snapshot      - get a snapshot
+ *     <li>post_snapshot     - create a new snapshot
+ *     <li>delete_snapshot   - delete a snapshot
+ *     <li>list_samples      - list the available sample snapshots
+ *     <li>post_sample       - create a new snapshot, based on a given sample
  *
  *     <li>list_configurations - list the available configurations
  *     <li>get_config        - get a configuration
@@ -88,7 +86,7 @@ class CliRestClient {
     }
 
     /*
-    //Used by comands to list analyses and builds
+    //Used by comands to list analyses and snapshots
     private static final Closure<HttpUriRequest> LIST_REQUEST_BUILDER = { String url ->
         Integer start = 0
         Integer count = DEFAULT_LIST_SIZE
@@ -161,20 +159,20 @@ class CliRestClient {
         }
     )    
 
-    private static final CliRestCommand LIST_BUILDS = new CliRestCommand(
-        name               : 'list_builds',
-        description        : 'list the builds stored in the remote server',
+    private static final CliRestCommand LIST_SNAPSHOTS = new CliRestCommand(
+        name               : 'list_snapshots',
+        description        : 'list the snapshots stored in the remote server',
         //TODO add pagination options
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         requestBuilder     : { String host, int port ->
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole()
-            return LowLevelAPI.Builds.listBuilds(token, user, project, host, port)
+            return LowLevelAPI.Snapshots.listSnapshots(token, user, project, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             def json = LowLevelAPI.Responses.parseJson(entity)
-            println "== Builds =="
+            println "== Snapshots =="
             for (def result : json.results) {
                 def arts = result.appArtifacts.collect { it.name }.toString()
                 println "* ${result.displayName} (${result.profile.id}): ${arts}"
@@ -186,14 +184,14 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_SAMPLES = new CliRestCommand(
             name               : 'list_samples',
-            description        : 'list the sample builds available in the remote server',
+            description        : 'list the sample snapshots available in the remote server',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                return LowLevelAPI.Builds.listSamples(token, user, project, host, port)
+                return LowLevelAPI.Snapshots.listSamples(token, user, project, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -274,16 +272,16 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand GET_BUILD = new CliRestCommand(
-            name               : 'get_build',
-            description        : 'get a build',
+    private static final CliRestCommand GET_SNAPSHOT = new CliRestCommand(
+            name               : 'get_snapshot',
+            description        : 'read a snapshot',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
-                return LowLevelAPI.Builds.getBuild(token, user, project, build, host, port)
+                String snapshot = readSnapshotNameFromConsole()
+                return LowLevelAPI.Snapshots.getSnapshot(token, user, project, snapshot, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -291,12 +289,12 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand POST_BUILD = new CliRestCommand(
-        name               : 'post_build',
-        description        : 'posts a new build to the remote server',
+    private static final CliRestCommand POST_SNAPSHOT = new CliRestCommand(
+        name               : 'post_snapshot',
+        description        : 'posts a new snapshot to the remote server',
         httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
         optionsBuilder     : { String host, int port ->
-            def json = ClientHelper.createCommandForOptionsDiscovery("BUILD", new DefaultHttpClientLifeCycle()).execute(host, port)
+            def json = ClientHelper.createCommandForOptionsDiscovery("SNAPSHOT", new DefaultHttpClientLifeCycle()).execute(host, port)
             return convertJsonEncodedOptionsToCliOptions(json)
         },
         requestBuilder     : { String host, int port ->
@@ -305,8 +303,8 @@ class CliRestClient {
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole()
-            String profile = readBuildProfileFromConsole()
-            return LowLevelAPI.Builds.createBuild(token, user, project, profile, post.asMultipart(), host, port)
+            String profile = readSnapshotProfileFromConsole()
+            return LowLevelAPI.Snapshots.createSnapshot(token, user, project, profile, post.asMultipart(), host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -319,7 +317,7 @@ class CliRestClient {
             description        : 'automated repackaging endpoint',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             optionsBuilder     : { String host, int port ->
-                def json = ClientHelper.createCommandForOptionsDiscovery("BUILD", new DefaultHttpClientLifeCycle()).execute(host, port)
+                def json = ClientHelper.createCommandForOptionsDiscovery("SNAPSHOT", new DefaultHttpClientLifeCycle()).execute(host, port)
                 return convertJsonEncodedOptionsToCliOptions(json)
             },
             requestBuilder     : { String host, int port ->
@@ -328,7 +326,7 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                return LowLevelAPI.Projects.repackageBuildForCI(token, user, project, post.asMultipart(), host, port)
+                return LowLevelAPI.Projects.repackageSnapshotForCI(token, user, project, post.asMultipart(), host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -336,17 +334,17 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand DELETE_BUILD = new CliRestCommand(
-            name               : 'delete_build',
-            description        : 'delete build stored in the remote server',
+    private static final CliRestCommand DELETE_SNAPSHOT = new CliRestCommand(
+            name               : 'delete_snapshot',
+            description        : 'delete snapshot stored in the remote server',
             //TODO add pagination options
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token   = getUserToken(true, host, port)
                 String user    = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build   = readBuildNameFromConsole()
-                return LowLevelAPI.Builds.deleteBuild(token, user, project, build, host, port)
+                String snapshot   = readSnapshotNameFromConsole()
+                return LowLevelAPI.Snapshots.deleteSnapshot(token, user, project, snapshot, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -354,9 +352,9 @@ class CliRestClient {
             }
     )
 
-    private static final CliRestCommand POST_SAMPLE_BUILD = new CliRestCommand(
-            name               : 'post_sample_build',
-            description        : 'posts a new build to the remote server, based on a sample',
+    private static final CliRestCommand POST_SAMPLE_SNAPSHOT = new CliRestCommand(
+            name               : 'post_sample_snapshot',
+            description        : 'posts a new snapshot to the remote server, based on a sample',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
@@ -366,7 +364,7 @@ class CliRestClient {
                 String sampleName = System.console().readLine("Sample name (default: '${DEFAULT_SAMPLE_NAME}'): ")
                 if ('' == sampleName)
                     sampleName = DEFAULT_SAMPLE_NAME
-                return LowLevelAPI.Builds.createBuildFromSample(token, user, project, sampleName, host, port)
+                return LowLevelAPI.Snapshots.createSnapshotFromSample(token, user, project, sampleName, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
@@ -391,14 +389,14 @@ class CliRestClient {
 
     private static final CliRestCommand LIST_CONFIGURATIONS = new CliRestCommand(
             name               : 'list_configurations',
-            description        : 'list the configurations of a build',
+            description        : 'list the configurations of a snapshot',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
-                return LowLevelAPI.Builds.listConfigurations(token, user, project, build, host, port)
+                String snapshot = readSnapshotNameFromConsole()
+                return LowLevelAPI.Snapshots.listConfigurations(token, user, project, snapshot, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -408,15 +406,15 @@ class CliRestClient {
 
     private static final CliRestCommand GET_CONFIGURATION = new CliRestCommand(
             name               : 'get_config',
-            description        : 'get a build configuration',
+            description        : 'get a snapshot configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Builds.getConfiguration(token, user, project, build, config, host, port)
+                return LowLevelAPI.Snapshots.getConfiguration(token, user, project, snapshot, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -426,15 +424,15 @@ class CliRestClient {
 
     private static final CliRestCommand CLONE_CONFIGURATION = new CliRestCommand(
             name               : 'clone_config',
-            description        : 'clone a build configuration',
+            description        : 'clone a snapshot configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Builds.cloneConfiguration(token, user, project, build, config, host, port)
+                return LowLevelAPI.Snapshots.cloneConfiguration(token, user, project, snapshot, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -444,16 +442,16 @@ class CliRestClient {
 
     private static final CliRestCommand RENAME_CONFIGURATION = new CliRestCommand(
             name               : 'rename_config',
-            description        : 'rename a build configuration',
+            description        : 'rename a snapshot configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String newName = readConfigFromConsole('new-name.json')
-                return LowLevelAPI.Builds.renameConfiguration(token, user, project, build, config, newName, host, port)
+                return LowLevelAPI.Snapshots.renameConfiguration(token, user, project, snapshot, config, newName, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -463,16 +461,16 @@ class CliRestClient {
 
     private static final CliRestCommand PASTE_CONFIGURATION_RULES = new CliRestCommand(
             name               : 'paste_rules',
-            description        : 'pastes rules from a build configuration to another configuration',
+            description        : 'pastes rules from a snapshot configuration to another configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String fromConfig = readConfigFromConsole('config2.json')
-                return LowLevelAPI.Builds.pasteConfigurationRules(token, user, project, build, config, fromConfig, host, port)
+                return LowLevelAPI.Snapshots.pasteConfigurationRules(token, user, project, snapshot, config, fromConfig, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -482,15 +480,15 @@ class CliRestClient {
 
     private static final CliRestCommand DELETE_CONFIGURATION = new CliRestCommand(
             name               : 'delete_config',
-            description        : 'delete a build configuration',
+            description        : 'delete a snapshot configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Builds.deleteConfiguration(token, user, project, build, config, host, port)
+                return LowLevelAPI.Snapshots.deleteConfiguration(token, user, project, snapshot, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -506,11 +504,11 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String idsLine = System.console().readLine('Rule IDs, separated by comma: ')
                 List<String> ids = idsLine.tokenize(',')
-                return LowLevelAPI.Builds.deleteRules(token, user, project, build, config, ids, host, port)
+                return LowLevelAPI.Snapshots.deleteRules(token, user, project, snapshot, config, ids, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -526,7 +524,7 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String originType = System.console().readLine("[Optional] Origin type: ")
                 if (originType == '')
@@ -535,7 +533,7 @@ class CliRestClient {
                 Integer _start = start == '' ? null : Integer.valueOf(start)
                 String count = System.console().readLine("[Optional] Pagination/count: ")
                 Integer _count = count == '' ? null : Integer.valueOf(count)
-                return LowLevelAPI.Builds.getRules(token, user, project, build, config, originType, _start, _count, host, port)
+                return LowLevelAPI.Snapshots.getRules(token, user, project, snapshot, config, originType, _start, _count, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -551,10 +549,10 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleBody = System.console().readLine("Rule body: ")
-                return LowLevelAPI.Builds.postRule(token, user, project, build, config, ruleBody, null, host, port)
+                return LowLevelAPI.Snapshots.postRule(token, user, project, snapshot, config, ruleBody, null, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -570,12 +568,12 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleId = System.console().readLine("Rule id: ")
                 String ruleBody = System.console().readLine("Rule body: ")
                 String comment = System.console().readLine("Rule comment: ")
-                return LowLevelAPI.Builds.putRule(token, user, project, build, config, ruleId, ruleBody, comment, host, port)
+                return LowLevelAPI.Snapshots.putRule(token, user, project, snapshot, config, ruleId, ruleBody, comment, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -591,10 +589,10 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String ruleId = System.console().readLine("Rule id: ")
-                return LowLevelAPI.Builds.deleteRule(token, user, project, build, config, ruleId, host, port)
+                return LowLevelAPI.Snapshots.deleteRule(token, user, project, snapshot, config, ruleId, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -604,15 +602,15 @@ class CliRestClient {
 
     private static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand(
             name               : 'export_config',
-            description        : 'export a build configuration',
+            description        : 'export a snapshot configuration',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Builds.exportConfiguration(token, user, project, build, config, host, port)
+                return LowLevelAPI.Snapshots.exportConfiguration(token, user, project, snapshot, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String conf = LowLevelAPI.Responses.asString(entity)
@@ -625,16 +623,16 @@ class CliRestClient {
 
     private static final CliRestCommand ANALYZE = new CliRestCommand(
             name               : 'analyze',
-            description        : 'run an analysis on a code build',
+            description        : 'run an analysis on a code snapshot',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String profile = readAnalysisProfileFromConsole()
-                return LowLevelAPI.Builds.analyze(token, user, project, build, config, profile, host, port)
+                return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, profile, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -650,9 +648,9 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
-                return LowLevelAPI.Builds.getRuntime(token, user, project, build, config, host, port)
+                return LowLevelAPI.Snapshots.getRuntime(token, user, project, snapshot, config, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
@@ -662,16 +660,16 @@ class CliRestClient {
 
     private static final CliRestCommand GET_OUTPUT = new CliRestCommand(
             name               : 'get_output',
-            description        : 'get a build output',
+            description        : 'get a snapshot output',
             httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
             requestBuilder     : { String host, int port ->
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole()
-                String build = readBuildNameFromConsole()
+                String snapshot = readSnapshotNameFromConsole()
                 String config = readConfigFromConsole()
                 String output = System.console().readLine("Output: ")
-                return LowLevelAPI.Builds.getOutput(token, user, project, build, config, output, host, port)
+                return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, output, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 LowLevelAPI.Responses.asString(entity)
@@ -699,13 +697,13 @@ class CliRestClient {
         return ('' == stacks) ? (new String[] {DEFAULT_STACK}) : (stacks.tokenize(' ') as String[])
     }
 
-    private static String readBuildNameFromConsole() {
-        final String DEFAULT_BUILD = 'build1'
-        String build = System.console().readLine("Build (default: '${DEFAULT_BUILD}'): ")
-        return ('' == build) ? DEFAULT_BUILD : build
+    private static String readSnapshotNameFromConsole() {
+        final String DEFAULT_SNAPSHOT = 'snapshot1'
+        String snapshot = System.console().readLine("Snapshot (default: '${DEFAULT_SNAPSHOT}'): ")
+        return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
     }
 
-    private static String readBuildProfileFromConsole() {
+    private static String readSnapshotProfileFromConsole() {
         final String DEFAULT_PROFILE = 'proAndroid'
         String profile = System.console().readLine("Profile (default is '${DEFAULT_PROFILE}'): ")
         return ((profile == null) || (profile == "")) ? DEFAULT_PROFILE : profile
@@ -769,15 +767,15 @@ class CliRestClient {
      * The map of available commands.
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
-        // Projects
-        LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT,
-        // Builds
-        LIST_BUILDS, LIST_SAMPLES, POST_BUILD, POST_SAMPLE_BUILD, GET_BUILD, DELETE_BUILD,
-        // Configurations
-        LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
-        // Misc.
-        PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME
-        // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+            // Projects
+            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT,
+            // Snapshots
+            LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
+            // Configurations
+            LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
+            // Misc.
+            PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME
+            // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
     ].collectEntries {
         [(it.name):it]
     }
