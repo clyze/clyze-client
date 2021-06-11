@@ -112,7 +112,7 @@ class Remote {
 			throws ClientProtocolException, HttpHostConnectException {
 		new HttpClientCommand(
 			httpClientLifeCycle: httpClientLifeCycle,
-			requestBuilder: LowLevelAPI.Snapshots.&createSnapshot.curry(token, owner, projectName, ps.asMultipart()),
+			requestBuilder: LowLevelAPI.Snapshots.&createSnapshot.curry(token, owner, projectName, ps),
 			onSuccess: LowLevelAPI.Responses.&parseJson
 		).execute(host, port)
 	}

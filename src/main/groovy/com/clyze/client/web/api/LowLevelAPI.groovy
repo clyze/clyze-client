@@ -165,7 +165,7 @@ class LowLevelAPI {
 
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String host, int port) {
-            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+            MultipartEntityBuilder entityBuilder = postState.asMultipart()
             postState.inputs.each { it.addTo(entityBuilder) }
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postSnapshotEndpoint()
             post.setEntity(entityBuilder.build())

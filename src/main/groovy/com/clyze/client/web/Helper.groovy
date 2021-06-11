@@ -107,36 +107,29 @@ class Helper {
      *
      * @param remote        the Remote object to use for the connection to the server
      * @param projectName   the project name
-     * @param platform      the project platform
+     * @param stacks        the project stacks
      */
     static void ensureProjectExists(Remote remote, String projectName,
-                                    String platform, boolean debug) {
+                                    String[] stacks, boolean debug) {
         if (!projectName)
             throw new RuntimeException("Missing project name")
-        else if (!platform)
-            throw new RuntimeException("Missing project platform")
+        else if (!stacks)
+            throw new RuntimeException("Missing project stacks")
 
         Map<String, Object> proj = null
         try {
             proj = remote.getProject(remote.currentUser(), projectName)
-            String projPlatform = proj.get('platform')
-            if (projPlatform != platform)
-                throw new RuntimeException("Project ${projectName} already exists but has platform '${projPlatform}', not '${platform}'.")
         } catch (Exception ex1) {
             if (debug)
                 ex1.printStackTrace()
             try {
-                proj = remote.createProject(remote.currentUser(), projectName, platform)
-                println "Project '${projectName}' created."
+                proj = remote.createProject(remote.currentUser(), projectName, stacks)
+                println "Project '${projectName}' created with stacks: ${stacks}"
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
             }
         }
-
-        // Check that the project to use matches the intended platform.
-        String projPlatform = proj?.get('platform')
-        if (projPlatform != platform)
-            throw new RuntimeException("Project '${projectName}' is of type '${projPlatform}' != '${platform}'")
+        println "Project data: ${proj}"
     }
 
     /**
@@ -147,18 +140,18 @@ class Helper {
      * @param username     the user name
      * @param password     the user password
      * @param projectName  the project to post the snapshot
-     * @param platform     the project platform (Android/Java)
+     * @param stacks     the project platform (Android/Java)
      * @param ps           the snapshot representation
      * @param handler      a handler of the resulting file returned by the server
      * @throws ClientProtocolException  if the server encountered an error
      */
     @SuppressWarnings('unused')
     static void repackageSnapshotForCI(String host, int port, String username, String password,
-                                       String projectName, String platform,
+                                       String projectName, String[] stacks,
                                        PostState ps, AttachmentHandler<String> handler)
     throws ClientProtocolException {
         Remote remote = connect(host, port, username, password)
-        ensureProjectExists(remote, projectName, platform, false)
+        ensureProjectExists(remote, projectName, stacks, false)
         remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
 
@@ -170,15 +163,15 @@ class Helper {
      * @param username          the user name
      * @param password          the user password
      * @param projectName       the project to post the snapshot
-     * @param platform          the project platform (Android/Java)
+     * @param stacks          the project platform (Android/Java)
      * @param snapshotPostState the snapshot object
      */
     static void postSnapshot(String host, int port, String username, String password,
-                             String projectName, String platform, PostState snapshotPostState)
+                             String projectName, String[] stacks, PostState snapshotPostState)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
-        ensureProjectExists(remote, projectName, platform, false)
+        ensureProjectExists(remote, projectName, stacks, false)
 
         println "Submitting snapshot in project '${projectName}'..."
         String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
@@ -221,7 +214,7 @@ class Helper {
 
             if (!options.dry)
                 postSnapshot(options.host, options.port, options.username,
-                        options.password, options.project, options.platform, ps)
+                        options.password, options.project, options.stacks, ps)
         } catch (HttpHostConnectException ex) {
             Message.print(messages, "ERROR: Cannot post snapshot, is the server running?")
             if (debug)

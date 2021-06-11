@@ -229,7 +229,7 @@ class CliRestClient {
                 String token    = getUserToken(true, host, port)
                 String user     = getUserName(false, host, port)
                 String project  = readProjectNameFromConsole(cliOptions)
-                String[] stacks = readStacksFromConsole()
+                String[] stacks = readStacksFromConsole(cliOptions)
                 return LowLevelAPI.Projects.createProject(token, user, project, stacks, host, port)
             },
             onSuccess          : { HttpEntity entity ->
@@ -314,15 +314,20 @@ class CliRestClient {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             printProjectOptions(host, port, user, project)
-            PostState post = new PostState()
-            post.inputs.addAll(readSnapshotInputsFromConsole(cliOptions))
-            return LowLevelAPI.Snapshots.createSnapshot(token, user, project, post, host, port)
+            PostState postState = getPostState(cliOptions)
+            return LowLevelAPI.Snapshots.createSnapshot(token, user, project, postState, host, port)
         },
         onSuccess          : { HttpEntity entity ->
             String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
             return id
         }
     )
+
+    private static final PostState getPostState(OptionAccessor cliOptions) {
+        PostState postState = new PostState()
+        postState.inputs.addAll(readSnapshotInputsFromConsole(cliOptions))
+        return postState
+    }
 
     private static final void printProjectOptions(String host, int port, String user, String project) {
         Map<String, Object> options = Remote.at(host, port).getProjectOptions(user, project)
@@ -720,10 +725,14 @@ class CliRestClient {
         return inputs
     }
 
-    private static String[] readStacksFromConsole() {
+    private static String[] readStacksFromConsole(OptionAccessor cliOptions) {
         final String DEFAULT_STACK = 'jvm'
-        String stacks = System.console().readLine("Project stacks (separated by spaces, default: '${DEFAULT_STACK})': ").trim()
-        return ('' == stacks) ? (new String[] {DEFAULT_STACK}) : (stacks.tokenize(' ') as String[])
+        Collection<String> stacks = cliOptions['stacks']
+        if (stacks)
+            println "Assuming stacks = ${stacks}"
+        else
+            stacks = System.console().readLine("Project stacks (separated by spaces, default: '${DEFAULT_STACK})': ").trim().tokenize(' ')
+        return stacks ?: new String[] {DEFAULT_STACK}
     }
 
     private static String readSnapshotNameFromConsole(OptionAccessor cliOptions) {
