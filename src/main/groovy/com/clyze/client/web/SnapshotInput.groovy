@@ -8,19 +8,22 @@ import org.apache.http.entity.mime.content.StringBody
 @CompileStatic
 class SnapshotInput {
     final boolean isFile
-    final String key
     String value
 
-    SnapshotInput(boolean isFile, String key, String value) {
+    SnapshotInput(boolean isFile, String value) {
         this.isFile = isFile
-        this.key = key
         this.value = value
     }
 
-    void addTo(MultipartEntityBuilder entityBuilder) {
+    void addTo(String key, MultipartEntityBuilder entityBuilder) {
         if (isFile)
             entityBuilder.addPart(key, new FileBody(new File(value)))
         else
             entityBuilder.addPart(key, new StringBody(value))
+    }
+
+    @Override
+    String toString() {
+        return isFile ? "file<${value}>" : "string<${value}>"
     }
 }

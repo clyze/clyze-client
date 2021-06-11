@@ -325,7 +325,9 @@ class CliRestClient {
 
     private static final PostState getPostState(OptionAccessor cliOptions) {
         PostState postState = new PostState()
-        postState.inputs.addAll(readSnapshotInputsFromConsole(cliOptions))
+        readSnapshotInputsFromConsole(cliOptions).forEach { String k, SnapshotInput input ->
+            postState.addInput(k, input)
+        }
         return postState
     }
 
@@ -703,8 +705,8 @@ class CliRestClient {
         return ('' == project) ? DEFAULT_PROJECT : project
     }
 
-    private static List<SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
-        List<SnapshotInput> inputs = new ArrayList<>()
+    private static Map<String, SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
+        Map<String, SnapshotInput> inputs = new HashMap<>()
         Collection<String> tokens = cliOptions['inputs'] ?: null
         if (tokens)
             println "Assuming inputs = ${tokens}"
@@ -713,11 +715,11 @@ class CliRestClient {
         for (String token : tokens) {
             int atIdx = token.indexOf('@')
             if (atIdx > 0)
-                inputs.add(new SnapshotInput(true, token.substring(0, atIdx), token.substring(atIdx + 1)))
+                inputs.put(token.substring(0, atIdx), new SnapshotInput(true, token.substring(atIdx + 1)))
             else {
                 int eqIdx = token.indexOf('=')
                 if (eqIdx > 0)
-                    inputs.add(new SnapshotInput(false, token.substring(0, eqIdx), token.substring(eqIdx + 1)))
+                    inputs.put(token.substring(0, eqIdx), new SnapshotInput(false, token.substring(eqIdx + 1)))
                 else
                     throw new RuntimeException('ERROR: Bad snapshot input: ' + token)
             }

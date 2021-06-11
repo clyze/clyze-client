@@ -7,8 +7,6 @@ import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.commons.cli.Option
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.FileBody
-import org.apache.http.entity.mime.content.StringBody
 import org.clyze.persistent.model.Item
 
 import static org.apache.commons.io.FileUtils.copyFileToDirectory
@@ -18,7 +16,7 @@ import static org.apache.commons.io.FileUtils.copyFileToDirectory
 class PostState implements Item {
 
     String id
-    Set<SnapshotInput> inputs = new HashSet<>()
+    private Map<String, SnapshotInput> inputs = new HashMap<>()
 
     PostState() { }
 
@@ -42,16 +40,14 @@ class PostState implements Item {
      */
     String toJSONWithRelativePaths(final String prefix) {
         final int prefixLen = prefix.length() + File.pathSeparator.length()
-        List<SnapshotInput> inputs0 = inputs.collect {
-            if (it instanceof SnapshotInput) {
-                SnapshotInput i0 = (SnapshotInput)it
-                if (i0.isFile) {
-                    String path = i0.value
-                    if (path.startsWith(prefix))
-                        return new SnapshotInput(i0.isFile, i0.key, path.substring(prefixLen))
-                }
+        List<SnapshotInput> inputs0 = inputs.collect { Map.Entry<String, SnapshotInput> entry ->
+            SnapshotInput i0 = entry.value
+            if (i0.isFile) {
+                String path = i0.value
+                if (path.startsWith(prefix))
+                    return new SnapshotInput(i0.isFile, path.substring(prefixLen))
             }
-            return it
+            return i0
         }
         return JsonOutput.toJson([inputs: inputs0] as Map<String, Object>)
     }
@@ -65,18 +61,18 @@ class PostState implements Item {
 
     @Override
     void fromMap(Map<String, Object> map) {
-        (map.inputs as Set<SnapshotInput>).each {
-            if (it.isFile) {
-                addFileInput(it.key as String, it.value)
-            } else {
-                addStringInput(it.key as String, it.value)
-            }
+        (map.inputs as Map<String, SnapshotInput>).each { Map.Entry<String, SnapshotInput> entry ->
+            SnapshotInput it = entry.value
+            if (it.isFile)
+                addFileInput(entry.key, it.value)
+            else
+                addStringInput(entry.key, it.value)
         }
     }
 
     PostState saveTo(File dir) {
         //process inputs to copy all files in the given dir
-        inputs.findAll { it.isFile }.each { SnapshotInput input ->
+        inputs.findAll { it.value.isFile }.values().each { SnapshotInput input ->
             log.info "Copying: ${input.value} -> ${dir}"
             File f = new File(input.value)
             if (f.exists()) {
@@ -113,7 +109,7 @@ class PostState implements Item {
      */
     PostState loadAndTranslatePathsFrom(File dir) {
         PostState ps = loadFrom(dir)
-        ps.inputs.findAll { it.isFile }.each {
+        ps.inputs.findAll { it.value.isFile }.values().each {
             // Ignore full paths on Unix.
             if (!it.value.startsWith(File.separator))
                 it.value = (new File(dir, it.value)).canonicalPath
@@ -122,11 +118,11 @@ class PostState implements Item {
     }
 
     void addStringInput(String key, String value) {
-        inputs.add(new SnapshotInput(false, key, value))
+        inputs.put(key, new SnapshotInput(false, value))
     }
 
     void addFileInput(String key, String file) {
-        inputs.add(new SnapshotInput(true, key, file))
+        inputs.put(key, new SnapshotInput(true, file))
     }
 
     void addInputFromCliOption(Option o, OptionAccessor cliOptions) {
@@ -145,23 +141,9 @@ class PostState implements Item {
     }
 
     MultipartEntityBuilder asMultipart() {
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create()              
-        inputs.each { SnapshotInput input ->
-            if (input.isFile) {
-                File f = new File(input.value)
-                if (f.exists()) {
-                    log.debug("${input.value} is a local file, it will be posted as attachment.")
-                    builder.addPart(input.key, new FileBody(f))
-                } else {
-                    //not a local file
-                    log.debug("${input.value} is not a local file, it will be posted as text.")
-                    builder.addPart(input.key, new StringBody(input.value))
-                }
-            } else {
-                builder.addPart(input.key, new StringBody(input.value))
-            }       
-        }
-        builder
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create()
+        inputs.each { it.value.addTo(it.key, builder) }
+        return builder
     }
     
     private static String fileName(String f) {
@@ -200,4 +182,15 @@ class PostState implements Item {
 //        if (l.size() != l.toSet().size())
 //            throw new RuntimeException("Flat structure violation, duplicate elements found in: ${l}")
 //    }
+
+    Map<String, SnapshotInput> getInputs() {
+        return this.inputs
+    }
+
+    void addInput(String key, SnapshotInput input) {
+        SnapshotInput existing = inputs.get(key)
+        if (existing != null)
+            log.warn "WARNING: overriding key '${key}': ${existing} -> ${input}"
+        inputs.put(key, input)
+    }
 }

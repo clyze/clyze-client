@@ -142,9 +142,9 @@ class LowLevelAPI {
         }
 
         static final HttpPost repackageSnapshotForCI(String userToken, String owner, String projectName,
-                                                     MultipartEntityBuilder entityBuilder, String host, int port) {
+                                                     PostState postState, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageSnapshotForCIEndpoint()
-            post.setEntity(entityBuilder.build())
+            post.setEntity(postState.asMultipart().build())
             return post
         }
 
@@ -166,7 +166,6 @@ class LowLevelAPI {
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String host, int port) {
             MultipartEntityBuilder entityBuilder = postState.asMultipart()
-            postState.inputs.each { it.addTo(entityBuilder) }
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName).postSnapshotEndpoint()
             post.setEntity(entityBuilder.build())
             return post
