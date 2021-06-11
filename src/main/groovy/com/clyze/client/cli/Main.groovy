@@ -102,6 +102,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('discover').desc('Show discovered options.').build())
         opts.addOption(Option.builder().longOpt('version').desc('Display version and exit.').build())
         opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Give project name.').build())
+        opts.addOption(Option.builder().longOpt('snapshot').numberOfArgs(1).argName('ID').desc('Give snapshot id.').build())
         opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Give snapshot input (examples: app@path, key=value).').build())
         cli.setOptions(opts)
 
