@@ -88,7 +88,6 @@ class Main {
         CliBuilder cli = new CliBuilder(
             parser: new DefaultParser (),
             usage : "client -r [remote] -c [command].",
-            footer: "Note that some commands may require -r to be present in order to discover options dynamically.",
             width : 120
         )        
 
