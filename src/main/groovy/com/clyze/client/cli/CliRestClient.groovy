@@ -3,6 +3,7 @@ package com.clyze.client.cli
 import com.clyze.client.web.PostState
 import com.clyze.client.web.SnapshotInput
 import com.clyze.client.web.api.LowLevelAPI
+import com.clyze.client.web.api.Remote
 import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 // import groovy.transform.TypeChecked
 import com.clyze.client.cli.CliAuthenticator.Selector
@@ -312,6 +313,7 @@ class CliRestClient {
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
+            printProjectOptions(host, port, user, project)
             PostState post = new PostState()
             post.inputs.addAll(readSnapshotInputsFromConsole(cliOptions))
             return LowLevelAPI.Snapshots.createSnapshot(token, user, project, post, host, port)
@@ -321,6 +323,13 @@ class CliRestClient {
             return id
         }
     )
+
+    private static final void printProjectOptions(String host, int port, String user, String project) {
+        Map<String, Object> options = Remote.at(host, port).getProjectOptions(user, project)
+        options.forEach{k, v ->
+            println ("Available options (${k}): " + v.collect {it.id + (it.isFile ? "@path" : "=value")})
+        }
+    }
 
     private static final CliRestCommand REPACKAGE = new CliRestCommand(
             name               : 'repackage',
@@ -692,7 +701,7 @@ class CliRestClient {
 
     private static List<SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
         List<SnapshotInput> inputs = new ArrayList<>()
-        Collection<String> tokens = cliOptions['inputs']
+        Collection<String> tokens = cliOptions['inputs'] ?: null
         if (tokens)
             println "Assuming inputs = ${tokens}"
         else
