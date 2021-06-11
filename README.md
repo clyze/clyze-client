@@ -49,6 +49,3 @@ Then we can switch to this directory and invoke the client from there.
 ## Use as a library
 
 This project can also be built as a library. Run `./gradlew jar` for a JAR output or publish to your mavenLocal() repo via `./gradlew publishToMavenLocal`.
-
-Releases of this library go to https://bintray.com/clyze/clients/clyze-client.
-
