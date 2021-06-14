@@ -11,9 +11,105 @@ import org.apache.log4j.Logger
 import org.clyze.utils.Helper
 import org.clyze.utils.JHelper
 
+import static com.clyze.client.cli.CliRestCommand.ANALYZE
+import static com.clyze.client.cli.CliRestCommand.CLONE_CONFIGURATION
+import static com.clyze.client.cli.CliRestCommand.CREATE_PROJECT
+import static com.clyze.client.cli.CliRestCommand.CREATE_SAMPLE_PROJECT
+import static com.clyze.client.cli.CliRestCommand.DELETE_CONFIGURATION
+import static com.clyze.client.cli.CliRestCommand.DELETE_PROJECT
+import static com.clyze.client.cli.CliRestCommand.DELETE_RULE
+import static com.clyze.client.cli.CliRestCommand.DELETE_RULES
+import static com.clyze.client.cli.CliRestCommand.DELETE_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.EXPORT_CONFIGURATION
+import static com.clyze.client.cli.CliRestCommand.GET_CONFIGURATION
+import static com.clyze.client.cli.CliRestCommand.GET_OUTPUT
+import static com.clyze.client.cli.CliRestCommand.GET_PROJECT
+import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_ANALYSES
+import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_OPTIONS
+import static com.clyze.client.cli.CliRestCommand.GET_RULES
+import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.LIST_CONFIGURATIONS
+import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
+import static com.clyze.client.cli.CliRestCommand.LIST_SAMPLES
+import static com.clyze.client.cli.CliRestCommand.LIST_SNAPSHOTS
+import static com.clyze.client.cli.CliRestCommand.LIST_STACKS
+import static com.clyze.client.cli.CliRestCommand.LOGIN
+import static com.clyze.client.cli.CliRestCommand.PASTE_CONFIGURATION_RULES
+import static com.clyze.client.cli.CliRestCommand.PING
+import static com.clyze.client.cli.CliRestCommand.POST_RULE
+import static com.clyze.client.cli.CliRestCommand.POST_SAMPLE_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.POST_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.PUT_RULE
+import static com.clyze.client.cli.CliRestCommand.RENAME_CONFIGURATION
+import static com.clyze.client.cli.CliRestCommand.REPACKAGE
+import static com.clyze.client.cli.CliRestCommand.RUNTIME
+
+/**
+ * A command line client for a remote doop server.
+ *
+ * The client can execute the following commands via the remote server:
+ * <ul>
+ *     <li>list_stacks       - list the available stacks
+ *     <li>list_projects     - list the available projects
+ *     <li>create_project    - create a project
+ *     <li>create_sample_project-create a project based on a sample
+ *     <li>get_project       - get a project
+ *     <li>delete_project    - delete a project
+ *     <li>get_project_options - show the options of a project
+ *     <li>get_project_analyses - show the analyses supported by a project
+ *
+ *     <li>list_snapshots    - list the available snapshots
+ *     <li>get_snapshot      - get a snapshot
+ *     <li>post_snapshot     - create a new snapshot
+ *     <li>delete_snapshot   - delete a snapshot
+ *     <li>list_samples      - list the available sample snapshots
+ *     <li>post_sample       - create a new snapshot, based on a given sample
+ *
+ *     <li>list_configurations - list the available configurations
+ *     <li>get_config        - get a configuration
+ *     <li>delete_config     - delete a configuration
+ *     <li>clone_config      - clone a configuration
+ *     <li>rename_config     - rename a configuration
+ *     <li>get_rules         - get configuration rules
+ *     <li>delete_rules      - delete configuration rules
+ *     <li>paste_rules       - paste configuration rules
+ *     <li>export_config     - export a configuration
+ *     <li>get_output        - get an analysis output
+ *
+ *     <li>login             - authenticate user
+ *     <li>ping              - check connection with server
+ *     <li>analyze           - run an analysis
+ *     <li>repackage         - run automated repackaging
+ *     <li>runtime           - check the runtime status of an analysis
+ *     <li>list              - list the available analyses
+ *     <li>post_doop         - create a new doop analysis
+ *     <li>post_cclyzer      - create a new cclyzer analysis
+ *     <li>get               - retrieves an analysis
+ *     <li>stop              - stop an analysis
+ *     <li>query             - query a complete analysis
+ *     <li>delete            - delete an analysis
+ * </ul>
+ *
+ * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
+ */
 @CompileStatic
 @Log4j
 class Main {
+
+    /** The map of available commands. */
+    public static final Map<String, CliRestCommand> COMMANDS = [
+            // Projects
+            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
+            // Snapshots
+            LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
+            // Configurations
+            LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
+            // Misc.
+            PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME, LIST_STACKS
+            // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+    ].collectEntries {
+        [(it.name):it]
+    }
 
     /**
      * The entry point.
@@ -41,7 +137,7 @@ class Main {
 
             if (cli['c']) {
                 cmd = cli['c']
-                command = CliRestClient.COMMANDS.get(cmd.toLowerCase())
+                command = COMMANDS.get(cmd.toLowerCase())
                 if (!command) {
                     System.out.println "The value of the command option is invalid: '${cmd}'. Available commands: ${availableCommands}."
                     exitWithError()
@@ -110,7 +206,7 @@ class Main {
     }
 
     static String getAvailableCommands() {
-        return CliRestClient.COMMANDS.keySet().sort().join(', ')
+        return COMMANDS.keySet().sort().join(', ')
     }
 
     static Remote parseRemote(String remoteDef) {        
