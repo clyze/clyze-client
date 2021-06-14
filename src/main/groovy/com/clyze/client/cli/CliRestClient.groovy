@@ -16,6 +16,7 @@ import org.apache.http.HttpEntity
  *
  * The client can execute the following commands via the remote server:
  * <ul>
+ *     <li>list_stacks       - list the available stacks
  *     <li>list_projects     - list the available projects
  *     <li>create_project    - create a project
  *     <li>create_sample_project-create a project based on a sample
@@ -196,9 +197,8 @@ class CliRestClient {
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
                 println "== Samples =="
-                for (def result : json.samples) {
+                for (def result : json.samples)
                     println "* ${result}"
-                }
                 println ""
                 json as String
             }
@@ -218,6 +218,24 @@ class CliRestClient {
             def json = LowLevelAPI.Responses.parseJson(entity)
             json as String
         }
+    )
+
+    private static final CliRestCommand LIST_STACKS = new CliRestCommand(
+            name               : 'list_stacks',
+            description        : 'list the available stacks',
+            //TODO add pagination options
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                return LowLevelAPI.Requests.listStacks(host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
+                println "== Stacks =="
+                for (def result : json.get('results') as Collection<Map<String, Object>>)
+                    println "* ${result}"
+                println ""
+                json as String
+            }
     )
 
     private static final CliRestCommand CREATE_PROJECT = new CliRestCommand(
@@ -803,7 +821,7 @@ class CliRestClient {
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Misc.
-            PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME
+            PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME, LIST_STACKS
             // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
     ].collectEntries {
         [(it.name):it]

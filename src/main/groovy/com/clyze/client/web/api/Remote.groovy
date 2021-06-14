@@ -75,6 +75,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> listStacks() {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Requests.&listStacks,
+				onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> login(String username, String password) throws HttpHostConnectException {
 		new HttpClientCommand(			
 			httpClientLifeCycle: httpClientLifeCycle,

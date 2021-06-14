@@ -50,6 +50,9 @@ class LowLevelAPI {
         } 
         */
 
+        static final HttpGet listStacks(String host, int port) {
+            return new Endpoints(host, port).getStacksEndpoint()
+        }
 
         static final HttpPost createAnalysis(String userToken, String snapshotId, String analysis, String host, int port) {
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
@@ -390,6 +393,10 @@ class LowLevelAPI {
 
         HttpGet listProjectsEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectsSuffix()))) as HttpGet
+        }
+
+        HttpGet getStacksEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, "/options/stacks"))) as HttpGet
         }
 
         HttpPost postProjectEndpoint() {
