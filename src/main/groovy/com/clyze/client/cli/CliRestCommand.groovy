@@ -218,6 +218,16 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand GET_SNAPSHOT_OPTIONS = new CliRestCommand('get_snapshot_options', 'read snapshot options') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getSnapshotOptions(token, user, project, host, port)
+        }
+    }
+
     static final CliRestCommand POST_SNAPSHOT = new CliRestCommand('post_snapshot', 'posts a new snapshot to the server') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {

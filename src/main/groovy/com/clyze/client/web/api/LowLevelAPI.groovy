@@ -170,6 +170,10 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getSnapshotEndpoint()
         }
 
+        static final HttpOptions getSnapshotOptions(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).getSnapshotOptionsEndpoint()
+        }
+
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String host, int port) {
             MultipartEntityBuilder entityBuilder = postState.asMultipart()
@@ -441,6 +445,10 @@ class LowLevelAPI {
 
         HttpGet getSnapshotEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix())))
+        }
+
+        HttpOptions getSnapshotOptionsEndpoint() {
+            withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsSuffix())))
         }
 
         HttpPost postSnapshotEndpoint() {

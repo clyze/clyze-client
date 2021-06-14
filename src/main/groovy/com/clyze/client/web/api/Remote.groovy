@@ -2,7 +2,6 @@ package com.clyze.client.web.api
 
 import com.clyze.client.web.PostState
 import com.clyze.client.web.http.DefaultHttpClientLifeCycle
-import com.clyze.client.web.http.HttpClientCommand
 import com.clyze.client.web.http.HttpClientLifeCycle
 import com.clyze.client.web.http.HttpMapClientCommand
 import com.clyze.client.web.http.HttpStringClientCommand
@@ -117,6 +116,15 @@ class Remote {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
 				return LowLevelAPI.Snapshots.listSnapshots(token, owner, projectName, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> getSnapshotOptions(String owner, String projectName)  {
+		new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Snapshots.getSnapshotOptions(token, owner, projectName, host, port)
 			}
 		}.execute(host, port)
 	}

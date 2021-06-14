@@ -28,6 +28,7 @@ import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_ANALYSES
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_OPTIONS
 import static com.clyze.client.cli.CliRestCommand.GET_RULES
 import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT_OPTIONS
 import static com.clyze.client.cli.CliRestCommand.LIST_CONFIGURATIONS
 import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
 import static com.clyze.client.cli.CliRestCommand.LIST_SAMPLES
@@ -60,6 +61,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *
  *     <li>list_snapshots    - list the available snapshots
  *     <li>get_snapshot      - get a snapshot
+ *     <li>get_snapshot_options - get snapshot options
  *     <li>post_snapshot     - create a new snapshot
  *     <li>delete_snapshot   - delete a snapshot
  *     <li>list_samples      - list the available sample snapshots
@@ -101,7 +103,7 @@ class Main {
             // Projects
             LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
             // Snapshots
-            LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
+            LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, GET_SNAPSHOT_OPTIONS, DELETE_SNAPSHOT,
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Misc.
