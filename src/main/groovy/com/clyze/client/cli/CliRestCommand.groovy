@@ -81,8 +81,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             def json = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
             println "== Snapshots =="
             for (def result : json.get('results') as Collection<Map<String, Object>>) {
-                def arts = (result.get('artifacts') as Map<String, Object>)
-                        .collect { (it as Map<String, Object>).get('name') }.toString()
+                def arts = (result.get('artifacts') as Collection<Map<String, Object>>)
+                        ?.collect { it?.get('name') }
                 println "* ${result.displayName}: ${arts}"
             }
             println ""
