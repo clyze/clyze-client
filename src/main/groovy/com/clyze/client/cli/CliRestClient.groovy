@@ -708,7 +708,7 @@ class CliRestClient {
 
     private static Map<String, SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
         Map<String, SnapshotInput> inputs = new HashMap<>()
-        Collection<String> tokens = cliOptions['inputs'] ?: null
+        Collection<String> tokens = (cliOptions['inputs'] as Collection<String>) ?: null
         if (tokens)
             println "Assuming inputs = ${tokens}"
         else
@@ -730,7 +730,7 @@ class CliRestClient {
 
     private static String[] readStacksFromConsole(OptionAccessor cliOptions) {
         final String DEFAULT_STACK = 'jvm'
-        Collection<String> stacks = cliOptions['stacks']
+        Collection<String> stacks = cliOptions['stacks'] as Collection<String>
         if (stacks)
             println "Assuming stacks = ${stacks}"
         else
