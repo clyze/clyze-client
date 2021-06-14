@@ -1,6 +1,6 @@
 # Clyze Client
 
-This is the Clyze client, a command-line application and library that can contact a [Clyze server](https://clyze.com/) throught a RESTful Web API.
+This is the Clyze client, a command-line application and library that can contact a [Clyze server](https://clyze.com/) through a RESTful Web API.
 
 The client uses the Web API to list the projects and builds of a server, trigger analysis/packing, manage configurations, and retrieve results.
 
