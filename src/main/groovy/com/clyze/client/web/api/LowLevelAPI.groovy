@@ -154,6 +154,10 @@ class LowLevelAPI {
         static final HttpOptions getProjectOptions(String userToken, String owner, String projectName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).createProjectOptionsEndpoint()
         }
+
+        static final HttpGet getProjectAnalyses(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).getProjectAnalysesEndpoint()
+        }
     }
 
     static final class Snapshots {
@@ -431,6 +435,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsSuffix()))) as HttpOptions
         }
 
+        HttpGet getProjectAnalysesEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, analysesSuffix()))) as HttpGet
+        }
+
         HttpGet getSnapshotEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix()))) as HttpGet
         }
@@ -549,6 +557,10 @@ class LowLevelAPI {
 
         String snapshotConfigsSuffix() {
             return "${snapshotSuffix()}/configs"
+        }
+
+        String analysesSuffix() {
+            return "${projectSuffix()}/analyses"
         }
 
         String snapshotConfigSuffix() {

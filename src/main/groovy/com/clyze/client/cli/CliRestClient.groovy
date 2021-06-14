@@ -23,6 +23,7 @@ import org.apache.http.HttpEntity
  *     <li>get_project       - get a project
  *     <li>delete_project    - delete a project
  *     <li>get_project_options - show the options of a project
+ *     <li>get_project_analyses - show the analyses supported by a project
  *
  *     <li>list_snapshots    - list the available snapshots
  *     <li>get_snapshot      - get a snapshot
@@ -60,9 +61,6 @@ import org.apache.http.HttpEntity
  */
 // @TypeChecked
 class CliRestClient {
-
-    private static final Option ID = Option.builder('id').hasArg().argName('id').
-                                                   desc('the analysis id').build()
 
     private static final String getUserInfo(boolean askForCredentialsIfEmpty, String host, int port, Selector selector) {
         String data = CliAuthenticator.getUserInfo(selector)
@@ -268,6 +266,25 @@ class CliRestClient {
             },
             onSuccess          : { HttpEntity entity ->
                 def json = LowLevelAPI.Responses.parseJson(entity)
+                json as String
+            }
+    )
+
+    private static final CliRestCommand GET_PROJECT_ANALYSES = new CliRestCommand(
+            name               : 'get_project_analyses',
+            description        : 'get the analyses supported by a project',
+            httpClientLifeCycle: new DefaultHttpClientLifeCycle(),
+            requestBuilder     : { String host, int port ->
+                String token = getUserToken(true, host, port)
+                String user  = getUserName(false, host, port)
+                String project = readProjectNameFromConsole(cliOptions)
+                return LowLevelAPI.Projects.getProjectAnalyses(token, user, project, host, port)
+            },
+            onSuccess          : { HttpEntity entity ->
+                def json = LowLevelAPI.Responses.parseJson(entity)
+                println "== Analyses =="
+                for (def result : json.get('results') as Collection<Map<String, Object>>)
+                    println "* ${result.get('id')} ('${result.get('displayName')}')"
                 json as String
             }
     )
@@ -815,7 +832,7 @@ class CliRestClient {
      */
     public static final Map<String, CliRestCommand> COMMANDS = [
             // Projects
-            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS,
+            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
             // Snapshots
             LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
             // Configurations

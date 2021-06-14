@@ -435,6 +435,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> getProjectAnalyses(String owner, String name) throws ClientProtocolException {
+		new HttpClientCommand(
+				httpClientLifeCycle: httpClientLifeCycle,
+				requestBuilder: LowLevelAPI.Projects.&getProjectAnalyses.curry(token, owner, name),
+				onSuccess : LowLevelAPI.Responses.&parseJson
+		).execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> deleteProject(String owner, String projectName) {
 		new HttpClientCommand(
 				httpClientLifeCycle: httpClientLifeCycle,
