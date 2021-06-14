@@ -444,7 +444,7 @@ class LowLevelAPI {
         }
 
         HttpPost postSnapshotEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix() + "?origin=API")))
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix())))
         }
 
         HttpDelete deleteSnapshotEndpoint() {
