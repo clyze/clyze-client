@@ -346,7 +346,8 @@ class CliRestClient {
                 String token = getUserToken(true, host, port)
                 String user  = getUserName(false, host, port)
                 String project = readProjectNameFromConsole(cliOptions)
-                return LowLevelAPI.Projects.repackageSnapshotForCI(token, user, project, host, port)
+                PostState postState = getPostState(cliOptions)
+                return LowLevelAPI.Projects.repackageSnapshotForCI(token, user, project, postState, host, port)
             },
             onSuccess          : { HttpEntity entity ->
                 String id = LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
