@@ -384,146 +384,146 @@ class LowLevelAPI {
         }
 
         HttpGet listUsersEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, usersSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, usersSuffix())))
         }
 
         HttpPost postUserEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, usersSuffix()))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, usersSuffix())))
         }
 
         HttpDelete deleteUserEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, userSuffix()))) as HttpDelete
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, userSuffix())))
         }
 
         HttpGet listProjectsEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectsSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectsSuffix())))
         }
 
         HttpGet getStacksEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, "/options/stacks"))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, "/options/stacks")))
         }
 
         HttpPost postProjectEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectsSuffix()))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectsSuffix())))
         }
 
         HttpDelete deleteProjectEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, projectSuffix()))) as HttpDelete
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, projectSuffix())))
         }
 
         HttpPost createSampleProjectEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, userSuffix() + "/phonograph"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, userSuffix() + "/phonograph")))
         }
 
         HttpGet getProjectEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectSuffix())))
         }
 
         HttpPut putProjectEndpoint() {
-            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix()))) as HttpPut
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, projectSuffix())))
         }
 
         HttpPost repackageSnapshotForCIEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, projectSuffix() + "/repackage")))
         }
 
         HttpGet listSnapshotsEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotsSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotsSuffix())))
         }
 
         HttpOptions createProjectOptionsEndpoint() {
-            withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsSuffix()))) as HttpOptions
+            withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsSuffix())))
         }
 
         HttpGet getProjectAnalysesEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, analysesSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, analysesSuffix())))
         }
 
         HttpGet getSnapshotEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix())))
         }
 
         HttpPost postSnapshotEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix() + "?origin=API"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix() + "?origin=API")))
         }
 
         HttpDelete deleteSnapshotEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotSuffix()))) as HttpDelete
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotSuffix())))
         }
 
         HttpGet listSamplesEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesSuffix())))
         }
 
         HttpGet getConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix())))
         }
 
         HttpDelete deleteConfigurationEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotConfigSuffix()))) as HttpDelete
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotConfigSuffix())))
         }
 
         HttpPut updateConfigurationEndpoint() {
-            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, snapshotConfigSuffix()))) as HttpPut
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, snapshotConfigSuffix())))
         }
 
         HttpPut renameConfigurationEndpoint() {
-            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/name'))) as HttpPut
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/name')))
         }
 
         HttpPost cloneConfigurationEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/clone'))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/clone')))
         }
 
         HttpPost pasteConfigurationRulesEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/pasteRules'))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/pasteRules')))
         }
 
         HttpGet getRulesEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, rulesSuffix())))
         }
 
         HttpPost postRuleEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, rulesSuffix())))
         }
 
         HttpPut putRuleEndpoint() {
-            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, ruleSuffix()))) as HttpPut
+            withTokenHeader(new HttpPut(createUrl(host, port, API_PATH, ruleSuffix())))
         }
 
         HttpDelete deleteRuleEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, ruleSuffix()))) as HttpDelete
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, ruleSuffix())))
         }
 
         HttpDeleteWithBody deleteRulesEndpoint() {
-            withTokenHeader(new HttpDeleteWithBody(createUrl(host, port, API_PATH, rulesSuffix()))) as HttpDeleteWithBody
+            withTokenHeader(new HttpDeleteWithBody(createUrl(host, port, API_PATH, rulesSuffix())))
         }
 
         HttpGet exportConfigurationEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/export'))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix() + '/export')))
         }
 
         HttpGet getRuntimeEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analysis/runtime"))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analysis/runtime")))
         }
 
         HttpGet listConfigurationsEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigsSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigsSuffix())))
         }
 
         HttpPost analyzeEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analyze"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigSuffix() + "/analyze")))
         }
 
         HttpGet getOutputEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, outputSuffix()))) as HttpGet
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, outputSuffix())))
         }
 
         HttpPost createSnapshotFromSampleEndpoint(String sampleName) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}"))) as HttpPost
+            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesSuffix() + "?name=${sampleName}")))
         }
 
-        private HttpRequestBase withTokenHeader(HttpRequestBase req) {
+        private <T extends HttpRequestBase> T withTokenHeader(T req) {
             if (userToken) req.addHeader(HEADER_TOKEN, userToken)
             return req
         }
