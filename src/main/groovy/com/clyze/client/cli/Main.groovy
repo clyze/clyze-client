@@ -97,8 +97,6 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>query             - query a complete analysis
  *     <li>delete            - delete an analysis
  * </ul>
- *
- * Experimentally, the client also supports fetching all the jars from Maven Central that match a free-text query.
  */
 @CompileStatic
 @Log4j
@@ -115,7 +113,7 @@ class Main {
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Misc.
             PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME, LIST_STACKS
-            // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, SEARCH_MAVEN, QUICKSTART
+            // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
     ].collectEntries {
         [(it.name):it]
     }
