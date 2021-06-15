@@ -201,7 +201,6 @@ class Main {
         opts.addOption(Option.builder('c').longOpt('command')
                 .desc("The command to execute via the remote server. Available commands: ${availableCommands}.")
                 .numberOfArgs(1).argName("command").build())
-        opts.addOption(Option.builder().longOpt('discover').desc('Show discovered options.').build())
         opts.addOption(Option.builder().longOpt('version').desc('Display version and exit.').build())
         opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Give project name.').build())
         opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Give project stack id.').build())
