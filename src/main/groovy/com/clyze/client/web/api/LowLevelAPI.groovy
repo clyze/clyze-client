@@ -4,6 +4,7 @@ import com.clyze.client.web.HttpDeleteWithBody
 import com.clyze.client.web.PostState
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
+import java.nio.charset.StandardCharsets
 import org.apache.http.HttpEntity
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
@@ -17,6 +18,10 @@ class LowLevelAPI {
 
     static final class InputConstants {
         public static final String ANALYSIS = "ANALYSIS"
+    }
+
+    static final String encodeValue(String value) {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
     }
 
     static final class Requests {
@@ -80,7 +85,7 @@ class LowLevelAPI {
         }
 
         static final HttpGet getSymbolAt(String userToken, String snapshotId, String analysisId, String file, int line, int col, String host, int port) {
-            String fileEncoded = URLEncoder.encode(file, "UTF-8")       
+            String fileEncoded = encodeValue(file)
             HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
             if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
             return get
@@ -172,6 +177,10 @@ class LowLevelAPI {
 
         static final HttpOptions getSnapshotOptions(String userToken, String owner, String projectName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).getSnapshotOptionsEndpoint()
+        }
+
+        static final HttpGet getSymbol(String userToken, String owner, String projectName, String snapshotName, String symbolId, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getSymbolEndpoint(symbolId)
         }
 
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
@@ -451,6 +460,10 @@ class LowLevelAPI {
             withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsSuffix())))
         }
 
+        HttpGet getSymbolEndpoint(String symbolId) {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix() + '/symbols/byId/' + encodeValue(symbolId))))
+        }
+
         HttpPost postSnapshotEndpoint() {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotsSuffix())))
         }
@@ -588,7 +601,7 @@ class LowLevelAPI {
             if (extraParams && extraParams.size() > 0) {
                 extraParams.forEach { k, v ->
                     if (v)
-                        q.add(k + '=' + URLEncoder.encode(v.toString(), "UTF-8" )) }
+                        q.add(k + '=' + encodeValue(v.toString())) }
             }
             return q.size() == 0 ? '' : '?' + q.join('&')
         }

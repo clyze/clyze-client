@@ -167,6 +167,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> getSymbol(String owner, String projectName, String snapshotName, String symbolId) {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Snapshots.getSymbol(token, owner, projectName, snapshotName, symbolId, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> deleteSnapshot(String owner, String projectName, String snapshotName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {

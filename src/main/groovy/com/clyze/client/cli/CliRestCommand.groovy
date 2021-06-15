@@ -218,6 +218,18 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand GET_SYMBOL = new CliRestCommand('get_symbol', 'read a symbol from a snapshot') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String symbol = readSymbolFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getSymbol(token, user, project, snapshot, symbol, host, port)
+        }
+    }
+
     static final CliRestCommand GET_SNAPSHOT_OPTIONS = new CliRestCommand('get_snapshot_options', 'read snapshot options') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
@@ -582,6 +594,16 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
     }
 
+    protected static String readSymbolFromConsole(OptionAccessor cliOptions) {
+        String symbol = cliOptions['symbol'] ?: null
+        if (symbol)
+            println "Assuming symbol = ${symbol}"
+        else
+            symbol = System.console().readLine("Symbol id: ")
+        if ('' == symbol)
+            throw new RuntimeException("ERROR: no symbol given.")
+        return symbol
+    }
     protected static String readConfigFromConsole(String defaultConfig = 'clyze.json') {
         String config = System.console().readLine("Configuration (default: '${defaultConfig})': ")
         return ('' == config) ? defaultConfig : config
