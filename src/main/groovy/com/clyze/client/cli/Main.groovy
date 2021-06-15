@@ -22,6 +22,8 @@ import static com.clyze.client.cli.CliRestCommand.DELETE_RULES
 import static com.clyze.client.cli.CliRestCommand.DELETE_SNAPSHOT
 import static com.clyze.client.cli.CliRestCommand.EXPORT_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.GET_CONFIGURATION
+import static com.clyze.client.cli.CliRestCommand.GET_FILE
+import static com.clyze.client.cli.CliRestCommand.GET_FILES
 import static com.clyze.client.cli.CliRestCommand.GET_OUTPUT
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_ANALYSES
@@ -68,6 +70,8 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>list_samples      - list the available sample snapshots
  *     <li>post_sample       - create a new snapshot, based on a given sample
  *     <li>get_symbol        - get a symbol from the snapshot
+ *     <li>get_files         - read the snapshot (artifact) files
+ *     <li>get_file          - read a snapshot (artifact) file
  *
  *     <li>list_configurations - list the available configurations
  *     <li>get_config        - get a configuration
@@ -106,7 +110,7 @@ class Main {
             LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
             // Snapshots
             LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, GET_SNAPSHOT_OPTIONS, DELETE_SNAPSHOT,
-            GET_SYMBOL,
+            GET_SYMBOL, GET_FILE, GET_FILES,
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Misc.
@@ -206,6 +210,8 @@ class Main {
         opts.addOption(Option.builder().longOpt('snapshot').numberOfArgs(1).argName('ID').desc('Give snapshot id.').build())
         opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Give snapshot input (examples: app@path, key=value).').build())
         opts.addOption(Option.builder().longOpt('symbol').numberOfArgs(1).argName('ID').desc('Give symbol id.').build())
+        opts.addOption(Option.builder().longOpt('artifact').numberOfArgs(1).argName('NAME').desc('Give snapshot artifact.').build())
+        opts.addOption(Option.builder().longOpt('file').numberOfArgs(1).argName('NAME').desc('Give snapshot file.').build())
         cli.setOptions(opts)
 
         return cli

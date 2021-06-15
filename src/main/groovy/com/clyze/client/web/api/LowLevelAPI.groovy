@@ -183,6 +183,16 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getSymbolEndpoint(symbolId)
         }
 
+        static final HttpGet getFile(String userToken, String owner, String projectName, String snapshotName,
+                                     String artifact, String file, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getFileEndpoint(artifact, file)
+        }
+
+        static final HttpGet getFiles(String userToken, String owner, String projectName, String snapshotName,
+                                      String artifact, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getFilesEndpoint(artifact)
+        }
+
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String host, int port) {
             MultipartEntityBuilder entityBuilder = postState.asMultipart()
@@ -462,6 +472,18 @@ class LowLevelAPI {
 
         HttpGet getSymbolEndpoint(String symbolId) {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix() + '/symbols/byId/' + encodeValue(symbolId))))
+        }
+
+        String filesSuffix(String artifact) {
+            return snapshotSuffix() + '/artifacts/' + encodeValue(artifact) + '/files'
+        }
+
+        HttpGet getFilesEndpoint(String artifact) {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, filesSuffix(artifact) + '/')))
+        }
+
+        HttpGet getFileEndpoint(String artifact, String file) {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, filesSuffix(artifact) + '/' + encodeValue(file))))
         }
 
         HttpPost postSnapshotEndpoint() {

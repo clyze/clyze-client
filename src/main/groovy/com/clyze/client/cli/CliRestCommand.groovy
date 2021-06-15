@@ -230,6 +230,31 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand GET_FILES = new CliRestCommand('get_files', 'read the snapshot files') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String artifact = readArtifactFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getFiles(token, user, project, snapshot, artifact, host, port)
+        }
+    }
+
+    static final CliRestCommand GET_FILE = new CliRestCommand('get_file', 'read a snapshot file') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String artifact = readArtifactFromConsole(cliOptions)
+            String file = readFileFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getFile(token, user, project, snapshot, artifact, file, host, port)
+        }
+    }
+
     static final CliRestCommand GET_SNAPSHOT_OPTIONS = new CliRestCommand('get_snapshot_options', 'read snapshot options') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
@@ -594,16 +619,29 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
     }
 
-    protected static String readSymbolFromConsole(OptionAccessor cliOptions) {
-        String symbol = cliOptions['symbol'] ?: null
-        if (symbol)
-            println "Assuming symbol = ${symbol}"
+    protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description) {
+        String value = cliOptions[name] ?: null
+        if (value)
+            println "Assuming ${name} = ${value}"
         else
-            symbol = System.console().readLine("Symbol id: ")
-        if ('' == symbol)
-            throw new RuntimeException("ERROR: no symbol given.")
-        return symbol
+            value = System.console().readLine("${description}: ")
+        if ('' == value)
+            throw new RuntimeException("ERROR: no ${name} given.")
+        return value
     }
+
+    protected static String readSymbolFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'symbol', 'Symbol id')
+    }
+
+    protected static String readFileFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'file', 'File')
+    }
+
+    protected static String readArtifactFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'artifact', 'Artifact')
+    }
+
     protected static String readConfigFromConsole(String defaultConfig = 'clyze.json') {
         String config = System.console().readLine("Configuration (default: '${defaultConfig})': ")
         return ('' == config) ? defaultConfig : config
