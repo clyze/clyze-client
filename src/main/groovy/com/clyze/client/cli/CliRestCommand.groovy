@@ -8,7 +8,6 @@ import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 import com.clyze.client.web.http.HttpStringClientCommand
 import groovy.cli.commons.OptionAccessor
 import groovy.transform.CompileStatic
-import org.apache.commons.cli.Option
 import org.apache.http.HttpEntity
 import org.apache.http.client.methods.HttpUriRequest
 
@@ -252,6 +251,18 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String artifact = readArtifactFromConsole(cliOptions)
             String file = readFileFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getFile(token, user, project, snapshot, artifact, file, host, port)
+        }
+    }
+
+    static final CliRestCommand GET_CODE_FILE = new CliRestCommand('get_code_file', 'read a snapshot code file') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String file = readFileFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getCodeFile(token, user, project, snapshot, file, host, port)
         }
     }
 

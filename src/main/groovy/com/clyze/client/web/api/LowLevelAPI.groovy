@@ -193,6 +193,11 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getFilesEndpoint(artifact)
         }
 
+        static final HttpGet getCodeFile(String userToken, String owner, String projectName, String snapshotName,
+                                         String codeFile, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getCodeFileEndpoint(codeFile)
+        }
+
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String host, int port) {
             MultipartEntityBuilder entityBuilder = postState.asMultipart()
@@ -484,6 +489,10 @@ class LowLevelAPI {
 
         HttpGet getFileEndpoint(String artifact, String file) {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, filesSuffix(artifact) + '/' + encodeValue(file))))
+        }
+
+        HttpGet getCodeFileEndpoint(String codeFile) {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotSuffix() + '/code/' + encodeValue(codeFile))))
         }
 
         HttpPost postSnapshotEndpoint() {
