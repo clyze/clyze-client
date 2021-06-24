@@ -176,6 +176,24 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> getFiles(String owner, String projectName, String snapshotName, String artifact) {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Snapshots.getFiles(token, owner, projectName, snapshotName, artifact, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
+	Map<String, Object> getFile(String owner, String projectName, String snapshotName, String artifact, String file) {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Snapshots.getFile(token, owner, projectName, snapshotName, artifact, file, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> getCodeFile(String owner, String projectName, String snapshotName, String codeFile) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
