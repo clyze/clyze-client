@@ -530,7 +530,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole()
-            return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, host, port)
+            String profile = readProfileFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, profile, host, port)
         }
     }
 
@@ -630,14 +631,25 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
     }
 
-    protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description) {
+    protected static String readProfileFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'profile', 'Analysis profile', 'r8')
+    }
+
+    protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description,
+                                                  String DEFAULT_VALUE = null) {
         String value = cliOptions[name] ?: null
         if (value)
             println "Assuming ${name} = ${value}"
-        else
-            value = System.console().readLine("${description}: ")
-        if ('' == value)
-            throw new RuntimeException("ERROR: no ${name} given.")
+        else {
+            String prompt = "${description}" + (DEFAULT_VALUE ? "(default: ${DEFAULT_VALUE})": "") + ": "
+            value = System.console().readLine(prompt)
+        }
+        if ('' == value) {
+            if (DEFAULT_VALUE)
+                return DEFAULT_VALUE
+            else
+                throw new RuntimeException("ERROR: no ${name} given.")
+        }
         return value
     }
 

@@ -88,7 +88,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *
  *     <li>login             - authenticate user
  *     <li>ping              - check connection with server
- *     <li>analyze           - run an analysis
+ *     <li>analyze           - create and run an analysis
  *     <li>repackage         - run automated repackaging
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>list              - list the available analyses
@@ -204,13 +204,14 @@ class Main {
                 .desc("The command to execute via the remote server. Available commands: ${availableCommands}.")
                 .numberOfArgs(1).argName("command").build())
         opts.addOption(Option.builder().longOpt('version').desc('Display version and exit.').build())
-        opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Give project name.').build())
-        opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Give project stack id.').build())
-        opts.addOption(Option.builder().longOpt('snapshot').numberOfArgs(1).argName('ID').desc('Give snapshot id.').build())
-        opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Give snapshot input (examples: app@path, key=value).').build())
-        opts.addOption(Option.builder().longOpt('symbol').numberOfArgs(1).argName('ID').desc('Give symbol id.').build())
-        opts.addOption(Option.builder().longOpt('artifact').numberOfArgs(1).argName('NAME').desc('Give snapshot artifact.').build())
-        opts.addOption(Option.builder().longOpt('file').numberOfArgs(1).argName('NAME').desc('Give snapshot file.').build())
+        opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Set project name.').build())
+        opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Set project stack (by id).').build())
+        opts.addOption(Option.builder().longOpt('snapshot').numberOfArgs(1).argName('ID').desc('set snapshot id.').build())
+        opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Set snapshot input (examples: app@path, key=value).').build())
+        opts.addOption(Option.builder().longOpt('symbol').numberOfArgs(1).argName('ID').desc('Set symbol id.').build())
+        opts.addOption(Option.builder().longOpt('artifact').numberOfArgs(1).argName('NAME').desc('Set snapshot artifact.').build())
+        opts.addOption(Option.builder().longOpt('file').numberOfArgs(1).argName('NAME').desc('Set snapshot file.').build())
+        opts.addOption(Option.builder().longOpt('profile').numberOfArgs(1).argName('ID').desc('Set analysis profile (by id).').build())
         cli.setOptions(opts)
 
         return cli
