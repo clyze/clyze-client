@@ -536,4 +536,27 @@ class Remote {
 			}
 		}.execute(host, port)
 	}
+
+	@SuppressWarnings('unused')
+	boolean waitForAnalysisToFinish(String owner, String projectName, String buildName, String configId) {
+		println "Build ${buildName}: waiting for analysis to finish..."
+		try {
+			final int TOTAL_TRIES = 60
+			for (int tries = 0; tries < TOTAL_TRIES; tries++) {
+				println "Checking analysis state (${tries} of ${TOTAL_TRIES})..."
+				Map<String, Object> config = getConfiguration(owner, projectName, buildName, configId)
+				String state = (config?.get('currentAnalysis') as Map<String, String>)?.get('state')
+				println "Current state: ${state}"
+				if (state == 'FINISHED')
+					return true
+				Thread.sleep(5000)
+			}
+			println "Too many tries, analysis assumed to be stuck."
+		} catch (Exception ex) {
+			println "Error checking analysis state: ${ex.message}"
+			ex.printStackTrace()
+		}
+		return false
+	}
+
 }
