@@ -635,7 +635,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         if (value)
             println "Assuming ${name} = ${value}"
         else {
-            String prompt = "${description}" + (DEFAULT_VALUE ? "(default: ${DEFAULT_VALUE})": "") + ": "
+            String prompt = "${description} " + (DEFAULT_VALUE ? "(default: ${DEFAULT_VALUE})": "") + ": "
             value = System.console().readLine(prompt)
         }
         if ('' == value) {
