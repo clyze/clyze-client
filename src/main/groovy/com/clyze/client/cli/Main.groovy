@@ -86,8 +86,6 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>repackage         - run automated repackaging
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>list              - list the available analyses
- *     <li>post_doop         - create a new doop analysis
- *     <li>post_cclyzer      - create a new cclyzer analysis
  *     <li>get               - retrieves an analysis
  *     <li>stop              - stop an analysis
  *     <li>query             - query a complete analysis
@@ -109,7 +107,7 @@ class Main {
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Misc.
             PING, LOGIN, REPACKAGE, ANALYZE, GET_OUTPUT, RUNTIME, LIST_STACKS
-            // POST_DOOP, POST_CCLYZER, LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
+            // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
     ].collectEntries {
         [(it.name):it]
     }
