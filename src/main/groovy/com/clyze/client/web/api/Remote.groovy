@@ -517,13 +517,14 @@ class Remote {
 
 	@SuppressWarnings('unused')
 	boolean waitForAnalysisToFinish(String owner, String projectName, String buildName, String configId,
-									int totalTries = 60) {
-		println "Build ${buildName}: waiting for analysis to finish..."
+									String analysisId, int totalTries = 60) {
+		println "Build ${buildName}: waiting for analysis ${analysisId} to finish..."
 		try {
 			for (int tries = 0; tries < totalTries; tries++) {
 				println "Checking analysis state (${tries} of ${totalTries})..."
 				Map<String, Object> config = getConfiguration(owner, projectName, buildName, configId)
-				String state = (config?.get('currentAnalysis') as Map<String, String>)?.get('state')
+				String state = (config?.get('analyses') as List<Map<String, String>>)
+						.find { Map<String, String> an -> an.get('id') == analysisId}?.get('state')
 				println "Current state: ${state}"
 				if (state == 'FINISHED')
 					return true
