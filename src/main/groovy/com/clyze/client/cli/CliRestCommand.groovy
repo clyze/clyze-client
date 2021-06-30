@@ -337,6 +337,20 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand EXECUTE_ANALYSIS_ACTION = new CliRestCommand('execute_action', 'executes an analysis action (such as "stop" or "restart")') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            String analysisId = readAnalysisIdFromConsole(cliOptions)
+            String action = readActionFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.executeAnalysisAction(token, user, project, snapshot, config, action, analysisId, host, port)
+        }
+    }
+
     static final CliRestCommand GET_CONFIGURATION = new CliRestCommand('get_config', 'get a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
@@ -609,6 +623,10 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readAnalysisIdFromConsole(OptionAccessor cliOptions) {
         return readOptionFromConsole(cliOptions, 'analysis', 'Analysis id')
+    }
+
+    protected static String readActionFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'action', 'Analysis action', 'stop')
     }
 
     protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description,

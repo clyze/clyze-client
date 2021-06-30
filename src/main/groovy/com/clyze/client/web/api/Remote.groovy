@@ -340,6 +340,16 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> executeAnalysisAction(String owner, String projectName, String snapshotName, String config,
+											  String action, String analysisId)  {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Snapshots.executeAnalysisAction(token, owner, projectName, snapshotName, config, action, analysisId, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	String repackageSnapshotForCI(String owner, String projectName, PostState ps, AttachmentHandler<String> handler) throws ClientProtocolException {
 		return new HttpStringClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
