@@ -311,6 +311,19 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand GET_ANALYSIS = new CliRestCommand('get_analysis', 'reads an analysis from a snapshot') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            String analysisId = readAnalysisIdFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getAnalysis(token, user, project, snapshot, config, analysisId, host, port)
+        }
+    }
+
     static final CliRestCommand GET_CONFIGURATION = new CliRestCommand('get_config', 'get a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
@@ -318,7 +331,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getConfiguration(token, user, project, snapshot, config, host, port)
         }
     }
@@ -330,7 +343,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.cloneConfiguration(token, user, project, snapshot, config, host, port)
         }
     }
@@ -342,8 +355,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
-            String newName = readConfigFromConsole('new-name.json')
+            String config = readConfigFromConsole(cliOptions)
+            String newName = readConfigFromConsole(null, 'new-name.json')
             return LowLevelAPI.Snapshots.renameConfiguration(token, user, project, snapshot, config, newName, host, port)
         }
     }
@@ -355,8 +368,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
-            String fromConfig = readConfigFromConsole('config2.json')
+            String config = readConfigFromConsole(cliOptions)
+            String fromConfig = readConfigFromConsole(null, 'config2.json')
             return LowLevelAPI.Snapshots.pasteConfigurationRules(token, user, project, snapshot, config, fromConfig, host, port)
         }
     }
@@ -368,7 +381,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.deleteConfiguration(token, user, project, snapshot, config, host, port)
         }
     }
@@ -380,7 +393,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String idsLine = System.console().readLine('Rule IDs, separated by comma: ')
             List<String> ids = idsLine.tokenize(',')
             return LowLevelAPI.Snapshots.deleteRules(token, user, project, snapshot, config, ids, host, port)
@@ -394,7 +407,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String originType = System.console().readLine("[Optional] Origin type: ")
             if (originType == '')
                 originType = null
@@ -413,7 +426,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String ruleBody = System.console().readLine("Rule body: ")
             return LowLevelAPI.Snapshots.postRule(token, user, project, snapshot, config, ruleBody, null, host, port)
         }
@@ -426,7 +439,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String ruleId = System.console().readLine("Rule id: ")
             String ruleBody = System.console().readLine("Rule body: ")
             String comment = System.console().readLine("Rule comment: ")
@@ -441,7 +454,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String ruleId = System.console().readLine("Rule id: ")
             return LowLevelAPI.Snapshots.deleteRule(token, user, project, snapshot, config, ruleId, host, port)
         }
@@ -460,7 +473,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.exportConfiguration(token, user, project, snapshot, config, host, port)
         }
 
@@ -481,7 +494,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String profile = readProfileFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, profile, host, port)
         }
@@ -494,7 +507,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getRuntime(token, user, project, snapshot, config, host, port)
         }
     }
@@ -506,7 +519,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String config = readConfigFromConsole()
+            String config = readConfigFromConsole(cliOptions)
             String output = System.console().readLine("Output: ")
             return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, output, host, port)
         }
@@ -574,22 +587,20 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     protected static String readSnapshotNameFromConsole(OptionAccessor cliOptions) {
-        final String DEFAULT_SNAPSHOT = 'snapshot1'
-        String snapshot = cliOptions['snapshot']
-        if (snapshot)
-            println "Assuming snapshot = ${snapshot}"
-        else
-            snapshot = System.console().readLine("Snapshot (default: '${DEFAULT_SNAPSHOT}'): ")
-        return ('' == snapshot) ? DEFAULT_SNAPSHOT : snapshot
+        return readOptionFromConsole(cliOptions, 'snapshot', 'Snapshot', 'snapshot1')
     }
 
     protected static String readProfileFromConsole(OptionAccessor cliOptions) {
         return readOptionFromConsole(cliOptions, 'profile', 'Analysis profile', 'r8')
     }
 
+    protected static String readAnalysisIdFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'analysis', 'Analysis id')
+    }
+
     protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description,
                                                   String DEFAULT_VALUE = null) {
-        String value = cliOptions[name] ?: null
+        String value = cliOptions ? (cliOptions[name] ?: null) : null
         if (value)
             println "Assuming ${name} = ${value}"
         else {
@@ -617,9 +628,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return readOptionFromConsole(cliOptions, 'artifact', 'Artifact')
     }
 
-    protected static String readConfigFromConsole(String defaultConfig = 'clyze.json') {
-        String config = System.console().readLine("Configuration (default: '${defaultConfig})': ")
-        return ('' == config) ? defaultConfig : config
+    protected static String readConfigFromConsole(OptionAccessor cliOptions, String defaultConfig = 'clyze.json') {
+        return readOptionFromConsole(cliOptions, 'config', 'Configuration', defaultConfig)
     }
 
     protected static Map<String, SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
