@@ -60,12 +60,6 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpGet getAnalysisStatus(String userToken, String snapshotId, String analysis, String host, int port) {
-            HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/analyses/${analysis}"))
-            if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
-            return get
-        }
-
         static final HttpGet getSymbolAt(String userToken, String snapshotId, String analysisId, String file, int line, int col, String host, int port) {
             String fileEncoded = encodeValue(file)
             HttpGet get = new HttpGet(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))

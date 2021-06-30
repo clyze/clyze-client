@@ -367,45 +367,6 @@ class Remote {
 		}.execute(host, port)
 	}
 
-	String getAnalysisStatus(String snapshotId, String analysisId) {
-		return new HttpStringClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.getAnalysisStatus(token, snapshotId, analysisId, host, port)
-			}
-			@Override String onSuccess(HttpEntity entity) {
-				Map<String, Object> json = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
-				return (json.get('analysis') as Map<String, Object>).get('state') as String
-			}
-		}.execute(host, port)
-	}
-
-	@SuppressWarnings('unused')
-	String waitForAnalysisStatus(Set<String> statusSet, String snapshotId, String analysisId, int minutes) {
-
-		long millis = minutes * 60 * 1000
-		long expireAt = System.currentTimeMillis() + millis
-
-		def state = null		
-		
-		while(!Thread.currentThread().isInterrupted() && !statusSet.contains(state) && System.currentTimeMillis() < expireAt) {
-			try {
-				state = getAnalysisStatus(snapshotId, analysisId)
-				Thread.sleep(15000)
-			}
-			catch(InterruptedException ie) {
-				throw new RuntimeException("Analysis wait interrupted: ${ie.message}")
-			}
-			catch(ClientProtocolException cpe) {
-				throw new RuntimeException("Analysis wait server error - ${cpe.getMessage()}", cpe)
-			}
-			catch(Throwable other) {
-				throw new RuntimeException("Analysis wait internal error - ${other.getMessage()}", other)
-			}
-		}
-
-		state
-	}
-
 	@SuppressWarnings('unused')
 	Map<String, Object> getSymbolAt(String snapshotId, String analysisId, String file, int line, int col) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
@@ -516,17 +477,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	boolean waitForAnalysisToFinish(String owner, String projectName, String buildName, String configId,
-									String analysisId, int totalTries = 60) {
+	boolean waitForAnalysisStatus(String owner, String projectName, String buildName, String config,
+								  String analysisId, Set<String> statusSet, int totalTries = 60) {
 		println "Build ${buildName}: waiting for analysis ${analysisId} to finish..."
 		try {
 			for (int tries = 0; tries < totalTries; tries++) {
 				println "Checking analysis state (${tries} of ${totalTries})..."
-				Map<String, Object> config = getConfiguration(owner, projectName, buildName, configId)
-				String state = (config?.get('analyses') as List<Map<String, String>>)
-						.find { Map<String, String> an -> an.get('id') == analysisId}?.get('state')
+				String state = getAnalysisStatus(owner, projectName, buildName, config, analysisId)
 				println "Current state: ${state}"
-				if (state == 'FINISHED')
+				if (statusSet.contains(state))
 					return true
 				Thread.sleep(5000)
 			}
@@ -536,6 +495,14 @@ class Remote {
 			ex.printStackTrace()
 		}
 		return false
+	}
+
+	String getAnalysisStatus(String owner, String projectName, String buildName,
+							 String configName, String analysisId) {
+		Map<String, Object> config = getConfiguration(owner, projectName, buildName, configName)
+		String state = (config?.get('analyses') as List<Map<String, String>>)
+				.find { Map<String, String> an -> an.get('id') == analysisId }?.get('state')
+		return state
 	}
 
 }
