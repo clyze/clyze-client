@@ -14,6 +14,7 @@ import org.clyze.utils.JHelper
 import static com.clyze.client.cli.CliRestCommand.ANALYZE
 import static com.clyze.client.cli.CliRestCommand.CLONE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.CREATE_PROJECT
+import static com.clyze.client.cli.CliRestCommand.DELETE_ANALYSIS
 import static com.clyze.client.cli.CliRestCommand.DELETE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.DELETE_PROJECT
 import static com.clyze.client.cli.CliRestCommand.DELETE_RULE
@@ -85,6 +86,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>ping              - check connection with server
  *     <li>analyze           - create and run an analysis
  *     <li>get_analysis      - read a snapshot analysis
+ *     <li>delete_analysis   - delete a snapshot analysis
  *     <li>repackage         - run automated repackaging
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>list              - list the available analyses
@@ -108,7 +110,7 @@ class Main {
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Analyses
-            ANALYZE, GET_ANALYSIS,
+            ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS,
             // Misc.
             PING, LOGIN, REPACKAGE, GET_OUTPUT, RUNTIME, LIST_STACKS
             // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART

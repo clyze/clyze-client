@@ -322,6 +322,10 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).getAnalysisEndpoint(analysisId)
         }
 
+        static final HttpDelete deleteAnalysis(String userToken, String owner, String projectName, String snapshotName,
+                                               String config, String analysisId, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).deleteAnalysisEndpoint(analysisId)
+        }
     }
 
     static final class Responses {
@@ -534,8 +538,16 @@ class LowLevelAPI {
             withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, snapshotConfigPrefix() + "/analyze?profile=" + encodeValue(profileId))))
         }
 
+        String analysisPrefix(String analysisId) {
+            return snapshotConfigPrefix() + "/analysis?analysis=" + encodeValue(analysisId)
+        }
+
         HttpGet getAnalysisEndpoint(String analysisId) {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigPrefix() + "/analysis?analysis=" + encodeValue(analysisId))))
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, analysisPrefix(analysisId))))
+        }
+
+        HttpDelete deleteAnalysisEndpoint(String analysisId) {
+            withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, analysisPrefix(analysisId))))
         }
 
         HttpGet getOutputEndpoint() {

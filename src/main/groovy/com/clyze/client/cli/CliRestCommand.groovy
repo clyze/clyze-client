@@ -324,6 +324,19 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand DELETE_ANALYSIS = new CliRestCommand('delete_analysis', 'deletes an analysis from a snapshot') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            String user  = getUserName(false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            String analysisId = readAnalysisIdFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.deleteAnalysis(token, user, project, snapshot, config, analysisId, host, port)
+        }
+    }
+
     static final CliRestCommand GET_CONFIGURATION = new CliRestCommand('get_config', 'get a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
