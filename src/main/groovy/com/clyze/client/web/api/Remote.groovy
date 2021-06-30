@@ -140,24 +140,6 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> listSamples(String owner, String projectName)  {
-		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.listSamples(token, owner, projectName, host, port)
-			}
-		}.execute(host, port)
-	}
-
-	@SuppressWarnings('unused')
-	Map<String, Object> createSnapshotFromSample(String owner, String projectName, String sampleName) throws HttpHostConnectException {
-		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.createSnapshotFromSample(token, owner, projectName, sampleName, host, port)
-			}
-		}.execute(host, port)
-	}
-
-	@SuppressWarnings('unused')
 	Map<String, Object> getSnapshot(String owner, String projectName, String snapshotName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
@@ -347,31 +329,6 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	String createAnalysis(String snapshotId, String analysis) {
-		return new HttpStringClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.createAnalysis(token, snapshotId, analysis, host, port)
-			}
-
-			@Override String onSuccess(HttpEntity entity) {
-				return LowLevelAPI.Responses.parseJsonAndGetAttr(entity, 'id') as String
-			}
-		}.execute(host, port)
-	}
-
-	String createAnalysis(String snapshotId, PostState ps) {
-		return new HttpStringClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.createAnalysis(token, snapshotId, ps.asMultipart(), host, port)
-			}
-
-			@Override String onSuccess(HttpEntity entity) {
-				return LowLevelAPI.Responses.parseJsonAndGetAttr(entity, 'id') as String
-			}
-		}.execute(host, port)
-	}
-
-	@SuppressWarnings('unused')
 	boolean executeAnalysisAction(String snapshotId, String analysisId, String action) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
@@ -421,7 +378,6 @@ class Remote {
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getSymbolAt(String snapshotId, String analysisId, String file, int line, int col) {
-		String fileEncoded = URLEncoder.encode(file, "UTF-8")		
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
 				return LowLevelAPI.Requests.getSymbolAt(token, snapshotId, analysisId, file, line, col, host, port)
@@ -525,14 +481,6 @@ class Remote {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
 				return LowLevelAPI.Projects.updateProject(token, owner, name, newMembers, host, port)
-			}
-		}.execute(host, port)
-	}
-
-	Map<String, Object> createSampleProject(String owner) {
-		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.createSampleProject(token, owner, host, port)
 			}
 		}.execute(host, port)
 	}

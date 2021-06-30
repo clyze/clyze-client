@@ -116,7 +116,7 @@ class Helper {
         else if (!stacks)
             throw new RuntimeException("Missing project stacks")
 
-        Map<String, Object> proj = null
+        Map<String, Object> proj
         try {
             proj = remote.getProject(remote.currentUser(), projectName)
         } catch (Exception ex1) {

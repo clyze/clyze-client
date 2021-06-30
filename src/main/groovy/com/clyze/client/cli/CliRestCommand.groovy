@@ -89,26 +89,6 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
-    static final CliRestCommand LIST_SAMPLES = new CliRestCommand('list_samples', 'list the sample snapshots available in server') {
-        @Override
-        HttpUriRequest buildRequest(String host, int port) {
-            String token = getUserToken(true, host, port)
-            String user  = getUserName(false, host, port)
-            String project = readProjectNameFromConsole(cliOptions)
-            return LowLevelAPI.Snapshots.listSamples(token, user, project, host, port)
-        }
-
-        @Override
-        String onSuccess(HttpEntity entity) {
-            def json = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
-            println "== Samples =="
-            for (def result : json.get('samples'))
-                println "* ${result}"
-            println ""
-            json as String
-        }
-    }
-
     static final CliRestCommand LIST_PROJECTS = new CliRestCommand('list_projects', 'list the projects') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
@@ -317,34 +297,6 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot   = readSnapshotNameFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.deleteSnapshot(token, user, project, snapshot, host, port)
-        }
-    }
-
-    static final CliRestCommand POST_SAMPLE_SNAPSHOT = new CliRestCommand('post_sample_snapshot', 'posts a new snapshot to the server, based on a sample') {
-        @Override
-        HttpUriRequest buildRequest(String host, int port) {
-            String token = getUserToken(true, host, port)
-            String user  = getUserName(false, host, port)
-            String project = readProjectNameFromConsole(cliOptions)
-            final String DEFAULT_SAMPLE_NAME = 'apps-android-wikipedia'
-            String sampleName = System.console().readLine("Sample name (default: '${DEFAULT_SAMPLE_NAME}'): ")
-            if ('' == sampleName)
-                sampleName = DEFAULT_SAMPLE_NAME
-            return LowLevelAPI.Snapshots.createSnapshotFromSample(token, user, project, sampleName, host, port)
-        }
-
-        @Override
-        String onSuccess(HttpEntity entity) {
-            return LowLevelAPI.Responses.parseJsonAndGetAttr(entity, "id") as String
-        }
-    }
-
-    static final CliRestCommand CREATE_SAMPLE_PROJECT = new CliRestCommand('create_sample_project', 'creates a new project based on a sample') {
-        @Override
-        HttpUriRequest buildRequest(String host, int port) {
-            String token = getUserToken(true, host, port)
-            String user  = getUserName(false, host, port)
-            return LowLevelAPI.Projects.createSampleProject(token, user, host, port)
         }
     }
 

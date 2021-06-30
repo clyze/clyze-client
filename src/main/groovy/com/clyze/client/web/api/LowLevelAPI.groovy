@@ -10,15 +10,10 @@ import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 
 @CompileStatic
 class LowLevelAPI {
-
-    static final class InputConstants {
-        public static final String ANALYSIS = "ANALYSIS"
-    }
 
     static final String encodeValue(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
@@ -57,19 +52,6 @@ class LowLevelAPI {
 
         static final HttpGet listStacks(String host, int port) {
             return new Endpoints(host, port).getStacksEndpoint()
-        }
-
-        static final HttpPost createAnalysis(String userToken, String snapshotId, String analysis, String host, int port) {
-            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()              
-            entityBuilder.addPart(InputConstants.ANALYSIS, new StringBody(analysis))
-            return createAnalysis(userToken, snapshotId, entityBuilder, host, port)
-        }
-
-        static final HttpPost createAnalysis(String userToken, String snapshotId, MultipartEntityBuilder entityBuilder, String host, int port) {
-            HttpPost post = new HttpPost(Endpoints.createUrl(host, port, Endpoints.API_PATH, "/snapshots/${snapshotId}/analyses"))
-            if (userToken) post.addHeader(Endpoints.HEADER_TOKEN, userToken)
-            post.setEntity(entityBuilder.build())
-            return post
         }
 
         static final HttpPut executeAnalysisAction(String userToken, String snapshotId, String analysis, String action, String host, int port) {
@@ -142,13 +124,6 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName).deleteProjectEndpoint()
         }
 
-        static final HttpPost createSampleProject(String userToken, String owner, String host, int port) {
-            HttpPost post = new Endpoints(host, port, userToken, owner).createSampleProjectEndpoint()
-            List<NameValuePair> params = new ArrayList<>(0)
-            post.setEntity(new UrlEncodedFormEntity(params))
-            return post
-        }
-
         static final HttpPost repackageSnapshotForCI(String userToken, String owner, String projectName,
                                                      PostState postState, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName).repackageSnapshotForCIEndpoint()
@@ -214,13 +189,6 @@ class LowLevelAPI {
 //            return createSnapshot(userToken, owner, projectName, inputs, entityBuilder, host, port)
 //        }
 //
-        static final HttpGet listSamples(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).listSamplesEndpoint()
-        }
-
-        static final HttpPost createSnapshotFromSample(String userToken, String owner, String projectName, String sampleName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).createSnapshotFromSampleEndpoint(sampleName)
-        }
 
         static final HttpDelete deleteSnapshot(String userToken, String owner, String projectName, String snapshotName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).deleteSnapshotEndpoint()
@@ -440,10 +408,6 @@ class LowLevelAPI {
             withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, projectPrefix())))
         }
 
-        HttpPost createSampleProjectEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, userPrefix() + "/phonograph")))
-        }
-
         HttpGet getProjectEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectPrefix())))
         }
@@ -502,10 +466,6 @@ class LowLevelAPI {
 
         HttpDelete deleteSnapshotEndpoint() {
             withTokenHeader(new HttpDelete(createUrl(host, port, API_PATH, snapshotPrefix())))
-        }
-
-        HttpGet listSamplesEndpoint() {
-            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, samplesPrefix())))
         }
 
         HttpGet getConfigurationEndpoint() {
@@ -570,10 +530,6 @@ class LowLevelAPI {
 
         HttpGet getOutputEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, outputPrefix())))
-        }
-
-        HttpPost createSnapshotFromSampleEndpoint(String sampleName) {
-            withTokenHeader(new HttpPost(createUrl(host, port, API_PATH, samplesPrefix() + "?name=${sampleName}")))
         }
 
         private <T extends HttpRequestBase> T withTokenHeader(T req) {
@@ -646,10 +602,6 @@ class LowLevelAPI {
             String ruleId = extraParams['ruleId'] as String
             if (!ruleId) throw new RuntimeException("No rule id")
             return "${snapshotConfigPrefix()}/rules/${ruleId}"
-        }
-
-        String samplesPrefix() {
-            return "${projectPrefix()}/samples"
         }
 
         static final String createUrl(String host, int port, String path, String endPoint) {

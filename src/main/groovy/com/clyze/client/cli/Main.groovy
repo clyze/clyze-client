@@ -14,7 +14,6 @@ import org.clyze.utils.JHelper
 import static com.clyze.client.cli.CliRestCommand.ANALYZE
 import static com.clyze.client.cli.CliRestCommand.CLONE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.CREATE_PROJECT
-import static com.clyze.client.cli.CliRestCommand.CREATE_SAMPLE_PROJECT
 import static com.clyze.client.cli.CliRestCommand.DELETE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.DELETE_PROJECT
 import static com.clyze.client.cli.CliRestCommand.DELETE_RULE
@@ -35,14 +34,12 @@ import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT_OPTIONS
 import static com.clyze.client.cli.CliRestCommand.GET_SYMBOL
 import static com.clyze.client.cli.CliRestCommand.LIST_CONFIGURATIONS
 import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
-import static com.clyze.client.cli.CliRestCommand.LIST_SAMPLES
 import static com.clyze.client.cli.CliRestCommand.LIST_SNAPSHOTS
 import static com.clyze.client.cli.CliRestCommand.LIST_STACKS
 import static com.clyze.client.cli.CliRestCommand.LOGIN
 import static com.clyze.client.cli.CliRestCommand.PASTE_CONFIGURATION_RULES
 import static com.clyze.client.cli.CliRestCommand.PING
 import static com.clyze.client.cli.CliRestCommand.POST_RULE
-import static com.clyze.client.cli.CliRestCommand.POST_SAMPLE_SNAPSHOT
 import static com.clyze.client.cli.CliRestCommand.POST_SNAPSHOT
 import static com.clyze.client.cli.CliRestCommand.PUT_RULE
 import static com.clyze.client.cli.CliRestCommand.RENAME_CONFIGURATION
@@ -57,7 +54,6 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>list_stacks       - list the available stacks
  *     <li>list_projects     - list the available projects
  *     <li>create_project    - create a project
- *     <li>create_sample_project-create a project based on a sample
  *     <li>get_project       - get a project
  *     <li>delete_project    - delete a project
  *     <li>get_project_options - show the options of a project
@@ -68,8 +64,6 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>get_snapshot_options - get snapshot options
  *     <li>post_snapshot     - create a new snapshot
  *     <li>delete_snapshot   - delete a snapshot
- *     <li>list_samples      - list the available sample snapshots
- *     <li>post_sample       - create a new snapshot, based on a given sample
  *     <li>get_symbol        - get a symbol from the snapshot
  *     <li>get_files         - read the snapshot (artifact) files
  *     <li>get_file          - read a snapshot (artifact) file
@@ -107,9 +101,9 @@ class Main {
     /** The map of available commands. */
     public static final Map<String, CliRestCommand> COMMANDS = [
             // Projects
-            LIST_PROJECTS, CREATE_PROJECT, CREATE_SAMPLE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
+            LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
             // Snapshots
-            LIST_SNAPSHOTS, LIST_SAMPLES, POST_SNAPSHOT, POST_SAMPLE_SNAPSHOT, GET_SNAPSHOT, GET_SNAPSHOT_OPTIONS, DELETE_SNAPSHOT,
+            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, GET_SNAPSHOT_OPTIONS, DELETE_SNAPSHOT,
             GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE,
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
