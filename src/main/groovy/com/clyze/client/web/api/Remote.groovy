@@ -467,13 +467,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	def getOutput(String owner, String name, String snapshotName, String config, String analysisId, String output, String start, String count) throws ClientProtocolException {
-		return new HttpStringClientCommand(httpClientLifeCycle) {
+	Map<String, Object> getOutput(String owner, String name, String snapshotName, String config, String analysisId, String output, String start, String count) throws ClientProtocolException {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
 				return LowLevelAPI.Snapshots.getOutput(token, owner, name, snapshotName, config, analysisId, output, start, count, host, port)
-			}
-			@Override String onSuccess(HttpEntity entity) {
-				return LowLevelAPI.Responses.asString(entity)
 			}
 		}.execute(host, port)
 	}
