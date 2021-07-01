@@ -539,7 +539,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
-    static final CliRestCommand GET_OUTPUT = new CliRestCommand('get_output', 'get a snapshot output') {
+    static final CliRestCommand GET_OUTPUT = new CliRestCommand('get_output', 'get an analysis output') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
             String token = getUserToken(true, host, port)
@@ -547,8 +547,11 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String output = System.console().readLine("Output: ")
-            return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, output, host, port)
+            String analysisId = readAnalysisIdFromConsole(cliOptions)
+            String output = readOutputFromConsole(cliOptions)
+            String start = readStartFromConsole(cliOptions)
+            String count = readCountFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, analysisId, output, start, count, host, port)
         }
 
         @Override
@@ -627,6 +630,18 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readActionFromConsole(OptionAccessor cliOptions) {
         return readOptionFromConsole(cliOptions, 'action', 'Analysis action', 'stop')
+    }
+
+    protected static String readOutputFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'output', 'Output')
+    }
+
+    protected static String readStartFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'start', 'Start', '0')
+    }
+
+    protected static String readCountFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'count', 'Count', '10')
     }
 
     protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description,

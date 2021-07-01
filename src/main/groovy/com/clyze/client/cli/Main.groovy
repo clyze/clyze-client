@@ -216,6 +216,9 @@ class Main {
         opts.addOption(Option.builder().longOpt('analysis').numberOfArgs(1).argName('ID').desc('Set snapshot analysis (by id).').build())
         opts.addOption(Option.builder().longOpt('config').numberOfArgs(1).argName('NAME').desc('Set snapshot configuration.').build())
         opts.addOption(Option.builder().longOpt('action').numberOfArgs(1).argName('ACTION').desc('Set action to execute.').build())
+        opts.addOption(Option.builder().longOpt('output').numberOfArgs(1).argName('ID').desc('Set analysis output (such as a dataset).').build())
+        opts.addOption(Option.builder().longOpt('start').numberOfArgs(1).argName('N').desc('Set start position when reading data.').build())
+        opts.addOption(Option.builder().longOpt('count').numberOfArgs(1).argName('N').desc('Set element count when reading data.').build())
         cli.setOptions(opts)
 
         return cli

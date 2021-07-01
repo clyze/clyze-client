@@ -298,8 +298,14 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).getRuntimeEndpoint()
         }
 
-        static final HttpGet getOutput(String userToken, String owner, String projectName, String snapshotName, String config, String output, String host, int port) {
-            Map<String, Object> extraParams = [output: output] as Map<String, Object>
+        static final HttpGet getOutput(String userToken, String owner, String projectName, String snapshotName,
+                                       String config, String analysisId, String output, String start, String count,
+                                       String host, int port) {
+            Map<String, Object> extraParams = [analysis: analysisId, output: output] as Map<String, Object>
+            if (start != null)
+                extraParams.put('start', start)
+            if (count != null)
+                extraParams.put('count', count)
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
@@ -609,9 +615,17 @@ class LowLevelAPI {
         }
 
         String outputPrefix() {
+            String analysisId = extraParams['analysis'] as String
+            if (!analysisId) throw new RuntimeException("No analysis id")
             String output = extraParams['output'] as String
             if (!output) throw new RuntimeException("No output")
-            return "${snapshotConfigPrefix()}/outputs/${output}"
+            String ret = "${snapshotConfigPrefix()}/analysis/outputs?analysis=${encodeValue(analysisId)}&dataset=${encodeValue(output)}"
+            for (String key : ['start', 'count']) {
+                String value = extraParams[key] as String
+                if (value != null)
+                    ret += '&' + key + '=' + encodeValue(value)
+            }
+            return ret
         }
 
         String getQueryForExtraParams() {
