@@ -303,9 +303,9 @@ class LowLevelAPI {
                                        String host, int port) {
             Map<String, Object> extraParams = [analysis: analysisId, output: output] as Map<String, Object>
             if (start != null)
-                extraParams.put('start', start)
+                extraParams.put('_start', start)
             if (count != null)
-                extraParams.put('count', count)
+                extraParams.put('_count', count)
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
@@ -620,7 +620,7 @@ class LowLevelAPI {
             String output = extraParams['output'] as String
             if (!output) throw new RuntimeException("No output")
             String ret = "${snapshotConfigPrefix()}/analysis/outputs?analysis=${encodeValue(analysisId)}&dataset=${encodeValue(output)}"
-            for (String key : ['start', 'count']) {
+            for (String key : ['_start', '_count']) {
                 String value = extraParams[key] as String
                 if (value != null)
                     ret += '&' + key + '=' + encodeValue(value)
