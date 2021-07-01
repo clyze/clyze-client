@@ -23,6 +23,7 @@ import static com.clyze.client.cli.CliRestCommand.DELETE_SNAPSHOT
 import static com.clyze.client.cli.CliRestCommand.EXECUTE_ANALYSIS_ACTION
 import static com.clyze.client.cli.CliRestCommand.EXPORT_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.GET_ANALYSIS
+import static com.clyze.client.cli.CliRestCommand.GET_ANALYSIS_RUNTIME
 import static com.clyze.client.cli.CliRestCommand.GET_CODE_FILE
 import static com.clyze.client.cli.CliRestCommand.GET_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.GET_FILE
@@ -85,6 +86,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *
  *     <li>analyze           - create and run an analysis
  *     <li>get_analysis      - read a snapshot analysis
+ *     <li>get_analysis_runtime - read snapshot analysis runtime information
  *     <li>delete_analysis   - delete a snapshot analysis
  *     <li>execute_action    - execute a snapshot analysis action
  *
@@ -113,7 +115,7 @@ class Main {
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Analyses
-            ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION,
+            ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
             // Misc.
             PING, LOGIN, REPACKAGE, GET_OUTPUT, RUNTIME, LIST_STACKS
             // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART

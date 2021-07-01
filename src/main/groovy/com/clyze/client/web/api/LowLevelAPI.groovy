@@ -333,6 +333,12 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config)
                     .executeAnalysisActionEndpoint(action, analysisId)
         }
+
+        static final HttpGet getAnalysisRuntime(String userToken, String owner, String projectName, String snapshotName,
+                                                String config, String analysisId, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).getAnalysisRuntimeEndpoint(analysisId)
+        }
+
     }
 
     static final class Responses {
@@ -551,6 +557,10 @@ class LowLevelAPI {
 
         HttpGet getAnalysisEndpoint(String analysisId) {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, analysisPrefix(analysisId))))
+        }
+
+        HttpGet getAnalysisRuntimeEndpoint(String analysisId) {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigPrefix() + "/analysis/runtime?analysis=" + encodeValue(analysisId))))
         }
 
         HttpDelete deleteAnalysisEndpoint(String analysisId) {
