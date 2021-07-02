@@ -126,7 +126,7 @@ class LowLevelAPI {
         }
 
         static final HttpOptions getProjectOptions(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).createProjectOptionsEndpoint()
+            return new Endpoints(host, port, userToken, owner, projectName).getProjectOptionsEndpoint()
         }
 
         static final HttpGet getProjectAnalyses(String userToken, String owner, String projectName, String host, int port) {
@@ -447,7 +447,7 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotsPrefix())))
         }
 
-        HttpOptions createProjectOptionsEndpoint() {
+        HttpOptions getProjectOptionsEndpoint() {
             withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsPrefix())))
         }
 
