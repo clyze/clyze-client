@@ -121,15 +121,6 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> getSnapshotOptions(String owner, String projectName)  {
-		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getSnapshotOptions(token, owner, projectName, host, port)
-			}
-		}.execute(host, port)
-	}
-
-	@SuppressWarnings('unused')
 	Map<String, Object> createSnapshot(String owner, String projectName, PostState ps)
 			throws ClientProtocolException, HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
@@ -439,11 +430,11 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> getProjectOptions(String owner, String name) throws ClientProtocolException {
+	Map<String, Object> getProjectInputs(String owner, String name) throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override
 			HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.getProjectOptions(token, owner, name, host, port)
+				return LowLevelAPI.Projects.getProjectInputs(token, owner, name, host, port)
 			}
 		}.execute(host, port)
 	}

@@ -136,13 +136,13 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
-    static final CliRestCommand GET_PROJECT_OPTIONS = new CliRestCommand('get_project_options', 'get options of project') {
+    static final CliRestCommand GET_PROJECT_INPUTS = new CliRestCommand('get_project_inputs', 'get input options of project') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
             String token = getUserToken(true, host, port)
             String user  = getUserName(false, host, port)
             String project = readProjectNameFromConsole(cliOptions)
-            return LowLevelAPI.Projects.getProjectOptions(token, user, project, host, port)
+            return LowLevelAPI.Projects.getProjectInputs(token, user, project, host, port)
         }
     }
 
@@ -243,16 +243,6 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String file = readFileFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getCodeFile(token, user, project, snapshot, file, host, port)
-        }
-    }
-
-    static final CliRestCommand GET_SNAPSHOT_OPTIONS = new CliRestCommand('get_snapshot_options', 'read snapshot options') {
-        @Override
-        HttpUriRequest buildRequest(String host, int port) {
-            String token = getUserToken(true, host, port)
-            String user  = getUserName(false, host, port)
-            String project = readProjectNameFromConsole(cliOptions)
-            return LowLevelAPI.Snapshots.getSnapshotOptions(token, user, project, host, port)
         }
     }
 
@@ -610,9 +600,10 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     protected static final void printProjectOptions(String host, int port, String user, String project) {
-        Map<String, Object> options = Remote.at(host, port).getProjectOptions(user, project)
+        Map<String, Object> options = Remote.at(host, port).getProjectInputs(user, project)
+        println()
         options.forEach{k, v ->
-            println ("Available options (${k}): " + v.collect {
+            println ("* Available options (${k}): " + v.collect {
                 def opt = it as Map<String, Object>
                 (opt.get('id') as String) + (opt.get('isFile') ? "@path" : "=value")
             })

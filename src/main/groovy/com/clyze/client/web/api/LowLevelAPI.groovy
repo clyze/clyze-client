@@ -125,12 +125,12 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpOptions getProjectOptions(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).getProjectOptionsEndpoint()
-        }
-
         static final HttpGet getProjectAnalyses(String userToken, String owner, String projectName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName).getProjectAnalysesEndpoint()
+        }
+
+        static final HttpGet getProjectInputs(String userToken, String owner, String projectName, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName).getProjectInputsEndpoint()
         }
     }
 
@@ -142,10 +142,6 @@ class LowLevelAPI {
 
         static final HttpGet getSnapshot(String userToken, String owner, String projectName, String snapshotName, String host, int port) {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getSnapshotEndpoint()
-        }
-
-        static final HttpOptions getSnapshotOptions(String userToken, String owner, String projectName, String host, int port) {
-            return new Endpoints(host, port, userToken, owner, projectName).getSnapshotOptionsEndpoint()
         }
 
         static final HttpGet getSymbol(String userToken, String owner, String projectName, String snapshotName, String symbolId, String host, int port) {
@@ -447,8 +443,8 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotsPrefix())))
         }
 
-        HttpOptions getProjectOptionsEndpoint() {
-            withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsPrefix())))
+        HttpGet getProjectInputsEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, "${projectPrefix()}/snapshots-inputs")))
         }
 
         HttpGet getProjectAnalysesEndpoint() {
@@ -457,10 +453,6 @@ class LowLevelAPI {
 
         HttpGet getSnapshotEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotPrefix())))
-        }
-
-        HttpOptions getSnapshotOptionsEndpoint() {
-            withTokenHeader(new HttpOptions(createUrl(host, port, API_PATH, snapshotsPrefix())))
         }
 
         HttpGet getSymbolEndpoint(String symbolId) {

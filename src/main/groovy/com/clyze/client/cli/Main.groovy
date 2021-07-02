@@ -31,10 +31,9 @@ import static com.clyze.client.cli.CliRestCommand.GET_FILES
 import static com.clyze.client.cli.CliRestCommand.GET_OUTPUT
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_ANALYSES
-import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_OPTIONS
+import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_INPUTS
 import static com.clyze.client.cli.CliRestCommand.GET_RULES
 import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT
-import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT_OPTIONS
 import static com.clyze.client.cli.CliRestCommand.GET_SYMBOL
 import static com.clyze.client.cli.CliRestCommand.LIST_CONFIGURATIONS
 import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
@@ -60,12 +59,11 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>create_project    - create a project
  *     <li>get_project       - get a project
  *     <li>delete_project    - delete a project
- *     <li>get_project_options - show the options of a project
+ *     <li>get_project_inputs - show the inputs supported by a project
  *     <li>get_project_analyses - show the analyses supported by a project
  *
  *     <li>list_snapshots    - list the available snapshots
  *     <li>get_snapshot      - get a snapshot
- *     <li>get_snapshot_options - get snapshot options
  *     <li>post_snapshot     - create a new snapshot
  *     <li>delete_snapshot   - delete a snapshot
  *     <li>get_symbol        - get a symbol from the snapshot
@@ -108,9 +106,10 @@ class Main {
     /** The map of available commands. */
     public static final Map<String, CliRestCommand> COMMANDS = [
             // Projects
-            LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_OPTIONS, GET_PROJECT_ANALYSES,
+            LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_ANALYSES,
+            GET_PROJECT_INPUTS,
             // Snapshots
-            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, GET_SNAPSHOT_OPTIONS, DELETE_SNAPSHOT,
+            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
             GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE,
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
