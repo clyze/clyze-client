@@ -612,8 +612,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String[] readStacksFromConsole(OptionAccessor cliOptions) {
         final String DEFAULT_STACK = 'jvm'
-        Collection<String> stacks = cliOptions['stacks'] as Collection<String>
-        if (stacks)
+        Collection<String> stacks = (cliOptions['stacks'] ?: null) as Collection<String>
+        if (stacks != null)
             println "Assuming stacks = ${stacks}"
         else
             stacks = System.console().readLine("Project stacks (separated by spaces, default: '${DEFAULT_STACK})': ").trim().tokenize(' ')
@@ -684,8 +684,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static Map<String, SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
         Map<String, SnapshotInput> inputs = new HashMap<>()
-        Collection<String> tokens = (cliOptions['inputs'] as Collection<String>) ?: null
-        if (tokens)
+        Collection<String> tokens = (cliOptions['inputs'] ?: null) as Collection<String>
+        if (tokens != null)
             println "Assuming inputs = ${tokens}"
         else
             tokens = System.console().readLine("Inputs (separated by spaces, example: 'app@path.jar jvm_platform=java_8'): ").tokenize(' ') as Collection<String>
