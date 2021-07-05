@@ -13,6 +13,7 @@ import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
 import com.clyze.client.Message
 
+@SuppressWarnings('unused')
 @CompileStatic
 class Helper {
 
@@ -110,7 +111,7 @@ class Helper {
      * @param stacks        the project stacks
      */
     static void ensureProjectExists(Remote remote, String projectName,
-                                    String[] stacks, boolean debug) {
+                                    List<String> stacks, boolean debug) {
         if (!projectName)
             throw new RuntimeException("Missing project name")
         else if (!stacks)
@@ -147,11 +148,10 @@ class Helper {
      */
     @SuppressWarnings('unused')
     static void repackageSnapshotForCI(String host, int port, String username, String password,
-                                       String projectName, String[] stacks,
-                                       PostState ps, AttachmentHandler<String> handler)
+                                       String projectName, PostState ps, AttachmentHandler<String> handler)
     throws ClientProtocolException {
         Remote remote = connect(host, port, username, password)
-        ensureProjectExists(remote, projectName, stacks, false)
+        ensureProjectExists(remote, projectName, ps.stacks, false)
         remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
 
@@ -163,15 +163,14 @@ class Helper {
      * @param username          the user name
      * @param password          the user password
      * @param projectName       the project to post the snapshot
-     * @param stacks          the project platform (Android/Java)
      * @param snapshotPostState the snapshot object
      */
     static void postSnapshot(String host, int port, String username, String password,
-                             String projectName, String[] stacks, PostState snapshotPostState)
+                             String projectName, PostState snapshotPostState)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
-        ensureProjectExists(remote, projectName, stacks, false)
+        ensureProjectExists(remote, projectName, snapshotPostState.stacks, false)
 
         println "Submitting snapshot in project '${projectName}'..."
         String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
@@ -214,7 +213,7 @@ class Helper {
 
             if (!options.dry)
                 postSnapshot(options.host, options.port, options.username,
-                        options.password, options.project, options.stacks, ps)
+                        options.password, options.project, ps)
         } catch (HttpHostConnectException ex) {
             Message.print(messages, "ERROR: Cannot post snapshot, is the server running?")
             if (debug)
@@ -309,6 +308,7 @@ class Helper {
             // Check if a snapshot post state exists.
             snapshotPostState = new PostState(id: snapshotId)
             snapshotPostState.loadAndTranslatePathsFrom(fromDir)
+            snapshotPostState.stacks = options.stacks
         } catch (any) {
             Message.print(messages, "Error bundling state: ${any.message}" as String)
             return

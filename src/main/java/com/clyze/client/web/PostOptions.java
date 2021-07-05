@@ -1,5 +1,7 @@
 package com.clyze.client.web;
 
+import java.util.List;
+
 /**
  * The options that drive the interaction with the server.
  */
@@ -9,7 +11,7 @@ public class PostOptions {
     public String username;
     public String password;
     public String project;
-    public String[] stacks;
+    public List<String> stacks;
     public boolean dry;
     /** true if Android should be supported by the server */
     public boolean android;

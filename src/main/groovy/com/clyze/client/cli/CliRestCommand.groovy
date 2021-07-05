@@ -131,7 +131,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String token    = getUserToken(true, host, port)
             String user     = getUserName(false, host, port)
             String project  = readProjectNameFromConsole(cliOptions)
-            String[] stacks = readStacksFromConsole(cliOptions)
+            List<String> stacks = readStacksFromConsole(cliOptions)
             return LowLevelAPI.Projects.createProject(token, user, project, stacks, host, port)
         }
     }
@@ -610,14 +610,14 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
-    protected static String[] readStacksFromConsole(OptionAccessor cliOptions) {
+    protected static List<String> readStacksFromConsole(OptionAccessor cliOptions) {
         final String DEFAULT_STACK = 'jvm'
         Collection<String> stacks = (cliOptions['stacks'] ?: null) as Collection<String>
         if (stacks != null)
             println "Assuming stacks = ${stacks}"
         else
             stacks = System.console().readLine("Project stacks (separated by spaces, default: '${DEFAULT_STACK})': ").trim().tokenize(' ')
-        return (stacks as String[]) ?: new String[] {DEFAULT_STACK}
+        return (stacks ? new ArrayList<String>(stacks) : Collections.singletonList(DEFAULT_STACK))
     }
 
     protected static String readSnapshotNameFromConsole(OptionAccessor cliOptions) {
