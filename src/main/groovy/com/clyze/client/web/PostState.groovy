@@ -1,11 +1,9 @@
 package com.clyze.client.web
 
-import groovy.cli.commons.OptionAccessor
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
-import org.apache.commons.cli.Option
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.clyze.persistent.model.Item
 
@@ -123,21 +121,6 @@ class PostState implements Item {
 
     void addFileInput(String key, String file) {
         inputs.put(key, new SnapshotInput(true, file))
-    }
-
-    void addInputFromCliOption(Option o, OptionAccessor cliOptions) {
-        String oid = o.longOpt.toUpperCase()
-        String[] values = cliOptions.commandLine.getOptionValues(o.longOpt)
-        if (o.argName && o.argName.startsWith('file')) {
-            values.each {
-                addFileInput(oid, it)
-            }
-        }
-        else {
-            values.each {
-                addStringInput(oid, it)
-            }
-        }
     }
 
     MultipartEntityBuilder asMultipart() {
