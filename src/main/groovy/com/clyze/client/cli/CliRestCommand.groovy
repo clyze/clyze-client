@@ -593,8 +593,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static final PostState getPostState(OptionAccessor cliOptions) {
         PostState postState = new PostState()
-        readSnapshotInputsFromConsole(cliOptions).forEach { String k, SnapshotInput input ->
-            postState.addInput(k, input)
+        readSnapshotInputsFromConsole(cliOptions).forEach { SnapshotInput input ->
+            postState.addInput(input)
         }
         return postState
     }
@@ -682,8 +682,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return readOptionFromConsole(cliOptions, 'config', 'Configuration', defaultConfig)
     }
 
-    protected static Map<String, SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
-        Map<String, SnapshotInput> inputs = new HashMap<>()
+    protected static List<SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {
+        List<SnapshotInput> inputs = new ArrayList<>()
         Collection<String> tokens = (cliOptions['inputs'] ?: null) as Collection<String>
         if (tokens != null)
             println "Assuming inputs = ${tokens}"
@@ -692,11 +692,11 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         for (String token : tokens) {
             int atIdx = token.indexOf('@')
             if (atIdx > 0)
-                inputs.put(token.substring(0, atIdx), new SnapshotInput(true, token.substring(atIdx + 1)))
+                inputs.add(new SnapshotInput(token.substring(0, atIdx), true, token.substring(atIdx + 1)))
             else {
                 int eqIdx = token.indexOf('=')
                 if (eqIdx > 0)
-                    inputs.put(token.substring(0, eqIdx), new SnapshotInput(false, token.substring(eqIdx + 1)))
+                    inputs.add(new SnapshotInput(token.substring(0, eqIdx), false, token.substring(eqIdx + 1)))
                 else
                     throw new RuntimeException('ERROR: Bad snapshot input: ' + token)
             }
