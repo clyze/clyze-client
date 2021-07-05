@@ -1,34 +1,22 @@
 package com.clyze.client.web
 
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.http.entity.mime.MultipartEntityBuilder
-import org.clyze.persistent.model.Item
+import org.clyze.persistent.model.ItemImpl
 
 import static org.apache.commons.io.FileUtils.copyFileToDirectory
 
 @Log4j
 @CompileStatic
-class PostState implements Item {
+class PostState extends ItemImpl {
 
     String id
+    List<String> stacks
     private Map<String, SnapshotInput> inputs = new HashMap<>()
 
     PostState() { }
-
-    @Override
-    PostState fromJSON(String json) {
-        def obj = new JsonSlurper().parseText(json)        
-        fromMap(obj as Map<String, Object>)
-        this
-    }
-
-    @Override
-    String toJSON() { 
-        return JsonOutput.toJson(toMap())
-    }
 
     /**
      * Generate JSON with file paths made relative to a
@@ -47,14 +35,13 @@ class PostState implements Item {
             }
             return i0
         }
-        return JsonOutput.toJson([inputs: inputs0] as Map<String, Object>)
+        return JsonOutput.toJson([inputs: inputs0, stacks: stacks] as Map<String, Object>)
     }
 
     @Override
-    Map<String, Object> toMap() {
-        return [            
-            inputs: inputs
-        ] as Map<String, Object>
+    protected void saveTo(Map<String, Object> map) {
+        map.put('inputs', inputs)
+        map.put('stacks', stacks)
     }
 
     @Override
@@ -66,6 +53,7 @@ class PostState implements Item {
             else
                 addStringInput(entry.key, it.value)
         }
+        this.stacks = (List<String>) map.get('stacks')
     }
 
     PostState saveTo(File dir) {
@@ -92,7 +80,7 @@ class PostState implements Item {
     PostState loadFrom(File dir) {
         File json = new File(dir, id + ".json") 
         if (json.exists()) {
-            return fromJSON(json.text)
+            return fromJSON(json.text) as PostState
         } else {
             throw new RuntimeException("File ${id}.json not found in $dir")
         }        
