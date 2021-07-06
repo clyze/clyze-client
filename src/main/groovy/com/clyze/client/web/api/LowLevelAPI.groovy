@@ -2,7 +2,6 @@ package com.clyze.client.web.api
 
 import com.clyze.client.web.HttpDeleteWithBody
 import com.clyze.client.web.PostState
-import groovy.json.JsonSlurper
 import groovy.transform.CompileStatic
 import java.nio.charset.StandardCharsets
 import org.apache.http.HttpEntity
@@ -11,6 +10,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.message.BasicNameValuePair
+import org.clyze.persistent.metadata.JSONUtil
 
 @CompileStatic
 class LowLevelAPI {
@@ -340,8 +340,7 @@ class LowLevelAPI {
     static final class Responses {
 
         static final def parseJson(HttpEntity entity) {
-            def json = new JsonSlurper().parse(entity.getContent(), "UTF-8")
-            return json
+            return JSONUtil.toMap(asString(entity))
         }
 
         static final def parseJsonAndGetAttr(HttpEntity entity, String attrName) {

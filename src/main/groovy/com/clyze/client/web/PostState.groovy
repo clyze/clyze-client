@@ -1,9 +1,9 @@
 package com.clyze.client.web
 
-import groovy.json.JsonOutput
 import groovy.transform.CompileStatic
 import groovy.util.logging.Log4j
 import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.clyze.persistent.metadata.JSONUtil
 import org.clyze.persistent.model.ItemImpl
 
 import static org.apache.commons.io.FileUtils.copyFileToDirectory
@@ -34,7 +34,7 @@ class PostState extends ItemImpl {
             }
             return i0
         }
-        return JsonOutput.toJson([inputs: inputs0, stacks: stacks] as Map<String, Object>)
+        return JSONUtil.getObjectWriter().writeValueAsString([inputs: inputs0, stacks: stacks] as Map<String, Object>)
     }
 
     @Override

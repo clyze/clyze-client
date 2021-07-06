@@ -10,6 +10,7 @@ import groovy.cli.commons.OptionAccessor
 import groovy.transform.CompileStatic
 import org.apache.http.HttpEntity
 import org.apache.http.client.methods.HttpUriRequest
+import org.clyze.persistent.metadata.JSONUtil
 
 /**
  * A CLI Rest Client command.
@@ -34,7 +35,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     @Override
     String onSuccess(HttpEntity entity) {
-        return LowLevelAPI.Responses.parseJson(entity) as String
+        // Convert string to map and then back to pretty string.
+        return JSONUtil.objectWriter.writeValueAsString(JSONUtil.toMap(entity.content.text))
     }
 
     static final CliRestCommand PING = new CliRestCommand('ping', 'pings the server') {
@@ -488,12 +490,6 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String ruleId = System.console().readLine("Rule id: ")
             return LowLevelAPI.Snapshots.deleteRule(token, user, project, snapshot, config, ruleId, host, port)
         }
-
-        @Override
-        String onSuccess(HttpEntity entity) {
-            def json = LowLevelAPI.Responses.parseJson(entity)
-            return json as String
-        }
     }
 
     static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand('export_config', 'export a snapshot configuration') {
@@ -555,11 +551,6 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String start = readStartFromConsole(cliOptions)
             String count = readCountFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, analysisId, output, start, count, host, port)
-        }
-
-        @Override
-        String onSuccess(HttpEntity entity) {
-            return LowLevelAPI.Responses.asString(entity)
         }
     }
 

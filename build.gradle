@@ -43,10 +43,9 @@ configurations.all {
 def groovyVersion='3.0.6'
 dependencies {    
     api 'org.clyze:clue-common:3.24.1'
-    api 'org.clyze:metadata-model:1.0.5'
+    api 'org.clyze:metadata-model:2.2.0'
     api 'commons-cli:commons-cli:1.4'
     api "org.codehaus.groovy:groovy:${groovyVersion}"
-    api "org.codehaus.groovy:groovy-json:${groovyVersion}"
     api "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"
     api 'org.apache.httpcomponents:httpclient:4.5.12'   // Used by the Rest client, Apache 2.0
     api 'org.apache.httpcomponents:httpmime:4.5.12'     // Used by the Rest client, Apache 2.0
