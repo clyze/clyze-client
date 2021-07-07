@@ -111,6 +111,7 @@ class Helper {
      * @param remote        the Remote object to use for the connection to the server
      * @param projectName   the project name
      * @param stacks        the project stacks
+     * @param debug         debugging mode
      */
     static void ensureProjectExists(Remote remote, String projectName,
                                     List<String> stacks, boolean debug) {
@@ -132,7 +133,8 @@ class Helper {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
             }
         }
-        println "Project data: ${JSONUtil.objectWriter.writeValueAsString(proj)}"
+        if (debug)
+            println "Project data: ${JSONUtil.objectWriter.writeValueAsString(proj)}"
     }
 
     /**
@@ -166,13 +168,15 @@ class Helper {
      * @param password          the user password
      * @param projectName       the project to post the snapshot
      * @param snapshotPostState the snapshot object
+     * @param debug             debugging mode
      */
     static void postSnapshot(String host, int port, String username, String password,
-                             String projectName, PostState snapshotPostState)
+                             String projectName, PostState snapshotPostState,
+                             boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(host, port, username, password)
 
-        ensureProjectExists(remote, projectName, snapshotPostState.stacks, false)
+        ensureProjectExists(remote, projectName, snapshotPostState.stacks, debug)
 
         println "Submitting snapshot in project '${projectName}'..."
         String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
@@ -180,7 +184,7 @@ class Helper {
     }
 
     static void post(PostState ps, PostOptions options, List<Message> messages,
-                     File cachePostDir, File metadataDir, boolean debug = false) {
+                     File cachePostDir, File metadataDir, boolean debug) {
         // Optional: save state that will be uploaded.
         if (cachePostDir != null) {
             try {
@@ -215,7 +219,7 @@ class Helper {
 
             if (!options.dry)
                 postSnapshot(options.host, options.port, options.username,
-                        options.password, options.project, ps)
+                        options.password, options.project, ps, debug)
         } catch (HttpHostConnectException ex) {
             Message.print(messages, "ERROR: Cannot post snapshot, is the server running?")
             if (debug)
