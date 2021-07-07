@@ -3,6 +3,8 @@ package com.clyze.client.web
 import com.clyze.client.web.api.AttachmentHandler
 import com.clyze.client.web.api.Remote
 import groovy.transform.CompileStatic
+import org.clyze.persistent.metadata.JSONUtil
+
 import java.awt.*
 import java.util.List
 
@@ -130,7 +132,7 @@ class Helper {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
             }
         }
-        println "Project data: ${proj}"
+        println "Project data: ${JSONUtil.objectWriter.writeValueAsString(proj)}"
     }
 
     /**
