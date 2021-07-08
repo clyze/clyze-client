@@ -36,7 +36,11 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     @Override
     String onSuccess(HttpEntity entity) {
         // Convert string to map and then back to pretty string.
-        return JSONUtil.objectWriter.writeValueAsString(JSONUtil.toMap(entity.content.text))
+        return prettyPrintMap(JSONUtil.toMap(entity.content.text))
+    }
+
+    static String prettyPrintMap(Map<?, ?> map) {
+        return JSONUtil.objectWriter.writeValueAsString(map)
     }
 
     static final CliRestCommand PING = new CliRestCommand('ping', 'pings the server') {
@@ -106,7 +110,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             for (Map<String, Object> result : json.get('results') as Collection<Map<String, Object>>)
                 println "* ${result.get('name')} (id: ${result.get('id')})"
             println ""
-            return json as String
+            return prettyPrintMap(json)
         }
     }
 
@@ -123,7 +127,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             for (def result : json.get('results') as Collection<Map<String, Object>>)
                 println "* ${result}"
             println ""
-            json as String
+            return prettyPrintMap(json)
         }
     }
 
@@ -164,7 +168,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             for (def result : json.get('results') as Collection<Map<String, Object>>)
                 println "* ${result.get('id')} ('${result.get('displayName')}')"
             println ""
-            json as String
+            return prettyPrintMap(json)
         }
     }
 
