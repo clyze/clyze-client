@@ -180,7 +180,8 @@ class Helper {
 
         println "Submitting snapshot in project '${projectName}'..."
         String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
-        println "Done (new snapshot $snapshotId)."
+        if (debug)
+            println "Done (new snapshot $snapshotId)."
     }
 
     static void post(PostState ps, PostOptions options, List<Message> messages,
