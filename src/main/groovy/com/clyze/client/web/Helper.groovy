@@ -182,7 +182,7 @@ class Helper {
 
         ensureProjectExists(remote, projectName, snapshotPostState.stacks, printer, debug)
 
-        printer.always("Submitting snapshot in project '${projectName}'...")
+        printer.always("Posting snapshot to project '${projectName}'...")
         String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
         if (debug)
             printer.always("Done (new snapshot $snapshotId).")
