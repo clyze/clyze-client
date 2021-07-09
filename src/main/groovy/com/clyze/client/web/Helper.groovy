@@ -1,5 +1,6 @@
 package com.clyze.client.web
 
+import com.clyze.client.Printer
 import com.clyze.client.web.api.AttachmentHandler
 import com.clyze.client.web.api.Remote
 import groovy.transform.CompileStatic
@@ -13,7 +14,6 @@ import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileBody
 import org.apache.http.entity.mime.content.StringBody
-import com.clyze.client.Message
 
 @SuppressWarnings('unused')
 @CompileStatic
@@ -95,11 +95,11 @@ class Helper {
         !isEmpty
     }
 
-    static Remote connect(String host, int port, String username, String password) throws HttpHostConnectException {
-        println "Connecting to ${host}:${port}"
+    static Remote connect(String host, int port, String username, String password, Printer printer) throws HttpHostConnectException {
+        printer.always("Connecting to ${host}:${port}")
         Remote remote = Remote.at(host, port)
 
-        println "Logging in as ${username}"
+        printer.always("Logging in as ${username}")
         remote.login(username, password)
 
         return remote
@@ -111,10 +111,11 @@ class Helper {
      * @param remote        the Remote object to use for the connection to the server
      * @param projectName   the project name
      * @param stacks        the project stacks
+     * @param printer       receiver of messages to display
      * @param debug         debugging mode
      */
     static void ensureProjectExists(Remote remote, String projectName,
-                                    List<String> stacks, boolean debug) {
+                                    List<String> stacks, Printer printer, boolean debug) {
         if (!projectName)
             throw new RuntimeException("Missing project name")
         else if (!stacks)
@@ -128,13 +129,13 @@ class Helper {
                 ex1.printStackTrace()
             try {
                 proj = remote.createProject(remote.currentUser(), projectName, stacks)
-                println "Project '${projectName}' created with stacks: ${stacks}"
+                printer.always("Project '${projectName}' created with stacks: ${stacks}")
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
             }
         }
         if (debug)
-            println "Project data: ${JSONUtil.objectWriter.writeValueAsString(proj)}"
+            printer.always("Project data: ${JSONUtil.objectWriter.writeValueAsString(proj)}")
     }
 
     /**
@@ -145,17 +146,19 @@ class Helper {
      * @param username     the user name
      * @param password     the user password
      * @param projectName  the project to post the snapshot
-     * @param stacks     the project platform (Android/Java)
+     * @param stacks       the project platform (Android/Java)
      * @param ps           the snapshot representation
      * @param handler      a handler of the resulting file returned by the server
+     * @param printer      receiver of messages to display
      * @throws ClientProtocolException  if the server encountered an error
      */
     @SuppressWarnings('unused')
     static void repackageSnapshotForCI(String host, int port, String username, String password,
-                                       String projectName, PostState ps, AttachmentHandler<String> handler)
+                                       String projectName, PostState ps,
+                                       AttachmentHandler<String> handler, Printer printer)
     throws ClientProtocolException {
-        Remote remote = connect(host, port, username, password)
-        ensureProjectExists(remote, projectName, ps.stacks, false)
+        Remote remote = connect(host, port, username, password, printer)
+        ensureProjectExists(remote, projectName, ps.stacks, printer, false)
         remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
 
@@ -168,32 +171,35 @@ class Helper {
      * @param password          the user password
      * @param projectName       the project to post the snapshot
      * @param snapshotPostState the snapshot object
+     * @param printer           receiver of messages to display
      * @param debug             debugging mode
      */
     static void postSnapshot(String host, int port, String username, String password,
                              String projectName, PostState snapshotPostState,
-                             boolean debug)
+                             Printer printer, boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
-        Remote remote = connect(host, port, username, password)
+        Remote remote = connect(host, port, username, password, printer)
 
-        ensureProjectExists(remote, projectName, snapshotPostState.stacks, debug)
+        ensureProjectExists(remote, projectName, snapshotPostState.stacks, printer, debug)
 
-        println "Submitting snapshot in project '${projectName}'..."
+        printer.always("Submitting snapshot in project '${projectName}'...")
         String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
         if (debug)
-            println "Done (new snapshot $snapshotId)."
+            printer.always("Done (new snapshot $snapshotId).")
+        else
+            printer.always("Done.")
     }
 
-    static void post(PostState ps, PostOptions options, List<Message> messages,
-                     File cachePostDir, File metadataDir, boolean debug) {
+    static void post(PostState ps, PostOptions options, File cachePostDir,
+                     File metadataDir, Printer printer, boolean debug) {
         // Optional: save state that will be uploaded.
         if (cachePostDir != null) {
             try {
                 cachePostDir.mkdirs()
                 ps.saveTo(cachePostDir)
-                Message.print(messages, "Saved post state in " + cachePostDir.canonicalPath)
+                printer.always("Saved post state in " + cachePostDir.canonicalPath)
             } catch (Exception ex) {
-                Message.warn(messages, "WARNING: Cannot save post state: " + ex.getMessage())
+                printer.warn("WARNING: Cannot save post state: " + ex.getMessage())
                 if (debug)
                     ex.printStackTrace()
             }
@@ -204,10 +210,10 @@ class Helper {
             File metadataFile = new File(metadataDir, POST_METADATA)
             new BufferedWriter(new FileWriter(metadataFile)).withCloseable { BufferedWriter writer ->
                 try {
-                    Message.debug(messages, "Saving options in: " + metadataFile.getCanonicalPath())
+                    printer.debug("Saving options in: " + metadataFile.getCanonicalPath())
                     writer.write(ps.toJSONWithRelativePaths(metadataDir.getCanonicalPath()))
                 } catch (IOException ex) {
-                    Message.warn(messages, "WARNING: Cannot save metadata: " + ex.getMessage())
+                    printer.warn("WARNING: Cannot save metadata: " + ex.getMessage())
                     if (debug)
                         ex.printStackTrace()
                 }
@@ -215,18 +221,18 @@ class Helper {
         }
 
         try {
-            if (!isServerCapable(options, messages))
+            if (!isServerCapable(options, printer))
                 return
 
             if (!options.dry)
                 postSnapshot(options.host, options.port, options.username,
-                        options.password, options.project, ps, debug)
+                        options.password, options.project, ps, printer, debug)
         } catch (HttpHostConnectException ex) {
-            Message.print(messages, "ERROR: Cannot post snapshot, is the server running?")
+            printer.error("ERROR: Cannot post snapshot, is the server running?")
             if (debug)
                 ex.printStackTrace()
         } catch (Exception ex) {
-            Message.print(messages, "ERROR: Cannot post snapshot: " + ex.getMessage())
+            printer.error("ERROR: Cannot post snapshot: " + ex.getMessage())
             if (debug)
                 ex.printStackTrace()
         }
@@ -236,12 +242,12 @@ class Helper {
      * Test server capabilities.
      *
      * @param options     the post options to use
-     * @param messages    a list of messages to contain resulting errors/warnings
+     * @param printer     receiver of messages to display
      * @return            true if the server is compatible, false otherwise (see
      *                    messages for reason)
      * @throws HttpHostConnectException if the server did not respond
      */
-    static boolean isServerCapable(PostOptions options, List<Message> messages)
+    static boolean isServerCapable(PostOptions options, Printer printer)
         throws HttpHostConnectException {
 
         if (options.dry)
@@ -250,16 +256,16 @@ class Helper {
         Map<String, Object> diag = diagnose(options)
         // Check if the server can receive Android snapshots.
         if (options.android && !isAndroidSupported(diag)) {
-            Message.print(messages, "ERROR: Cannot post snapshot: Android SDK setup missing.")
+            printer.error("ERROR: Cannot post snapshot: Android SDK setup missing.")
             return false
         } else if (options.autoRepackaging && !supportsAutomatedRepackaging(diag)) {
-            Message.print(messages, "ERROR: This version of the server does not support automated repackaging.")
+            printer.error("ERROR: This version of the server does not support automated repackaging.")
             return false
         } else {
             String sv = getServerVersion(diag)
             String expected = "1.0.3"
             if (sv != expected)
-                Message.warn(messages, "WARNING: Server version not compatible: " + sv + " (expected: " + expected + ")")
+                printer.warn("WARNING: Server version not compatible: " + sv + " (expected: " + expected + ")")
         }
         return true
     }
@@ -308,7 +314,7 @@ class Helper {
     }
 
     static void postCachedSnapshot(PostOptions options, File fromDir,
-                                   String snapshotId, List<Message> messages,
+                                   String snapshotId, Printer printer,
                                    boolean debug) {
         PostState snapshotPostState
         try {
@@ -317,10 +323,10 @@ class Helper {
             snapshotPostState.loadAndTranslatePathsFrom(fromDir)
             snapshotPostState.stacks = options.stacks
         } catch (any) {
-            Message.print(messages, "Error bundling state: ${any.message}" as String)
+            printer.error("Error bundling state: ${any.message}" as String)
             return
         }
 
-        post(snapshotPostState, options, messages, null, null, debug)
+        post(snapshotPostState, options, null, null, printer, debug)
     }
 }
