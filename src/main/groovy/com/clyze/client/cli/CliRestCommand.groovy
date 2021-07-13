@@ -545,7 +545,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
             String profile = readProfileFromConsole(cliOptions)
-            return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, profile, host, port)
+            List<String> options = readOptionsFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.analyze(token, user, project, snapshot, config, profile, options, host, port)
         }
     }
 
@@ -625,13 +626,21 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     protected static List<String> readStacksFromConsole(OptionAccessor cliOptions) {
-        final String DEFAULT_STACK = 'jvm'
-        Collection<String> stacks = (cliOptions['stacks'] ?: null) as Collection<String>
-        if (stacks != null)
-            println "Assuming stacks = ${stacks}"
+        return readOptionsFromConsole(cliOptions, 'stacks', 'Project stacks', Collections.singletonList('jvm'))
+    }
+
+    protected static List<String> readOptionsFromConsole(OptionAccessor cliOptions) {
+        return readOptionsFromConsole(cliOptions, 'options', 'Analysis options', new ArrayList<String>())
+    }
+
+    protected static List<String> readOptionsFromConsole(OptionAccessor cliOptions, String pluralOpt,
+                                                         String description, List<String> defaultValue) {
+        Collection<String> values = (cliOptions[pluralOpt] ?: null) as Collection<String>
+        if (values != null)
+            println "Assuming ${pluralOpt} = ${values}"
         else
-            stacks = System.console().readLine("Project stacks (separated by spaces, default: '${DEFAULT_STACK})': ").trim().tokenize(' ')
-        return (stacks ? new ArrayList<String>(stacks) : Collections.singletonList(DEFAULT_STACK))
+            values = System.console().readLine("${description} (separated by spaces, default: ${defaultValue}): ").trim().tokenize(' ')
+        return (values ? new ArrayList<String>(values) : defaultValue)
     }
 
     protected static String readSnapshotNameFromConsole(OptionAccessor cliOptions) {

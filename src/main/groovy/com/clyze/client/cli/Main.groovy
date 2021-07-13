@@ -223,6 +223,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('output').numberOfArgs(1).argName('ID').desc('Set analysis output (such as a dataset).').build())
         opts.addOption(Option.builder().longOpt('start').numberOfArgs(1).argName('N').desc('Set start position when reading data.').build())
         opts.addOption(Option.builder().longOpt('count').numberOfArgs(1).argName('N').desc('Set element count when reading data.').build())
+        opts.addOption(Option.builder().longOpt('option').numberOfArgs(1).argName('OPT').desc('Set analysis option in the form "id=value".').build())
         cli.setOptions(opts)
 
         return cli

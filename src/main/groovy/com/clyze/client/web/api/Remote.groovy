@@ -302,10 +302,11 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> analyze(String owner, String projectName, String snapshotName, String config, String profileId)  {
+	Map<String, Object> analyze(String owner, String projectName, String snapshotName, String config,
+								String profileId, List<String> options)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.analyze(token, owner, projectName, snapshotName, config, profileId, host, port)
+				return LowLevelAPI.Snapshots.analyze(token, owner, projectName, snapshotName, config, profileId, options, host, port)
 			}
 		}.execute(host, port)
 	}

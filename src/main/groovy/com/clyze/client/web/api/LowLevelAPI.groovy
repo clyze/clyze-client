@@ -9,6 +9,7 @@ import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
 import org.apache.http.entity.mime.MultipartEntityBuilder
+import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.message.BasicNameValuePair
 import org.clyze.persistent.metadata.JSONUtil
 
@@ -313,10 +314,17 @@ class LowLevelAPI {
         }
 
         static final HttpPost analyze(String userToken, String owner, String projectName, String snapshotName,
-                                      String config, String profileId, String host, int port) {
+                                      String config, String profileId, List<String> options, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).analyzeEndpoint(profileId)
-            // Use empty multipart
-            post.setEntity(MultipartEntityBuilder.create().build())
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+            for (String option : options) {
+                int eqIdx = option.indexOf('=')
+                if (eqIdx > 0)
+                    entityBuilder.addPart(option.substring(0, eqIdx), new StringBody(option.substring(eqIdx + 1)))
+                else
+                    System.err.println "WARNING: ignoring bad option ${option}"
+            }
+            post.setEntity(entityBuilder.build())
             return post
         }
 
