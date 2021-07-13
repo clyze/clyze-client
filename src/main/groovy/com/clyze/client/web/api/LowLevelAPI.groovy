@@ -91,11 +91,14 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, user).listProjectsEndpoint()
         }
 
-        static final HttpPost createProject(String userToken, String owner, String projectName, List<String> stacks, String host, int port) {
+        static final HttpPost createProject(String userToken, String owner, String projectName, List<String> stacks,
+                                            String isPublic, String host, int port) {
             HttpPost post = new Endpoints(host, port, userToken, owner).postProjectEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
-            params.add(new BasicNameValuePair("name", projectName))
+            params.add(new BasicNameValuePair('name', projectName))
             stacks.each {String st -> params.add(new BasicNameValuePair("stack", st)) }
+            if (isPublic)
+                params.add(new BasicNameValuePair('isPublic', isPublic))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
         }

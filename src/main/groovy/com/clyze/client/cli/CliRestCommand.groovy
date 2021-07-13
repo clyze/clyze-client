@@ -138,7 +138,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String user     = getUserName(false, host, port)
             String project  = readProjectNameFromConsole(cliOptions)
             List<String> stacks = readStacksFromConsole(cliOptions)
-            return LowLevelAPI.Projects.createProject(token, user, project, stacks, host, port)
+            String isPublic = readOptionFromConsole(cliOptions, 'public', 'Project is public (true/false)', 'false')
+            return LowLevelAPI.Projects.createProject(token, user, project, stacks, isPublic, host, port)
         }
     }
 

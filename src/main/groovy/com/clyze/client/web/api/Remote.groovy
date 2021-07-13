@@ -412,10 +412,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> createProject(String owner, String name, List<String> stacks) {
+	Map<String, Object> createProject(String owner, String name, List<String> stacks, String isPublic) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.createProject(token, owner, name, stacks, host, port)
+				return LowLevelAPI.Projects.createProject(token, owner, name, stacks, isPublic, host, port)
 			}
 		}.execute(host, port)
 	}

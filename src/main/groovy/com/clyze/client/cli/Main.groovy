@@ -208,6 +208,7 @@ class Main {
         opts.addOption(Option.builder('v').longOpt('version').desc('Display version and exit.').build())
         opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Set project name.').build())
         opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Set project stack (by id).').build())
+        opts.addOption(Option.builder().longOpt('public').desc('Make project public.').build())
         opts.addOption(Option.builder().longOpt('snapshot').numberOfArgs(1).argName('ID').desc('set snapshot id.').build())
         opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Set snapshot input (examples: app@path, key=value).').build())
         opts.addOption(Option.builder().longOpt('symbol').numberOfArgs(1).argName('ID').desc('Set symbol id.').build())

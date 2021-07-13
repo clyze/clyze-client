@@ -128,7 +128,7 @@ class Helper {
             if (debug)
                 ex1.printStackTrace()
             try {
-                proj = remote.createProject(remote.currentUser(), projectName, stacks)
+                proj = remote.createProject(remote.currentUser(), projectName, stacks, 'false')
                 printer.always("Project '${projectName}' created with stacks: ${stacks}")
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
