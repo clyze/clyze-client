@@ -403,6 +403,15 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> listPublicProjects() {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Projects.getPublicProjects(token, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> listProjects(String owner) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {

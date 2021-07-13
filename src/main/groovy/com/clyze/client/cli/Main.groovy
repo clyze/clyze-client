@@ -37,6 +37,7 @@ import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT
 import static com.clyze.client.cli.CliRestCommand.GET_SYMBOL
 import static com.clyze.client.cli.CliRestCommand.LIST_CONFIGURATIONS
 import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
+import static com.clyze.client.cli.CliRestCommand.LIST_PUBLIC_PROJECTS
 import static com.clyze.client.cli.CliRestCommand.LIST_SNAPSHOTS
 import static com.clyze.client.cli.CliRestCommand.LIST_STACKS
 import static com.clyze.client.cli.CliRestCommand.LOGIN
@@ -55,6 +56,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  * The client can execute the following commands via the remote server:
  * <ul>
  *     <li>list_stacks       - list the available stacks
+ *     <li>list_public_projects - list all public projects
  *     <li>list_projects     - list the available projects
  *     <li>create_project    - create a project
  *     <li>get_project       - get a project
@@ -106,8 +108,8 @@ class Main {
     /** The map of available commands. */
     public static final Map<String, CliRestCommand> COMMANDS = [
             // Projects
-            LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT, GET_PROJECT_ANALYSES,
-            GET_PROJECT_INPUTS,
+            LIST_PUBLIC_PROJECTS, LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT,
+            GET_PROJECT_ANALYSES, GET_PROJECT_INPUTS,
             // Snapshots
             LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
             GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE,

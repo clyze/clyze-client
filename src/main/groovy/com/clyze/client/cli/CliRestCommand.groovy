@@ -114,6 +114,24 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand LIST_PUBLIC_PROJECTS = new CliRestCommand('list_public_projects', 'list the public projects') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(true, host, port)
+            return LowLevelAPI.Projects.getPublicProjects(token, host, port)
+        }
+
+        @Override
+        String onSuccess(HttpEntity entity) {
+            def json = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
+            println "== Projects =="
+            for (Map<String, Object> result : json.get('results') as Collection<Map<String, Object>>)
+                println "* ${result.get('name')} (id: ${result.get('id')})"
+            println ""
+            return prettyPrintMap(json)
+        }
+    }
+
     static final CliRestCommand LIST_STACKS = new CliRestCommand('list_stacks', 'list the available stacks') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {

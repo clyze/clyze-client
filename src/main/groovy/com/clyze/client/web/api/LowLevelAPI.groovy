@@ -87,6 +87,10 @@ class LowLevelAPI {
 
     static final class Projects {
 
+        static final HttpGet getPublicProjects(String userToken, String host, int port) {
+            return new Endpoints(host, port, userToken).listPublicProjectsEndpoint()
+        }
+
         static final HttpGet getProjects(String userToken, String user, String host, int port) {
             return new Endpoints(host, port, userToken, user).listProjectsEndpoint()
         }
@@ -415,6 +419,10 @@ class LowLevelAPI {
 
         HttpGet listProjectsEndpoint() {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, projectsPrefix())))
+        }
+
+        HttpGet listPublicProjectsEndpoint() {
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, '/public-projects')))
         }
 
         HttpGet getStacksEndpoint() {
