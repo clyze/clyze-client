@@ -28,9 +28,12 @@ class Remote {
 		this.httpClientLifeCycle = httpClientLifeCycle
 	}
 
-	static Remote at(String host, Integer port) {
+	static Remote at(String host, Integer port, String user, String token) {
 		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
-		return new Remote(host, port, new SameInstanceHttpClientLifeCycle(client))
+		Remote r = new Remote(host, port, new SameInstanceHttpClientLifeCycle(client))
+		r.setUsername(user)
+		r.setToken(token)
+		return r
 	}
 
 	String currentUser() {
@@ -85,7 +88,6 @@ class Remote {
 		}.execute(host, port)
 	}
 
-	@SuppressWarnings('unused')
 	Map<String, Object> login(String username, String password) throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {

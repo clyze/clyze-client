@@ -5,6 +5,7 @@ import com.clyze.client.web.PostState
 import groovy.transform.CompileStatic
 import java.nio.charset.StandardCharsets
 import org.apache.http.HttpEntity
+import org.apache.http.HttpHeaders
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.*
@@ -23,19 +24,19 @@ class LowLevelAPI {
     static final class Requests {
 
         static final HttpGet ping(String host, int port) {
-            return new Endpoints(host, port).pingEndpoint()
+            return new Endpoints(host, port, null).pingEndpoint()
         }
 
         static final HttpGet diagnose(String host, int port) {
-            return new Endpoints(host, port).diagnoseEndpoint()
+            return new Endpoints(host, port, null).diagnoseEndpoint()
         }
 
         static final HttpPost cleanDeploy(String host, int port) {
-            return new Endpoints(host, port).cleanDeployEndpoint()
+            return new Endpoints(host, port, null).cleanDeployEndpoint()
         }
 
         static final HttpPost login(String username, String password, String host, int port) {
-            HttpPost post = new Endpoints(host, port).authenticateEndpoint()
+            HttpPost post = new Endpoints(host, port, null).authenticateEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
             params.add(new BasicNameValuePair("username", username))
             params.add(new BasicNameValuePair("password", password))
@@ -52,7 +53,7 @@ class LowLevelAPI {
         */
 
         static final HttpGet listStacks(String host, int port) {
-            return new Endpoints(host, port).getStacksEndpoint()
+            return new Endpoints(host, port, null).getStacksEndpoint()
         }
 
         static final HttpPut executeAnalysisAction(String userToken, String snapshotId, String analysis, String action, String host, int port) {
@@ -384,7 +385,7 @@ class LowLevelAPI {
         String config
         Map<String, Object> extraParams
 
-        Endpoints(String host, int port, String userToken=null, String username=null,
+        Endpoints(String host, int port, String userToken, String username=null,
                   String projectName=null, String snapshotName=null, String config=null,
                   Map<String, Object> extraParams=null) {
             this.host        = host
@@ -406,7 +407,7 @@ class LowLevelAPI {
         }
 
         HttpPost cleanDeployEndpoint() {
-            return new HttpPost(createUrl(host, port, BASE_PATH, "/clean/deploy"))
+            withTokenHeader(new HttpPost(createUrl(host, port, BASE_PATH, "/clean/deploy")))
         }
 
         HttpPost authenticateEndpoint() {
@@ -590,7 +591,10 @@ class LowLevelAPI {
         }
 
         private <T extends HttpRequestBase> T withTokenHeader(T req) {
-            if (userToken) req.addHeader(HEADER_TOKEN, userToken)
+            if (userToken) {
+                req.addHeader(HEADER_TOKEN, userToken)
+                req.setHeader(HttpHeaders.AUTHORIZATION, 'Bearer ' + userToken)
+            }
             return req
         }
 
