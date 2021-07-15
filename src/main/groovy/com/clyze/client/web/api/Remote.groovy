@@ -178,6 +178,16 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> getAnalysisOutputFile(String owner, String projectName, String snapshotName,
+											  String config, String analysisId, String codeFile) {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String host, int port) {
+				return LowLevelAPI.Snapshots.getAnalysisOutputFile(token, owner, projectName, snapshotName, config, analysisId, codeFile, host, port)
+			}
+		}.execute(host, port)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> deleteSnapshot(String owner, String projectName, String snapshotName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String host, int port) {

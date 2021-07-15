@@ -29,6 +29,7 @@ import static com.clyze.client.cli.CliRestCommand.GET_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.GET_FILE
 import static com.clyze.client.cli.CliRestCommand.GET_FILES
 import static com.clyze.client.cli.CliRestCommand.GET_OUTPUT
+import static com.clyze.client.cli.CliRestCommand.GET_OUTPUT_FILE
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_ANALYSES
 import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_INPUTS
@@ -72,6 +73,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>get_files         - read the snapshot (artifact) files
  *     <li>get_file          - read a snapshot (artifact) file
  *     <li>get_code_file     - read a snapshot (code) file
+ *     <li>get_output_file   - read an analysis output file
  *
  *     <li>list_configurations - list the available configurations
  *     <li>get_config        - get a configuration
@@ -112,7 +114,7 @@ class Main {
             GET_PROJECT_ANALYSES, GET_PROJECT_INPUTS,
             // Snapshots
             LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
-            GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE,
+            GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE, GET_OUTPUT_FILE,
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Analyses

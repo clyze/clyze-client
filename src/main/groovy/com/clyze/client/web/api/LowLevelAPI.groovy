@@ -172,6 +172,11 @@ class LowLevelAPI {
             return new Endpoints(host, port, userToken, owner, projectName, snapshotName).getCodeFileEndpoint(codeFile)
         }
 
+        static final HttpGet getAnalysisOutputFile(String userToken, String owner, String projectName, String snapshotName,
+                                                   String config, String analysisId, String codeFile, String host, int port) {
+            return new Endpoints(host, port, userToken, owner, projectName, snapshotName, config).getAnalysisOutputFileEndpoint(analysisId, codeFile)
+        }
+
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String host, int port) {
             MultipartEntityBuilder entityBuilder = postState.asMultipart()
@@ -492,6 +497,11 @@ class LowLevelAPI {
 
         HttpGet getCodeFileEndpoint(String codeFile) {
             withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotPrefix() + '/code/' + encodeValue(codeFile))))
+        }
+
+        HttpGet getAnalysisOutputFileEndpoint(String analysisId, String file) {
+            String opts = "analysis=${encodeValue(analysisId)}&file=${encodeValue(file)}"
+            withTokenHeader(new HttpGet(createUrl(host, port, API_PATH, snapshotConfigPrefix() + '/analysis/output-file?' + opts)))
         }
 
         HttpPost postSnapshotEndpoint() {

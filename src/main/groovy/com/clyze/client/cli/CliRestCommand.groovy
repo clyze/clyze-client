@@ -271,6 +271,20 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand GET_OUTPUT_FILE = new CliRestCommand('get_output_file', 'read an analysis output file') {
+        @Override
+        HttpUriRequest buildRequest(String host, int port) {
+            String token = getUserToken(cliOptions, true, host, port)
+            String user  = getUserName(cliOptions, false, host, port)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            String analysis = readAnalysisIdFromConsole(cliOptions)
+            String file = readFileFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getAnalysisOutputFile(token, user, project, snapshot, config, analysis, file, host, port)
+        }
+    }
+
     static final CliRestCommand POST_SNAPSHOT = new CliRestCommand('post_snapshot', 'posts a new snapshot to the server') {
         @Override
         HttpUriRequest buildRequest(String host, int port) {
