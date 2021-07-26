@@ -51,12 +51,8 @@ class Helper {
         return collection.collect { closure.call(it, i++) }
     }
 
-    private static String createAnalysisPageURL(String host, int port, String postedId, String token = null) {
-        return "http://$host:$port/clue/" + (token ? "?t=$token" : "") + "#/analyses/$postedId"
-    }
-
     private static void openBrowser(String url) {
-        File html = File.createTempFile("_doop", ".html")
+        File html = File.createTempFile("_clyze", ".html")
         html.withWriter('UTF-8') { w ->
             w.write """\
                     <html>
