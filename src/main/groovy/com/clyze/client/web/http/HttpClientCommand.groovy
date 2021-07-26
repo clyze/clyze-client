@@ -31,7 +31,7 @@ abstract class HttpClientCommand<T> implements ResponseHandler<T> {
 //     */
 //    Closure<? extends HttpUriRequest> requestBuilder
 
-    abstract HttpUriRequest buildRequest(String host, int port)
+    abstract HttpUriRequest buildRequest(String hostPrefix)
     abstract T onSuccess(HttpEntity entity)
 
 //    /** A closure to be executed in case of success (status code == 200). It accepts an HttpEntity object and returns a
@@ -62,7 +62,7 @@ abstract class HttpClientCommand<T> implements ResponseHandler<T> {
 //        return requestBuilder.call(host, port)
 //    }
 //
-    T execute(String host, int port) {
+    T execute(String hostPrefix) {
 
         if (httpClientLifeCycle == null) {
             throw new RuntimeException("Command is not configured correctly (no lifecycle)")
@@ -71,7 +71,7 @@ abstract class HttpClientCommand<T> implements ResponseHandler<T> {
         CloseableHttpClient client = httpClientLifeCycle.createHttpClient()
 
         try {
-            HttpUriRequest request = buildRequest(host, port)            
+            HttpUriRequest request = buildRequest(hostPrefix)
             log.debug "Executing request: ${request.getRequestLine()}"
             return client.execute(request, this) as T
         }

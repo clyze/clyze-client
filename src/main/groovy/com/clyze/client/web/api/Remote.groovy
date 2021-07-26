@@ -16,21 +16,19 @@ import org.apache.http.impl.client.CloseableHttpClient
 @CompileStatic
 class Remote {
 
-	private final String host
-	private final Integer port
+	private final String hostPrefix
 	private final HttpClientLifeCycle httpClientLifeCycle
 	private String token    = null
 	private String username = null
 
-	private Remote(String host, Integer port, HttpClientLifeCycle httpClientLifeCycle) {
-		this.host = host
-		this.port = port
+	private Remote(String hostPrefix, HttpClientLifeCycle httpClientLifeCycle) {
+		this.hostPrefix = hostPrefix
 		this.httpClientLifeCycle = httpClientLifeCycle
 	}
 
-	static Remote at(String host, Integer port, String user, String token) {
+	static Remote at(String hostPrefix, String user, String token) {
 		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
-		Remote r = new Remote(host, port, new SameInstanceHttpClientLifeCycle(client))
+		Remote r = new Remote(hostPrefix, new SameInstanceHttpClientLifeCycle(client))
 		r.setUsername(user)
 		r.setToken(token)
 		return r
@@ -56,42 +54,42 @@ class Remote {
 	@SuppressWarnings('unused')
 	Map<String, Object> ping() throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				LowLevelAPI.Requests.ping(host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				LowLevelAPI.Requests.ping(hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	Map<String, Object> diagnose() throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.diagnose(host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.diagnose(hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> cleanDeploy() {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.cleanDeploy(host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.cleanDeploy(hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> listStacks() {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.listStacks(host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.listStacks(hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	Map<String, Object> login(String username, String password) throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.login(username, password, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.login(username, password, hostPrefix)
 			}
 
 			@Override Map<String, Object> onSuccess(HttpEntity entity) {
@@ -100,7 +98,7 @@ class Remote {
 				setUsername(data.get('username') as String)
 				return data
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 //	void logout() {
@@ -110,390 +108,391 @@ class Remote {
 //			onSuccess: { HttpEntity entity ->
 //				token = null
 //			}
-//		).execute(host, port)
+//		).execute(hostPrefix)
 //	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> listSnapshots(String owner, String projectName)  {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.listSnapshots(token, owner, projectName, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.listSnapshots(token, owner, projectName, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> createSnapshot(String owner, String projectName, PostState ps)
 			throws ClientProtocolException, HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.createSnapshot(token, owner, projectName, ps, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.createSnapshot(token, owner, projectName, ps, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getSnapshot(String owner, String projectName, String snapshotName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getSnapshot(token, owner, projectName, snapshotName, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getSnapshot(token, owner, projectName, snapshotName, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getSymbol(String owner, String projectName, String snapshotName, String symbolId) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getSymbol(token, owner, projectName, snapshotName, symbolId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getSymbol(token, owner, projectName, snapshotName, symbolId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getFiles(String owner, String projectName, String snapshotName, String artifact) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getFiles(token, owner, projectName, snapshotName, artifact, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getFiles(token, owner, projectName, snapshotName, artifact, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getFile(String owner, String projectName, String snapshotName, String artifact, String file) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getFile(token, owner, projectName, snapshotName, artifact, file, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getFile(token, owner, projectName, snapshotName, artifact, file, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getCodeFile(String owner, String projectName, String snapshotName, String codeFile) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getCodeFile(token, owner, projectName, snapshotName, codeFile, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getCodeFile(token, owner, projectName, snapshotName, codeFile, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getAnalysisOutputFile(String owner, String projectName, String snapshotName,
 											  String config, String analysisId, String codeFile) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getAnalysisOutputFile(token, owner, projectName, snapshotName, config, analysisId, codeFile, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getAnalysisOutputFile(token, owner, projectName, snapshotName, config, analysisId, codeFile, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> deleteSnapshot(String owner, String projectName, String snapshotName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.deleteSnapshot(token, owner, projectName, snapshotName, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.deleteSnapshot(token, owner, projectName, snapshotName, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 	@SuppressWarnings('unused')
 	Map<String, Object> listConfigurations(String owner, String projectName, String snapshotName)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.listConfigurations(token, owner, projectName, snapshotName, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.listConfigurations(token, owner, projectName, snapshotName, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getConfiguration(String owner, String projectName, String snapshotName, String config) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getConfiguration(token, owner, projectName, snapshotName, config, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getConfiguration(token, owner, projectName, snapshotName, config, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> cloneConfiguration(String owner, String projectName, String snapshotName, String config) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.cloneConfiguration(token, owner, projectName, snapshotName, config, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.cloneConfiguration(token, owner, projectName, snapshotName, config, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> renameConfiguration(String owner, String projectName, String snapshotName, String config, String newName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.renameConfiguration(token, owner, projectName, snapshotName, config, newName, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.renameConfiguration(token, owner, projectName, snapshotName, config, newName, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getRules(String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getRules(token, owner, projectName, snapshotName, config, originType, start, count, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getRules(token, owner, projectName, snapshotName, config, originType, start, count, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> postRule(String owner, String projectName, String snapshotName, String config, String ruleBody, String doopId) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.postRule(token, owner, projectName, snapshotName, config, ruleBody, doopId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.postRule(token, owner, projectName, snapshotName, config, ruleBody, doopId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> putRule(String owner, String projectName, String snapshotName, String config, String ruleId, String ruleBody, String comment) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.putRule(token, owner, projectName, snapshotName, config, ruleId, ruleBody, comment, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.putRule(token, owner, projectName, snapshotName, config, ruleId, ruleBody, comment, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> deleteRule(String owner, String projectName, String snapshotName, String config, String ruleId) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.deleteRule(token, owner, projectName, snapshotName, config, ruleId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.deleteRule(token, owner, projectName, snapshotName, config, ruleId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> deleteRules(String owner, String projectName, String snapshotName, String config, Collection<String> ids) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.deleteRules(token, owner, projectName, snapshotName, config, ids, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.deleteRules(token, owner, projectName, snapshotName, config, ids, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> pasteConfigurationRules(String owner, String projectName, String snapshotName, String config, String fromConfig) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.pasteConfigurationRules(token, owner, projectName, snapshotName, config, fromConfig, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.pasteConfigurationRules(token, owner, projectName, snapshotName, config, fromConfig, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> updateConfiguration(String owner, String projectName, String snapshotName, String config,
 											List<Tuple2<String, Object>> settings) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.updateConfiguration(token, owner, projectName, snapshotName, config, settings, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.updateConfiguration(token, owner, projectName, snapshotName, config, settings, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> deleteConfiguration(String owner, String projectName, String snapshotName, String config) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.deleteConfiguration(token, owner, projectName, snapshotName, config, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.deleteConfiguration(token, owner, projectName, snapshotName, config, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	String exportConfiguration(String owner, String projectName, String snapshotName, String config) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.exportConfiguration(token, owner, projectName, snapshotName, config, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.exportConfiguration(token, owner, projectName, snapshotName, config, hostPrefix)
 			}
-		}.execute(host, port) as String
+		}.execute(hostPrefix) as String
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> analyze(String owner, String projectName, String snapshotName, String config,
 								String profileId, List<String> options)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.analyze(token, owner, projectName, snapshotName, config, profileId, options, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.analyze(token, owner, projectName, snapshotName, config, profileId, options, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> deleteAnalysis(String owner, String projectName, String snapshotName, String config,
 									   String analysisId)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.deleteAnalysis(token, owner, projectName, snapshotName, config, analysisId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.deleteAnalysis(token, owner, projectName, snapshotName, config, analysisId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getAnalysis(String owner, String projectName, String snapshotName, String config,
 									String analysisId)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getAnalysis(token, owner, projectName, snapshotName, config, analysisId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getAnalysis(token, owner, projectName, snapshotName, config, analysisId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getAnalysisRuntime(String owner, String projectName, String snapshotName, String config,
 										   String analysisId)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getAnalysisRuntime(token, owner, projectName, snapshotName, config, analysisId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getAnalysisRuntime(token, owner, projectName, snapshotName, config, analysisId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> executeAnalysisAction(String owner, String projectName, String snapshotName, String config,
 											  String action, String analysisId)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.executeAnalysisAction(token, owner, projectName, snapshotName, config, action, analysisId, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.executeAnalysisAction(token, owner, projectName, snapshotName, config, action, analysisId, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	String repackageSnapshotForCI(String owner, String projectName, PostState ps, AttachmentHandler<String> handler) throws ClientProtocolException {
 		return new HttpStringClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.repackageSnapshotForCI(token, owner, projectName, ps, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.repackageSnapshotForCI(token, owner, projectName, ps, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	boolean executeAnalysisAction(String snapshotId, String analysisId, String action) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.executeAnalysisAction(token, snapshotId, analysisId, action, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.executeAnalysisAction(token, snapshotId, analysisId, action, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getSymbolAt(String snapshotId, String analysisId, String file, int line, int col) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.getSymbolAt(token, snapshotId, analysisId, file, line, col, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.getSymbolAt(token, snapshotId, analysisId, file, line, col, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> listUsers() throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.getUsers(token, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.getUsers(token, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	Map<String, Object> createUser(String username, String password) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.createUser(token, username, password, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.createUser(token, username, password, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	Map<String, Object> deleteUser(String username) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Requests.deleteUser(token, username, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Requests.deleteUser(token, username, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> listPublicProjects() {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.getPublicProjects(token, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.getPublicProjects(token, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> listProjects(String owner) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.getProjects(token, owner, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.getProjects(token, owner, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> createProject(String owner, String name, List<String> stacks, String isPublic) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.createProject(token, owner, name, stacks, isPublic, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.createProject(token, owner, name, stacks, isPublic, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getProject(String owner, String name) throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.getProject(token, owner, name, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.getProject(token, owner, name, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getProjectInputs(String owner, String name) throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override
-			HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.getProjectInputs(token, owner, name, host, port)
+			HttpUriRequest buildRequest(String hostPrefix) {
+				println "getProjectInputs.owner=${owner}/token=${token}"
+				return LowLevelAPI.Projects.getProjectInputs(token, owner, name, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getProjectAnalyses(String owner, String name) throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.getProjectAnalyses(token, owner, name, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.getProjectAnalyses(token, owner, name, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> deleteProject(String owner, String projectName) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.deleteProject(token, owner, projectName, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.deleteProject(token, owner, projectName, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
 	Map<String, Object> getOutput(String owner, String name, String snapshotName, String config, String analysisId, String output, String start, String count) throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Snapshots.getOutput(token, owner, name, snapshotName, config, analysisId, output, start, count, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getOutput(token, owner, name, snapshotName, config, analysisId, output, start, count, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	Map<String, Object> updateProject(String owner, String name, List<String> newMembers) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String host, int port) {
-				return LowLevelAPI.Projects.updateProject(token, owner, name, newMembers, host, port)
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Projects.updateProject(token, owner, name, newMembers, hostPrefix)
 			}
-		}.execute(host, port)
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')

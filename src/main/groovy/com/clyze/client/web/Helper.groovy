@@ -2,13 +2,12 @@ package com.clyze.client.web
 
 import com.clyze.client.Printer
 import com.clyze.client.web.api.AttachmentHandler
+import com.clyze.client.web.api.LowLevelAPI
 import com.clyze.client.web.api.Remote
 import groovy.transform.CompileStatic
-import org.clyze.persistent.metadata.JSONUtil
-
 import java.awt.*
 import java.util.List
-
+import org.clyze.persistent.metadata.JSONUtil
 import org.apache.http.client.ClientProtocolException
 import org.apache.http.conn.HttpHostConnectException
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -93,8 +92,7 @@ class Helper {
 
     /**
      * Connects to the server.
-     * @param host         the server host name
-     * @param port         the server port
+     * @param hostPrefix   the server host prefix (host name, port, base path)
      * @param username     the user name
      * @param token        the authentication token to use
      * @param tokenType    if true, this is a JWT token; if false, token is a password
@@ -102,10 +100,10 @@ class Helper {
      * @return             the Remote object to use for interacting with the server
      * @throws HttpHostConnectException    on connection failures
      */
-    static Remote connect(String host, int port, String username, String token, boolean tokenType,
+    static Remote connect(String hostPrefix, String username, String token, boolean tokenType,
                           Printer printer) throws HttpHostConnectException {
-        printer.always("Connecting to ${host}:${port} as ${username}")
-        Remote remote = Remote.at(host, port, username, tokenType ? token : null)
+        printer.always("Connecting to ${hostPrefix} as ${username}")
+        Remote remote = Remote.at(hostPrefix, username, tokenType ? token : null)
 
         if (!tokenType) {
             printer.always("Logging in as ${username} (with password)")
@@ -151,8 +149,7 @@ class Helper {
     /**
      * Invokes the automated repackaging endpoint.
      *
-     * @param host         the server host name
-     * @param port         the server port
+     * @param hostPrefix   the server host prefix (host name, port, base path)
      * @param username     the user name
      * @param password     the user password
      * @param projectName  the project to post the snapshot
@@ -163,11 +160,11 @@ class Helper {
      * @throws ClientProtocolException  if the server encountered an error
      */
     @SuppressWarnings('unused')
-    static void repackageSnapshotForCI(String host, int port, String username, String password,
-                                       String projectName, PostState ps,
+    static void repackageSnapshotForCI(String hostPrefix, String username,
+                                       String password, String projectName, PostState ps,
                                        AttachmentHandler<String> handler, Printer printer)
     throws ClientProtocolException {
-        Remote remote = connect(host, port, username, password, true, printer)
+        Remote remote = connect(hostPrefix, username, password, true, printer)
         ensureProjectExists(remote, projectName, ps.stacks, printer, false)
         remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
@@ -175,20 +172,19 @@ class Helper {
     /**
      * Invokes the endpoint that creates/posts a snapshot.
      *
-     * @param host              the server host name
-     * @param port              the server port
+     * @param hostPrefix        the server host prefix (host name, port, base path)
      * @param username          the user name
-     * @param token          the user password
+     * @param token             the user authentication token
      * @param projectName       the project to post the snapshot
      * @param snapshotPostState the snapshot object
      * @param printer           receiver of messages to display
      * @param debug             debugging mode
      */
-    static void postSnapshot(String host, int port, String username, String token,
+    static void postSnapshot(String hostPrefix, String username, String token,
                              String projectName, PostState snapshotPostState,
                              Printer printer, boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
-        Remote remote = connect(host, port, username, token, true, printer)
+        Remote remote = connect(hostPrefix, username, token, true, printer)
 
         ensureProjectExists(remote, projectName, snapshotPostState.stacks, printer, debug)
 
@@ -235,8 +231,8 @@ class Helper {
                 return
 
             if (!options.dry)
-                postSnapshot(options.host, options.port, options.username,
-                        options.password, options.project, ps, printer, debug)
+                postSnapshot(LowLevelAPI.getHostPrefix(options.host, options.port, options.basePath),
+                        options.username, options.password, options.project, ps, printer, debug)
         } catch (HttpHostConnectException ex) {
             printer.error("ERROR: Cannot post snapshot, is the server running?")
             if (debug)
@@ -320,7 +316,7 @@ class Helper {
      * @throws HttpHostConnectException if the server did not respond
      */
     static Map<String, Object> diagnose(PostOptions options) throws HttpHostConnectException {
-        return Remote.at(options.host, options.port, null, null).diagnose()
+        return Remote.at(LowLevelAPI.getHostPrefix(options.host, options.port, options.basePath), null, null).diagnose()
     }
 
     static void postCachedSnapshot(PostOptions options, File fromDir,

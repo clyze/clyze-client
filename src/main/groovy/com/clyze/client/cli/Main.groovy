@@ -1,5 +1,6 @@
 package com.clyze.client.cli
 
+import com.clyze.client.web.api.LowLevelAPI
 import groovy.cli.commons.CliBuilder
 import groovy.cli.commons.OptionAccessor
 import groovy.transform.CompileStatic
@@ -167,7 +168,7 @@ class Main {
             }
 
             if (cli['r']) {
-                Remote remote = parseRemote(cli['r'] as String)
+                String hostPrefix = cli['r'] as String
 
                 if (!command) {
                     throw new RuntimeException("ERROR: 'command' not properly initialized in: ${cmd}")
@@ -175,7 +176,7 @@ class Main {
 
                 CliAuthenticator.init()
                 command.cliOptions = cli
-                println command.execute(remote.host, remote.port)
+                println command.execute(hostPrefix)
 
             } else {
                 builder.usage()
@@ -205,7 +206,7 @@ class Main {
         Options opts = new Options()
         opts.addOption(Option.builder('h').longOpt('help')
                 .desc('Display help and exit. Combine it with a command to see the command options.').build())
-        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('[hostname|ip]:[port]').desc('Give remote server.').build())
+        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('[hostname|ip]:[port][/path]').desc('Give remote server.').build())
         opts.addOption(Option.builder('c').longOpt('command')
                 .desc("The command to execute via the remote server. Available commands: ${availableCommands}.")
                 .numberOfArgs(1).argName("command").build())
@@ -235,30 +236,5 @@ class Main {
 
     static String getAvailableCommands() {
         return COMMANDS.keySet().sort().join(', ')
-    }
-
-    static Remote parseRemote(String remoteDef) {        
-        String[] parts = remoteDef.split(":")
-        int len = parts.length
-        if (len < 1 || len > 2) {
-            throw new RuntimeException("The value of the remote option is invalid: $remoteDef")
-        }
-
-        String host = parts[0]
-        int port
-        try {
-            port = parts[1] as int
-        } catch(e) {
-            port = 80
-            println "Using default port number: $port"
-            log.debug e.message
-        }
-
-        return new Remote(host:host, port:port)
-    }
-
-    private static final class Remote {
-        String host
-        int port                
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 public class PostOptions {
     public String host;
     public int port;
+    public String basePath;
     public String username;
     public String password;
     public String project;
