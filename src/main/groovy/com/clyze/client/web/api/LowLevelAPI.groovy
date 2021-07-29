@@ -315,12 +315,14 @@ class LowLevelAPI {
 
         static final HttpGet getOutput(String userToken, String owner, String projectName, String snapshotName,
                                        String config, String analysisId, String output, String start, String count,
-                                       String hostPrefix) {
+                                       String appOnly, String hostPrefix) {
             Map<String, Object> extraParams = [analysis: analysisId, output: output] as Map<String, Object>
             if (start != null)
                 extraParams.put('_start', start)
             if (count != null)
                 extraParams.put('_count', count)
+            if (appOnly != null)
+                extraParams.put('appOnly', appOnly)
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
@@ -655,7 +657,7 @@ class LowLevelAPI {
             String output = extraParams['output'] as String
             if (!output) throw new RuntimeException("No output")
             String ret = "${snapshotConfigPrefix()}/analysis/outputs?analysis=${encodeValue(analysisId)}&dataset=${encodeValue(output)}"
-            for (String key : ['_start', '_count']) {
+            for (String key : ['_start', '_count', 'appOnly']) {
                 String value = extraParams[key] as String
                 if (value != null)
                     ret += '&' + key + '=' + encodeValue(value)

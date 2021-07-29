@@ -229,6 +229,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('option').numberOfArgs(1).argName('OPT').desc('Set analysis option in the form "id=value".').build())
         opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name.').build())
         opts.addOption(Option.builder().longOpt('token').numberOfArgs(1).argName('TOKEN').desc('Set authentication token.').build())
+        opts.addOption(Option.builder().longOpt('appOnly').numberOfArgs(1).argName('FLAG').desc('Set "appOnly" filter (true/false).').build())
         cli.setOptions(opts)
 
         return cli

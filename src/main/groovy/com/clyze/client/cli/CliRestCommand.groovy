@@ -588,7 +588,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String output = readOutputFromConsole(cliOptions)
             String start = readStartFromConsole(cliOptions)
             String count = readCountFromConsole(cliOptions)
-            return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, analysisId, output, start, count, hostPrefix)
+            String appOnly = readAppOnlyFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getOutput(token, user, project, snapshot, config, analysisId, output, start, count, appOnly, hostPrefix)
         }
     }
 
@@ -691,6 +692,12 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readCountFromConsole(OptionAccessor cliOptions) {
         return readOptionFromConsole(cliOptions, 'count', 'Count', '10')
+    }
+
+    protected static String readAppOnlyFromConsole(OptionAccessor cliOptions) {
+        String ret = readOptionFromConsole(cliOptions, 'appOnly', 'Application-only results (true/false/null)', 'null')
+        // Permit 'null' command line option.
+        return ret == 'null' ? null : ret
     }
 
     protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description,

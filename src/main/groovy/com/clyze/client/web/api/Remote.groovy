@@ -479,10 +479,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> getOutput(String owner, String name, String snapshotName, String config, String analysisId, String output, String start, String count) throws ClientProtocolException {
+	Map<String, Object> getOutput(String owner, String name, String snapshotName, String config, String analysisId, String output, String start, String count, String appOnly) throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Snapshots.getOutput(token, owner, name, snapshotName, config, analysisId, output, start, count, hostPrefix)
+				return LowLevelAPI.Snapshots.getOutput(token, owner, name, snapshotName, config, analysisId, output, start, count, appOnly, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}
