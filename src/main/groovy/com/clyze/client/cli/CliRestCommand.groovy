@@ -283,6 +283,12 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String file = readFileFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getAnalysisOutputFile(token, user, project, snapshot, config, analysis, file, hostPrefix)
         }
+
+        @Override
+        String onSuccess(HttpEntity entity) {
+            // Output files can be anything, just return their contents.
+            return entity.content.text
+        }
     }
 
     static final CliRestCommand POST_SNAPSHOT = new CliRestCommand('post_snapshot', 'posts a new snapshot to the server') {
