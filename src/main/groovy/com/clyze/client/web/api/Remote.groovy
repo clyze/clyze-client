@@ -176,6 +176,16 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> getCodeFileHints(String owner, String projectName, String snapshotName,
+										 String config, String codeFile) {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.getCodeFileHints(token, owner, projectName, snapshotName, config, codeFile, hostPrefix)
+			}
+		}.execute(hostPrefix)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> getAnalysisOutputFile(String owner, String projectName, String snapshotName,
 											  String config, String analysisId, String codeFile) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {

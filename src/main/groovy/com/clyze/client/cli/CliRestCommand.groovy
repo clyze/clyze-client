@@ -82,7 +82,6 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
-
     static final CliRestCommand LIST_SNAPSHOTS = new CliRestCommand('list_snapshots',  'list the snapshots stored in server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
@@ -267,6 +266,19 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String artifact = readArtifactFromConsole(cliOptions)
             String file = readFileFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getFile(token, user, project, snapshot, artifact, file, hostPrefix)
+        }
+    }
+
+    static final CliRestCommand GET_CODE_HINTS = new CliRestCommand('get_code_hints', 'get the hints for a snapshot code file') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            String token = getUserToken(cliOptions, true, hostPrefix)
+            String user  = getUserName(cliOptions, false, hostPrefix)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String file = readFileFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.getCodeFileHints(token, user, project, snapshot, config, file, hostPrefix)
         }
     }
 

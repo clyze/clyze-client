@@ -169,6 +169,11 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).getCodeFileEndpoint(codeFile)
         }
 
+        static final HttpGet getCodeFileHints(String userToken, String owner, String projectName, String snapshotName,
+                                              String config, String codeFile, String hostPrefix) {
+            return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getCodeFileHintsEndpoint(codeFile)
+        }
+
         static final HttpGet getAnalysisOutputFile(String userToken, String owner, String projectName, String snapshotName,
                                                    String config, String analysisId, String codeFile, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getAnalysisOutputFileEndpoint(analysisId, codeFile)
@@ -491,6 +496,10 @@ class LowLevelAPI {
 
         HttpGet getCodeFileEndpoint(String codeFile) {
             withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotPrefix() + '/code/' + encodeValue(codeFile))))
+        }
+
+        HttpGet getCodeFileHintsEndpoint(String codeFile) {
+            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotConfigPrefix() + '/code/' + encodeValue(codeFile) + '/hints')))
         }
 
         HttpGet getAnalysisOutputFileEndpoint(String analysisId, String file) {
