@@ -59,9 +59,10 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LOGIN = new CliRestCommand('login', 'login to the server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            Map<String, String> credentials = CliAuthenticator.askForCredentials()
-            LOGIN_LAST_USERNAME = credentials.username
-            return LowLevelAPI.Requests.login(credentials.username, credentials.password, hostPrefix)
+            String token = readTokenFromConsole(cliOptions)
+            String user  = readUserFromConsole(cliOptions)
+            LOGIN_LAST_USERNAME = user
+            return LowLevelAPI.Requests.login(user, token, hostPrefix)
         }
 
         @Override
@@ -698,6 +699,14 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readCountFromConsole(OptionAccessor cliOptions) {
         return readOptionFromConsole(cliOptions, 'count', 'Count', '10')
+    }
+
+    protected static String readUserFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'user', 'User', 'user')
+    }
+
+    protected static String readTokenFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'token', 'Authentication token', '')
     }
 
     protected static String readAppOnlyFromConsole(OptionAccessor cliOptions) {

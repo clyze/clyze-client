@@ -40,21 +40,13 @@ class LowLevelAPI {
         }
 
         static final HttpPost login(String username, String password, String hostPrefix) {
-            HttpPost post = new Endpoints(hostPrefix, null).authenticateEndpoint()
+            HttpPost post = new Endpoints(hostPrefix, null).loginEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
             params.add(new BasicNameValuePair("username", username))
             params.add(new BasicNameValuePair("password", password))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
         }
-
-        /*
-        static final HttpDelete logout(String hostPrefix) {
-            HttpDelete delete = new HttpDelete(createUrl(hostPrefix, AUTH_PATH, "/session"))
-            if (userToken) delete.addHeader(LowLevelAPI.HEADER_TOKEN, userToken)            
-            return delete
-        } 
-        */
 
         static final HttpGet listStacks(String hostPrefix) {
             return new Endpoints(hostPrefix, null).getStacksEndpoint()
@@ -184,9 +176,8 @@ class LowLevelAPI {
 
         static final HttpPost createSnapshot(String userToken, String owner, String projectName,
                                              PostState postState, String hostPrefix) {
-            MultipartEntityBuilder entityBuilder = postState.asMultipart()
             HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName).postSnapshotEndpoint()
-            post.setEntity(entityBuilder.build())
+            post.setEntity(postState.asMultipart().build())
             return post
         }
 
@@ -418,8 +409,8 @@ class LowLevelAPI {
             withTokenHeader(new HttpPost(createUrl(hostPrefix, '', '/clean/deploy')))
         }
 
-        HttpPost authenticateEndpoint() {
-            new HttpPost(createUrl(hostPrefix, API_PATH, "/session"))
+        HttpPost loginEndpoint() {
+            new HttpPost(createUrl(hostPrefix, API_PATH, "/login"))
         }
 
         HttpGet listUsersEndpoint() {

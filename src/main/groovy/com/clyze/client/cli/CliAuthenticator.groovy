@@ -50,16 +50,4 @@ class CliAuthenticator {
         }
     }
 
-    //TODO: Can be safer if we avoid storing the password as a String
-    static Map<String, String> askForCredentials() {
-        Console console = System.console()
-        if (console) {
-            def credentials = [:] as Map<String, String>
-            credentials.put('username', console.readLine("Username: "))
-            credentials.put('password', new String(console.readPassword("Password: ")))
-            return credentials
-        } else {
-            throw new RuntimeException("Could not get System Console")
-        }
-    }
 }
