@@ -397,10 +397,10 @@ class Remote {
 		}.execute(hostPrefix)
 	}
 
-	Map<String, Object> createUser(String username, String password) {
+	Map<String, Object> createUser(String newUsername, String newPassword) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.createUser(token, username, password, hostPrefix)
+				return LowLevelAPI.Requests.createUser(token, newUsername, newPassword, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}
