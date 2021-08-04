@@ -42,6 +42,7 @@ import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
 import static com.clyze.client.cli.CliRestCommand.LIST_PUBLIC_PROJECTS
 import static com.clyze.client.cli.CliRestCommand.LIST_SNAPSHOTS
 import static com.clyze.client.cli.CliRestCommand.LIST_STACKS
+import static com.clyze.client.cli.CliRestCommand.LIST_USERS
 import static com.clyze.client.cli.CliRestCommand.LOGIN
 import static com.clyze.client.cli.CliRestCommand.PASTE_CONFIGURATION_RULES
 import static com.clyze.client.cli.CliRestCommand.PING
@@ -94,6 +95,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>execute_action    - execute a snapshot analysis action
  *
  *     <li>login             - authenticate user
+ *     <li>list_users        - list users
  *     <li>ping              - check connection with server
  *     <li>repackage         - run automated repackaging
  *     <li>runtime           - check the runtime status of an analysis
@@ -121,7 +123,7 @@ class Main {
             // Analyses
             ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
             // Misc.
-            PING, LOGIN, REPACKAGE, RUNTIME, LIST_STACKS
+            PING, LOGIN, LIST_USERS, REPACKAGE, RUNTIME, LIST_STACKS
             // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
     ].collectEntries {
         [(it.name):it]

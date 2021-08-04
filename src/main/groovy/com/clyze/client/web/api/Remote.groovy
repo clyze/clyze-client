@@ -392,7 +392,7 @@ class Remote {
 	Map<String, Object> listUsers() throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.getUsers(token, hostPrefix)
+				return LowLevelAPI.Requests.listUsers(token, username, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}

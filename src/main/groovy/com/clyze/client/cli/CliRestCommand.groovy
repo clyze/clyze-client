@@ -73,6 +73,16 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand LIST_USERS = new CliRestCommand('list_users', 'list the users') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            String token = getUserToken(cliOptions, true, hostPrefix)
+            String user  = getUserName(cliOptions, false, hostPrefix)
+            return LowLevelAPI.Requests.listUsers(token, user, hostPrefix)
+        }
+    }
+
+
     static final CliRestCommand LIST_SNAPSHOTS = new CliRestCommand('list_snapshots',  'list the snapshots stored in server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {

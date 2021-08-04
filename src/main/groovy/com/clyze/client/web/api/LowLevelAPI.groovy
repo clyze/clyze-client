@@ -65,8 +65,8 @@ class LowLevelAPI {
             return get
         }        
 
-        static final HttpGet getUsers(String userToken, String hostPrefix) {
-            return new Endpoints(hostPrefix, userToken).listUsersEndpoint()
+        static final HttpGet listUsers(String userToken, String username, String hostPrefix) {
+            return new Endpoints(hostPrefix, userToken, username).listUsersEndpoint()
         }
 
         static final HttpPost createUser(String userToken, String username, String password,
