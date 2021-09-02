@@ -18,4 +18,12 @@ public class PostOptions {
     public boolean android;
     /** true if automated repackaging should be supported by the server */
     public boolean autoRepackaging;
+
+    /**
+     * Return the host prefix of the server.
+     * @return  the host prefix (e.g. www.service.com:8080/abc)
+     */
+    public String getHostPrefix() {
+        return host + ":" + port + basePath;
+    }
 }

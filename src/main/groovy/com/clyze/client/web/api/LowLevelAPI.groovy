@@ -21,10 +21,6 @@ class LowLevelAPI {
         return URLEncoder.encode(value, StandardCharsets.UTF_8.toString())
     }
 
-    static final String getHostPrefix(String host, int port, String basePath) {
-        return "${host}:${port}${basePath}"
-    }
-
     static final class Requests {
 
         static final HttpGet ping(String hostPrefix) {

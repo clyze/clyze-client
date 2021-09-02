@@ -231,7 +231,7 @@ class Helper {
                 return
 
             if (!options.dry)
-                postSnapshot(LowLevelAPI.getHostPrefix(options.host, options.port, options.basePath),
+                postSnapshot(options.getHostPrefix(),
                         options.username, options.password, options.project, ps, printer, debug)
         } catch (HttpHostConnectException ex) {
             printer.error("ERROR: Cannot post snapshot, is the server running?")
@@ -316,7 +316,7 @@ class Helper {
      * @throws HttpHostConnectException if the server did not respond
      */
     static Map<String, Object> diagnose(PostOptions options) throws HttpHostConnectException {
-        return Remote.at(LowLevelAPI.getHostPrefix(options.host, options.port, options.basePath), null, null).diagnose()
+        return Remote.at(options.getHostPrefix(), null, null).diagnose()
     }
 
     static void postCachedSnapshot(PostOptions options, File fromDir,
