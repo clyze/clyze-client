@@ -56,12 +56,34 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     private static String LOGIN_LAST_USERNAME = null
+    static final Tuple2<String, String> readLogin(OptionAccessor cliOptions) {
+        String token = readTokenFromConsole(cliOptions)
+        String user  = readUserFromConsole(cliOptions)
+        LOGIN_LAST_USERNAME = user
+        return new Tuple2<>(user, token)
+    }
+
+    static final CliRestCommand CLEAN_DEPLOY = new CliRestCommand('clean_deploy', 'cleans the server for deployment') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            Tuple2<String, String> login = readLogin(cliOptions)
+            String token = login.v2
+            String user  = login.v1
+            return LowLevelAPI.Requests.cleanDeploy(hostPrefix, user, token)
+        }
+
+        @Override
+        String onSuccess(HttpEntity entity) {
+            return 'OK'
+        }
+    }
+
     static final CliRestCommand LOGIN = new CliRestCommand('login', 'login to the server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = readTokenFromConsole(cliOptions)
-            String user  = readUserFromConsole(cliOptions)
-            LOGIN_LAST_USERNAME = user
+            Tuple2<String, String> login = readLogin(cliOptions)
+            String token = login.v2
+            String user  = login.v1
             return LowLevelAPI.Requests.login(user, token, hostPrefix)
         }
 

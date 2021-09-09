@@ -69,10 +69,10 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> cleanDeploy() {
+	Map<String, Object> cleanDeploy(String user, String userToken) {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.cleanDeploy(hostPrefix)
+				return LowLevelAPI.Requests.cleanDeploy(hostPrefix, user, userToken)
 			}
 		}.execute(hostPrefix)
 	}

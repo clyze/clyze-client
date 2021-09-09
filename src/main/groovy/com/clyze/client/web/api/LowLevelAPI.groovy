@@ -31,8 +31,8 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, null).diagnoseEndpoint()
         }
 
-        static final HttpPost cleanDeploy(String hostPrefix) {
-            return new Endpoints(hostPrefix, null).cleanDeployEndpoint()
+        static final HttpPost cleanDeploy(String hostPrefix, String username, String userToken) {
+            return new Endpoints(hostPrefix, userToken, username).cleanDeployEndpoint()
         }
 
         static final HttpPost login(String username, String password, String hostPrefix) {

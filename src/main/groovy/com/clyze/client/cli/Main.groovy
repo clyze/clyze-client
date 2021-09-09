@@ -13,6 +13,7 @@ import org.clyze.utils.Helper
 import org.clyze.utils.JHelper
 
 import static com.clyze.client.cli.CliRestCommand.ANALYZE
+import static com.clyze.client.cli.CliRestCommand.CLEAN_DEPLOY
 import static com.clyze.client.cli.CliRestCommand.CLONE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.CREATE_PROJECT
 import static com.clyze.client.cli.CliRestCommand.DELETE_ANALYSIS
@@ -96,6 +97,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>delete_analysis   - delete a snapshot analysis
  *     <li>execute_action    - execute a snapshot analysis action
  *
+ *     <li>clean_deploy      - clean a server for deployment
  *     <li>login             - authenticate user
  *     <li>list_users        - list users
  *     <li>ping              - check connection with server
@@ -126,7 +128,7 @@ class Main {
             // Analyses
             ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
             // Misc.
-            PING, LOGIN, LIST_USERS, REPACKAGE, RUNTIME, LIST_STACKS
+            CLEAN_DEPLOY, PING, LOGIN, LIST_USERS, REPACKAGE, RUNTIME, LIST_STACKS
             // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
     ].collectEntries {
         [(it.name):it]
