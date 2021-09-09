@@ -646,7 +646,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readProjectNameFromConsole(OptionAccessor cliOptions) {
         final String DEFAULT_PROJECT = 'test-project'
-        String project = cliOptions['project'] as String
+        String project = (cliOptions['project'] ?: null) as String
         if (project)
             println "Assuming project = ${project}"
         else
