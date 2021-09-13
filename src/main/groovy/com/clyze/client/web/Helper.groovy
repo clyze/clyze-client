@@ -2,7 +2,6 @@ package com.clyze.client.web
 
 import com.clyze.client.Printer
 import com.clyze.client.web.api.AttachmentHandler
-import com.clyze.client.web.api.LowLevelAPI
 import com.clyze.client.web.api.Remote
 import groovy.transform.CompileStatic
 import java.awt.*
@@ -120,10 +119,12 @@ class Helper {
      * @param projectName   the project name
      * @param stacks        the project stacks
      * @param printer       receiver of messages to display
+     * @param makePublic    if creating a new project, make it public
      * @param debug         debugging mode
      */
     static void ensureProjectExists(Remote remote, String projectName,
-                                    List<String> stacks, Printer printer, boolean debug) {
+                                    List<String> stacks, Printer printer,
+                                    boolean makePublic, boolean debug) {
         if (!projectName)
             throw new RuntimeException("Missing project name")
         else if (!stacks)
@@ -136,7 +137,7 @@ class Helper {
             if (debug)
                 ex1.printStackTrace()
             try {
-                proj = remote.createProject(remote.currentUser(), projectName, stacks, 'false')
+                proj = remote.createProject(remote.currentUser(), projectName, stacks, makePublic ? 'true' : 'false')
                 printer.always("Project '${projectName}' created with stacks: ${stacks}")
             } catch (Exception ex2) {
                 throw new RuntimeException("Could not create project '${projectName}'.", ex2)
@@ -165,7 +166,7 @@ class Helper {
                                        AttachmentHandler<String> handler, Printer printer)
     throws ClientProtocolException {
         Remote remote = connect(hostPrefix, username, password, true, printer)
-        ensureProjectExists(remote, projectName, ps.stacks, printer, false)
+        ensureProjectExists(remote, projectName, ps.stacks, printer, ps.makePublic, false)
         remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
 
@@ -176,20 +177,20 @@ class Helper {
      * @param username          the user name
      * @param token             the user authentication token
      * @param projectName       the project to post the snapshot
-     * @param snapshotPostState the snapshot object
+     * @param ps                the snapshot object
      * @param printer           receiver of messages to display
      * @param debug             debugging mode
      */
     static void postSnapshot(String hostPrefix, String username, String token,
-                             String projectName, PostState snapshotPostState,
+                             String projectName, PostState ps,
                              Printer printer, boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(hostPrefix, username, token, true, printer)
 
-        ensureProjectExists(remote, projectName, snapshotPostState.stacks, printer, debug)
+        ensureProjectExists(remote, projectName, ps.stacks, printer, ps.makePublic, debug)
 
         printer.always("Posting snapshot to project '${projectName}'...")
-        String snapshotId = remote.createSnapshot(username, projectName, snapshotPostState)
+        String snapshotId = remote.createSnapshot(username, projectName, ps)
         if (debug)
             printer.always("Done (new snapshot $snapshotId).")
         else

@@ -14,6 +14,7 @@ class PostState extends ItemImpl {
 
     String id
     List<String> stacks
+    boolean makePublic = false
     private List<SnapshotInput> inputs = new ArrayList<>()
 
     PostState() { }
@@ -41,6 +42,7 @@ class PostState extends ItemImpl {
     protected void saveTo(Map<String, Object> map) {
         map.put('inputs', inputs)
         map.put('stacks', stacks)
+        map.put('makePublic', makePublic)
     }
 
     @Override
@@ -52,6 +54,7 @@ class PostState extends ItemImpl {
                 addStringInput(it.key, it.value)
         }
         this.stacks = (List<String>) map.get('stacks')
+        this.makePublic = (String) map.get('makePublic')
     }
 
     PostState saveTo(File dir) {
