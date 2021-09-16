@@ -1,6 +1,6 @@
 package com.clyze.client.cli
 
-import com.clyze.client.web.api.LowLevelAPI
+
 import groovy.cli.commons.CliBuilder
 import groovy.cli.commons.OptionAccessor
 import groovy.transform.CompileStatic
@@ -39,6 +39,7 @@ import static com.clyze.client.cli.CliRestCommand.GET_PROJECT_INPUTS
 import static com.clyze.client.cli.CliRestCommand.GET_RULES
 import static com.clyze.client.cli.CliRestCommand.GET_SNAPSHOT
 import static com.clyze.client.cli.CliRestCommand.GET_SYMBOL
+import static com.clyze.client.cli.CliRestCommand.GET_SYMBOLS
 import static com.clyze.client.cli.CliRestCommand.LIST_CONFIGURATIONS
 import static com.clyze.client.cli.CliRestCommand.LIST_PROJECTS
 import static com.clyze.client.cli.CliRestCommand.LIST_PUBLIC_PROJECTS
@@ -74,6 +75,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>post_snapshot     - create a new snapshot
  *     <li>delete_snapshot   - delete a snapshot
  *     <li>get_symbol        - get a symbol from the snapshot
+ *     <li>get_symbols       - get the symbols of a given line
  *     <li>get_files         - read the snapshot (artifact) files
  *     <li>get_file          - read a snapshot (artifact) file
  *     <li>get_code_file     - read a snapshot (code) file
@@ -120,7 +122,7 @@ class Main {
             LIST_PUBLIC_PROJECTS, LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT,
             GET_PROJECT_ANALYSES, GET_PROJECT_INPUTS,
             // Snapshots
-            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT,
+            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT, GET_SYMBOLS,
             GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE, GET_OUTPUT_FILE, GET_OUTPUT,
             GET_CODE_HINTS,
             // Configurations
@@ -237,6 +239,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name.').build())
         opts.addOption(Option.builder().longOpt('token').numberOfArgs(1).argName('TOKEN').desc('Set authentication token.').build())
         opts.addOption(Option.builder().longOpt('appOnly').numberOfArgs(1).argName('FLAG').desc('Set "appOnly" filter (true/false).').build())
+        opts.addOption(Option.builder().longOpt('line').numberOfArgs(1).argName('LINE').desc('Set code line number.').build())
         cli.setOptions(opts)
 
         return cli

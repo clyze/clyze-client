@@ -54,11 +54,9 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpGet getSymbolAt(String userToken, String snapshotId, String analysisId, String file, int line, int col, String hostPrefix) {
-            String fileEncoded = encodeValue(file)
-            HttpGet get = new HttpGet(Endpoints.createUrl(hostPrefix, Endpoints.API_PATH, "/snapshots/${snapshotId}/symbols/${fileEncoded}/${line}/${col}?analysis=${analysisId}"))
-            if (userToken) get.addHeader(Endpoints.HEADER_TOKEN, userToken)
-            return get
+        static final HttpGet getSymbols(String userToken, String owner, String project, String snapshot,
+                                        String config, String codeFile, String line, String hostPrefix) {
+            return new Endpoints(hostPrefix, userToken, owner, project, snapshot, config).getSymbolsEndpoint(codeFile, line)
         }        
 
         static final HttpGet listUsers(String userToken, String username, String hostPrefix) {
@@ -494,8 +492,16 @@ class LowLevelAPI {
             withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotPrefix() + '/code/' + encodeValue(codeFile))))
         }
 
+        String codeFilePrefix(String codeFile) {
+            return snapshotConfigPrefix() + '/code/' + encodeValue(codeFile)
+        }
+
         HttpGet getCodeFileHintsEndpoint(String codeFile) {
-            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotConfigPrefix() + '/code/' + encodeValue(codeFile) + '/hints')))
+            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, codeFilePrefix(codeFile)  + '/hints')))
+        }
+
+        HttpGet getSymbolsEndpoint(String codeFile, String line) {
+            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, codeFilePrefix(codeFile)  + '/symbols/' + encodeValue(line))))
         }
 
         HttpGet getAnalysisOutputFileEndpoint(String analysisId, String file) {

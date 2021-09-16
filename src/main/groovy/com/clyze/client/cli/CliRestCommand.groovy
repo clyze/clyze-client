@@ -266,6 +266,20 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand GET_SYMBOLS = new CliRestCommand('get_symbols', 'get the symbols of a given code line') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            String token = getUserToken(cliOptions, true, hostPrefix)
+            String user  = getUserName(cliOptions, false, hostPrefix)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            String line = readLineFromConsole(cliOptions)
+            String file = readFileFromConsole(cliOptions)
+            return LowLevelAPI.Requests.getSymbols(token, user, project, snapshot, config, file, line, hostPrefix)
+        }
+    }
+
     static final CliRestCommand GET_FILES = new CliRestCommand('get_files', 'read the snapshot files') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
@@ -779,6 +793,10 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readSymbolFromConsole(OptionAccessor cliOptions) {
         return readOptionFromConsole(cliOptions, 'symbol', 'Symbol id')
+    }
+
+    protected static String readLineFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'line', 'Line number')
     }
 
     protected static String readFileFromConsole(OptionAccessor cliOptions) {

@@ -390,10 +390,11 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> getSymbolAt(String snapshotId, String analysisId, String file, int line, int col) {
+	Map<String, Object> getSymbols(String owner, String projectName, String snapshotName, String config,
+								   String codeFile, String line) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.getSymbolAt(token, snapshotId, analysisId, file, line, col, hostPrefix)
+				return LowLevelAPI.Requests.getSymbols(token, owner, projectName, snapshotName, config, codeFile, line, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}
