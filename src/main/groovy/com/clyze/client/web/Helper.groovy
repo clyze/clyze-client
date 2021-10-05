@@ -180,25 +180,26 @@ class Helper {
      * @param ps                the snapshot object
      * @param printer           receiver of messages to display
      * @param debug             debugging mode
+     * @return                  the snapshot data
      */
-    static void postSnapshot(String hostPrefix, String username, String token,
-                             String projectName, PostState ps,
-                             Printer printer, boolean debug)
+    static Map<String, Object> postSnapshot(String hostPrefix, String username, String token, String projectName,
+                                            PostState ps, Printer printer, boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
         Remote remote = connect(hostPrefix, username, token, true, printer)
 
         ensureProjectExists(remote, projectName, ps.stacks, printer, ps.makePublic, debug)
 
         printer.always("Posting snapshot to project '${projectName}'...")
-        String snapshotId = remote.createSnapshot(username, projectName, ps)
+        Map<String, Object> snapshot = remote.createSnapshot(username, projectName, ps)
         if (debug)
-            printer.always("Done (new snapshot $snapshotId).")
+            printer.always("Done (new snapshot: ${snapshot}).")
         else
             printer.always("Done.")
+        return snapshot
     }
 
-    static void post(PostState ps, PostOptions options, File cachePostDir,
-                     File metadataDir, Printer printer, boolean debug) {
+    static Map<String, Object> post(PostState ps, PostOptions options, File cachePostDir,
+                                    File metadataDir, Printer printer, boolean debug) {
         // Optional: save state that will be uploaded.
         if (cachePostDir != null) {
             try {
@@ -229,11 +230,10 @@ class Helper {
 
         try {
             if (!isServerCapable(options, printer))
-                return
+                return null
 
             if (!options.dry)
-                postSnapshot(options.getHostPrefix(),
-                        options.username, options.password, options.project, ps, printer, debug)
+                return postSnapshot(options.getHostPrefix(), options.username, options.password, options.project, ps, printer, debug)
         } catch (HttpHostConnectException ex) {
             printer.error("ERROR: Cannot post snapshot, is the server running?")
             if (debug)
@@ -243,6 +243,7 @@ class Helper {
             if (debug)
                 ex.printStackTrace()
         }
+        return null
     }
 
     /**
@@ -320,9 +321,8 @@ class Helper {
         return Remote.at(options.getHostPrefix(), null, null).diagnose()
     }
 
-    static void postCachedSnapshot(PostOptions options, File fromDir,
-                                   String snapshotId, Printer printer,
-                                   boolean debug) {
+    static Map<String, Object> postCachedSnapshot(PostOptions options, File fromDir, String snapshotId,
+                                                  Printer printer, boolean debug) {
         PostState snapshotPostState
         try {
             // Check if a snapshot post state exists.
@@ -334,6 +334,6 @@ class Helper {
             return
         }
 
-        post(snapshotPostState, options, null, null, printer, debug)
+        return post(snapshotPostState, options, null, null, printer, debug)
     }
 }
