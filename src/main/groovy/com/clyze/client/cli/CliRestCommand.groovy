@@ -2,6 +2,7 @@ package com.clyze.client.cli
 
 import com.clyze.client.web.PostState
 import com.clyze.client.web.SnapshotInput
+import com.clyze.client.web.AuthToken
 import com.clyze.client.web.api.LowLevelAPI
 import com.clyze.client.web.api.Remote
 import com.clyze.client.web.http.DefaultHttpClientLifeCycle
@@ -56,19 +57,20 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     private static String LOGIN_LAST_USERNAME = null
-    static final Tuple2<String, String> readLogin(OptionAccessor cliOptions) {
-        String token = readTokenFromConsole(cliOptions)
-        String user  = readUserFromConsole(cliOptions)
+    static final Tuple2<String, AuthToken> readLogin(OptionAccessor cliOptions) {
+        String user = readUserFromConsole(cliOptions)
+        String tokenValue = readTokenFromConsole(cliOptions)
         LOGIN_LAST_USERNAME = user
-        return new Tuple2<>(user, token)
+        return new Tuple2<>(user, new AuthToken(user, tokenValue))
     }
+
 
     static final CliRestCommand CLEAN_DEPLOY = new CliRestCommand('clean_deploy', 'cleans the server for deployment') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            Tuple2<String, String> login = readLogin(cliOptions)
-            String token = login.v2
-            String user  = login.v1
+            Tuple2<String, AuthToken> login = readLogin(cliOptions)
+            String user = login.v1
+            AuthToken token = login.v2
             return LowLevelAPI.Requests.cleanDeploy(hostPrefix, user, token)
         }
 
@@ -81,9 +83,9 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LOGIN = new CliRestCommand('login', 'login to the server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            Tuple2<String, String> login = readLogin(cliOptions)
-            String token = login.v2
-            String user  = login.v1
+            Tuple2<String, AuthToken> login = readLogin(cliOptions)
+            String user = login.v1
+            AuthToken token = login.v2
             return LowLevelAPI.Requests.login(user, token, hostPrefix)
         }
 
@@ -98,8 +100,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LIST_USERS = new CliRestCommand('list_users', 'list the users') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             return LowLevelAPI.Requests.listUsers(token, user, hostPrefix)
         }
     }
@@ -107,8 +109,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LIST_SNAPSHOTS = new CliRestCommand('list_snapshots',  'list the snapshots stored in server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.listSnapshots(token, user, project, hostPrefix)
         }
@@ -130,8 +132,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LIST_PROJECTS = new CliRestCommand('list_projects', 'list the projects') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             return LowLevelAPI.Projects.getProjects(token, user, hostPrefix)
         }
 
@@ -149,7 +151,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LIST_PUBLIC_PROJECTS = new CliRestCommand('list_public_projects', 'list the public projects') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
+            AuthToken token = getUserToken(null, cliOptions, true, hostPrefix)
             return LowLevelAPI.Projects.getPublicProjects(token, hostPrefix)
         }
 
@@ -184,9 +186,9 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand CREATE_PROJECT = new CliRestCommand('create_project', 'create an empty project') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token    = getUserToken(cliOptions, true, hostPrefix)
-            String user     = getUserName(cliOptions, false, hostPrefix)
-            String project  = readProjectNameFromConsole(cliOptions)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
+            String project = readProjectNameFromConsole(cliOptions)
             List<String> stacks = readStacksFromConsole(cliOptions)
             String isPublic = readOptionFromConsole(cliOptions, 'public', 'Project is public (true/false)', 'false')
             return LowLevelAPI.Projects.createProject(token, user, project, stacks, isPublic, hostPrefix)
@@ -196,8 +198,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_PROJECT_INPUTS = new CliRestCommand('get_project_inputs', 'get input options of project') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             return LowLevelAPI.Projects.getProjectInputs(token, user, project, hostPrefix)
         }
@@ -206,8 +208,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_PROJECT_ANALYSES = new CliRestCommand('get_project_analyses', 'get the analyses supported by a project') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             return LowLevelAPI.Projects.getProjectAnalyses(token, user, project, hostPrefix)
         }
@@ -226,8 +228,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_PROJECT = new CliRestCommand('get_project', 'get project') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             return LowLevelAPI.Projects.getProject(token, user, project, hostPrefix)
         }
@@ -236,8 +238,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand DELETE_PROJECT = new CliRestCommand('delete_project', 'delete project') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             return LowLevelAPI.Projects.deleteProject(token, user, project, hostPrefix)
         }
@@ -246,8 +248,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_SNAPSHOT = new CliRestCommand('get_snapshot', 'read a snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.getSnapshot(token, user, project, snapshot, hostPrefix)
@@ -257,8 +259,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_SYMBOL = new CliRestCommand('get_symbol', 'read a symbol from a snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String symbol = readSymbolFromConsole(cliOptions)
@@ -269,8 +271,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_SYMBOLS = new CliRestCommand('get_symbols', 'get the symbols of a given code line') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -283,8 +285,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_FILES = new CliRestCommand('get_files', 'read the snapshot files') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String artifact = readArtifactFromConsole(cliOptions)
@@ -295,8 +297,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_FILE = new CliRestCommand('get_file', 'read a snapshot file') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String artifact = readArtifactFromConsole(cliOptions)
@@ -308,8 +310,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_CODE_HINTS = new CliRestCommand('get_code_hints', 'get the hints for a snapshot code file') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String file = readFileFromConsole(cliOptions)
@@ -321,8 +323,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_CODE_FILE = new CliRestCommand('get_code_file', 'read a snapshot code file') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String file = readFileFromConsole(cliOptions)
@@ -333,8 +335,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_OUTPUT_FILE = new CliRestCommand('get_output_file', 'read an analysis output file') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -353,8 +355,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand POST_SNAPSHOT = new CliRestCommand('post_snapshot', 'posts a new snapshot to the server') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             printProjectOptions(hostPrefix, user, token, project)
             PostState postState = getPostState(cliOptions)
@@ -370,8 +372,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand REPACKAGE = new CliRestCommand('repackage', 'automated repackaging endpoint') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             PostState postState = getPostState(cliOptions)
             return LowLevelAPI.Projects.repackageSnapshotForCI(token, user, project, postState, hostPrefix)
@@ -386,10 +388,10 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand DELETE_SNAPSHOT = new CliRestCommand('delete_snapshot', 'delete snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token   = getUserToken(cliOptions, true, hostPrefix)
-            String user    = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
-            String snapshot   = readSnapshotNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.deleteSnapshot(token, user, project, snapshot, hostPrefix)
         }
     }
@@ -397,8 +399,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand LIST_CONFIGURATIONS = new CliRestCommand('list_configurations', 'list the configurations of a snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.listConfigurations(token, user, project, snapshot, hostPrefix)
@@ -408,8 +410,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_ANALYSIS = new CliRestCommand('get_analysis', 'reads an analysis from a snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -421,8 +423,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_ANALYSIS_RUNTIME = new CliRestCommand('get_analysis_runtime', 'read analysis runtime information') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -434,8 +436,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand DELETE_ANALYSIS = new CliRestCommand('delete_analysis', 'deletes an analysis from a snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -447,8 +449,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand EXECUTE_ANALYSIS_ACTION = new CliRestCommand('execute_action', 'executes an analysis action (such as "stop" or "restart")') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -461,8 +463,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_CONFIGURATION = new CliRestCommand('get_config', 'get a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -473,8 +475,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand CLONE_CONFIGURATION = new CliRestCommand('clone_config', 'clone a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -485,8 +487,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand RENAME_CONFIGURATION = new CliRestCommand('rename_config', 'rename a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -498,8 +500,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand PASTE_CONFIGURATION_RULES = new CliRestCommand('paste_rules', 'pastes rules from a snapshot configuration to another configuration') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -511,8 +513,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand DELETE_CONFIGURATION = new CliRestCommand('delete_config', 'delete a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -523,8 +525,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand DELETE_RULES = new CliRestCommand('delete_rules', 'delete configuration rules') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -537,8 +539,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_RULES = new CliRestCommand('get_rules', 'get configuration rules') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -556,8 +558,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand POST_RULE = new CliRestCommand('post_rule', 'post configuration rule') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -569,8 +571,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand PUT_RULE = new CliRestCommand('put_rule', 'put configuration rule (e.g. edit comment)') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -584,8 +586,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand DELETE_RULE = new CliRestCommand('delete_rule', 'delete configuration rule') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -597,8 +599,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand EXPORT_CONFIGURATION = new CliRestCommand('export_config', 'export a snapshot configuration') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -618,8 +620,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand ANALYZE = new CliRestCommand('analyze', 'run an analysis on a code snapshot') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -632,8 +634,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand RUNTIME = new CliRestCommand('runtime', 'show runtime stats for an analysis') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -644,8 +646,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand GET_OUTPUT = new CliRestCommand('get_output', 'get an analysis output') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            String token = getUserToken(cliOptions, true, hostPrefix)
-            String user  = getUserName(cliOptions, false, hostPrefix)
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
@@ -678,12 +680,10 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         data
     }
 
-    protected static final String getUserToken(OptionAccessor cliOptions, boolean askForCredentialsIfEmpty, String hostPrefix) {
+    protected static final AuthToken getUserToken(String user, OptionAccessor cliOptions, boolean askForCredentialsIfEmpty, String hostPrefix) {
         String token = cliOptions['token']
-        if (token != null)
-            return token
-        else
-            getUserInfo(askForCredentialsIfEmpty, hostPrefix, CliAuthenticator.Selector.TOKEN)
+        String value = token ?: getUserInfo(askForCredentialsIfEmpty, hostPrefix, CliAuthenticator.Selector.TOKEN)
+        return new AuthToken(user, value)
     }
 
     protected static final String getUserName(OptionAccessor cliOptions, boolean askForCredentialsIfEmpty, String hostPrefix) {
@@ -702,7 +702,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return postState
     }
 
-    protected static final void printProjectOptions(String hostPrefix, String user, String token, String project) {
+    protected static final void printProjectOptions(String hostPrefix, String user, AuthToken token, String project) {
         Map<String, Object> options = Remote.at(hostPrefix, user, token).getProjectInputs(user, project)
         println()
         options.forEach{k, v ->

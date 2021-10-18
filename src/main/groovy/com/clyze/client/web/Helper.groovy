@@ -94,17 +94,17 @@ class Helper {
      * @param hostPrefix   the server host prefix (host name, port, base path)
      * @param username     the user name
      * @param token        the authentication token to use
-     * @param tokenType    if true, this is a JWT token; if false, token is a password
+     * @param remember     if true, log in to the server (to remember state)
      * @param printer      the printer to use for printing messages
      * @return             the Remote object to use for interacting with the server
      * @throws HttpHostConnectException    on connection failures
      */
-    static Remote connect(String hostPrefix, String username, String token, boolean tokenType,
+    static Remote connect(String hostPrefix, String username, AuthToken token, boolean remember,
                           Printer printer) throws HttpHostConnectException {
         printer.always("Connecting to ${hostPrefix} as ${username}")
-        Remote remote = Remote.at(hostPrefix, username, tokenType ? token : null)
+        Remote remote = Remote.at(hostPrefix, username, token)
 
-        if (!tokenType) {
+        if (remember) {
             printer.always("Logging in as ${username} (with password)")
             remote.login(username, token)
         }
@@ -152,7 +152,7 @@ class Helper {
      *
      * @param hostPrefix   the server host prefix (host name, port, base path)
      * @param username     the user name
-     * @param password     the user password
+     * @param authToken    the user password
      * @param projectName  the project to post the snapshot
      * @param stacks       the project platform (Android/Java)
      * @param ps           the snapshot representation
@@ -162,10 +162,10 @@ class Helper {
      */
     @SuppressWarnings('unused')
     static void repackageSnapshotForCI(String hostPrefix, String username,
-                                       String password, String projectName, PostState ps,
+                                       AuthToken authToken, String projectName, PostState ps,
                                        AttachmentHandler<String> handler, Printer printer)
     throws ClientProtocolException {
-        Remote remote = connect(hostPrefix, username, password, true, printer)
+        Remote remote = connect(hostPrefix, username, authToken, false, printer)
         ensureProjectExists(remote, projectName, ps.stacks, printer, ps.makePublic, false)
         remote.repackageSnapshotForCI(username, projectName, ps, handler)
     }
@@ -175,17 +175,17 @@ class Helper {
      *
      * @param hostPrefix        the server host prefix (host name, port, base path)
      * @param username          the user name
-     * @param token             the user authentication token
+     * @param authToken         the user authentication token
      * @param projectName       the project to post the snapshot
      * @param ps                the snapshot object
      * @param printer           receiver of messages to display
      * @param debug             debugging mode
      * @return                  the snapshot data
      */
-    static Map<String, Object> postSnapshot(String hostPrefix, String username, String token, String projectName,
-                                            PostState ps, Printer printer, boolean debug)
+    static Map<String, Object> postSnapshot(String hostPrefix, String username, AuthToken authToken,
+                                            String projectName, PostState ps, Printer printer, boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
-        Remote remote = connect(hostPrefix, username, token, true, printer)
+        Remote remote = connect(hostPrefix, username, authToken, false, printer)
 
         ensureProjectExists(remote, projectName, ps.stacks, printer, ps.makePublic, debug)
 
@@ -233,7 +233,7 @@ class Helper {
                 return null
 
             if (!options.dry)
-                return postSnapshot(options.getHostPrefix(), options.username, options.password, options.project, ps, printer, debug)
+                return postSnapshot(options.getHostPrefix(), options.username, options.authToken, options.project, ps, printer, debug)
         } catch (HttpHostConnectException ex) {
             printer.error("ERROR: Cannot post snapshot, is the server running?")
             if (debug)
@@ -331,7 +331,7 @@ class Helper {
             snapshotPostState.stacks = options.stacks
         } catch (any) {
             printer.error("Error bundling state: ${any.message}" as String)
-            return
+            return null
         }
 
         return post(snapshotPostState, options, null, null, printer, debug)

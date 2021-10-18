@@ -1,5 +1,6 @@
 package com.clyze.client.web.api
 
+import com.clyze.client.web.AuthToken
 import com.clyze.client.web.PostState
 import com.clyze.client.web.http.DefaultHttpClientLifeCycle
 import com.clyze.client.web.http.HttpClientLifeCycle
@@ -18,7 +19,7 @@ class Remote {
 
 	private final String hostPrefix
 	private final HttpClientLifeCycle httpClientLifeCycle
-	private String token    = null
+	private AuthToken token = null
 	private String username = null
 
 	private Remote(String hostPrefix, HttpClientLifeCycle httpClientLifeCycle) {
@@ -26,7 +27,7 @@ class Remote {
 		this.httpClientLifeCycle = httpClientLifeCycle
 	}
 
-	static Remote at(String hostPrefix, String user, String token) {
+	static Remote at(String hostPrefix, String user, AuthToken token) {
 		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
 		Remote r = new Remote(hostPrefix, new SameInstanceHttpClientLifeCycle(client))
 		r.setUsername(user)
@@ -42,7 +43,7 @@ class Remote {
 		this.username = name
 	}
 
-	void setToken(String t) {
+	void setToken(AuthToken t) {
 		this.token = t
 	}
 
@@ -69,7 +70,7 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> cleanDeploy(String user, String userToken) {
+	Map<String, Object> cleanDeploy(String user, AuthToken userToken) {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
 				return LowLevelAPI.Requests.cleanDeploy(hostPrefix, user, userToken)
@@ -86,15 +87,15 @@ class Remote {
 		}.execute(hostPrefix)
 	}
 
-	Map<String, Object> login(String username, String password) throws HttpHostConnectException {
+	Map<String, Object> login(String username, AuthToken token) throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.login(username, password, hostPrefix)
+				return LowLevelAPI.Requests.login(username, token, hostPrefix)
 			}
 
 			@Override Map<String, Object> onSuccess(HttpEntity entity) {
 				Map<String, Object> data = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
-				setToken(data.get('token') as String)
+				setToken(new AuthToken(username, data.get('token') as String))
 				setUsername(data.get('username') as String)
 				return data
 			}
@@ -376,15 +377,6 @@ class Remote {
 		return new HttpStringClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
 				return LowLevelAPI.Projects.repackageSnapshotForCI(token, owner, projectName, ps, hostPrefix)
-			}
-		}.execute(hostPrefix)
-	}
-
-	@SuppressWarnings('unused')
-	boolean executeAnalysisAction(String snapshotId, String analysisId, String action) {
-		return new HttpMapClientCommand(httpClientLifeCycle) {
-			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.executeAnalysisAction(token, snapshotId, analysisId, action, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}

@@ -10,7 +10,7 @@ public class PostOptions {
     public int port;
     public String basePath;
     public String username;
-    public String password;
+    public AuthToken authToken;
     public String project;
     public List<String> stacks;
     public boolean dry;

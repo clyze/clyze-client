@@ -1,5 +1,6 @@
 package com.clyze.client.web.api
 
+import com.clyze.client.web.AuthToken
 import com.clyze.client.web.HttpDeleteWithBody
 import com.clyze.client.web.PostState
 import groovy.transform.CompileStatic
@@ -31,15 +32,15 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, null).diagnoseEndpoint()
         }
 
-        static final HttpPost cleanDeploy(String hostPrefix, String username, String userToken) {
+        static final HttpPost cleanDeploy(String hostPrefix, String username, AuthToken userToken) {
             return new Endpoints(hostPrefix, userToken, username).cleanDeployEndpoint()
         }
 
-        static final HttpPost login(String username, String password, String hostPrefix) {
+        static final HttpPost login(String username, AuthToken authToken, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, null).loginEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
             params.add(new BasicNameValuePair("username", username))
-            params.add(new BasicNameValuePair("password", password))
+            params.add(new BasicNameValuePair("password", authToken.value))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
         }
@@ -48,22 +49,23 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, null).getStacksEndpoint()
         }
 
-        static final HttpPut executeAnalysisAction(String userToken, String snapshotId, String analysis, String action, String hostPrefix) {
-            HttpPut put = new HttpPut(Endpoints.createUrl(hostPrefix, Endpoints.API_PATH, "/snapshots/${snapshotId}/analyses/${analysis}/action/${action}"))
-            if (userToken) put.addHeader(Endpoints.HEADER_TOKEN, userToken)
-            return put
+        static final HttpPut executeAnalysisAction(AuthToken userToken, String owner, String project,
+                                                   String snapshot, String config, String analysisId,
+                                                   String action, String hostPrefix) {
+            return new Endpoints(hostPrefix, userToken, owner, project, snapshot, config)
+                    .executeAnalysisActionEndpoint(action, analysisId)
         }
 
-        static final HttpGet getSymbols(String userToken, String owner, String project, String snapshot,
+        static final HttpGet getSymbols(AuthToken userToken, String owner, String project, String snapshot,
                                         String config, String codeFile, String line, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, project, snapshot, config).getSymbolsEndpoint(codeFile, line)
         }        
 
-        static final HttpGet listUsers(String userToken, String username, String hostPrefix) {
+        static final HttpGet listUsers(AuthToken userToken, String username, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, username).listUsersEndpoint()
         }
 
-        static final HttpPost createUser(String userToken, String username, String password,
+        static final HttpPost createUser(AuthToken userToken, String username, String password,
                                          String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken).postUserEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
@@ -73,22 +75,22 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpDelete deleteUser(String userToken, String username, String hostPrefix) {
+        static final HttpDelete deleteUser(AuthToken userToken, String username, String hostPrefix) {
             new Endpoints(hostPrefix, userToken).deleteUserEndpoint()
         }
     }
 
     static final class Projects {
 
-        static final HttpGet getPublicProjects(String userToken, String hostPrefix) {
+        static final HttpGet getPublicProjects(AuthToken userToken, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken).listPublicProjectsEndpoint()
         }
 
-        static final HttpGet getProjects(String userToken, String user, String hostPrefix) {
+        static final HttpGet getProjects(AuthToken userToken, String user, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, user).listProjectsEndpoint()
         }
 
-        static final HttpPost createProject(String userToken, String owner, String projectName, List<String> stacks,
+        static final HttpPost createProject(AuthToken userToken, String owner, String projectName, List<String> stacks,
                                             String isPublic, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken, owner).postProjectEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
@@ -100,11 +102,11 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpGet getProject(String userToken, String owner, String name, String hostPrefix) {
+        static final HttpGet getProject(AuthToken userToken, String owner, String name, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, name).getProjectEndpoint()
         }
 
-        static final HttpPut updateProject(String userToken, String owner, String name, List<String> newMembers, String hostPrefix) {
+        static final HttpPut updateProject(AuthToken userToken, String owner, String name, List<String> newMembers, String hostPrefix) {
             HttpPut put = new Endpoints(hostPrefix, userToken, owner, name).putProjectEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
             newMembers?.each {
@@ -114,73 +116,73 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpDelete deleteProject(String userToken, String owner, String projectName, String hostPrefix) {
+        static final HttpDelete deleteProject(AuthToken userToken, String owner, String projectName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName).deleteProjectEndpoint()
         }
 
-        static final HttpPost repackageSnapshotForCI(String userToken, String owner, String projectName,
+        static final HttpPost repackageSnapshotForCI(AuthToken userToken, String owner, String projectName,
                                                      PostState postState, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName).repackageSnapshotForCIEndpoint()
             post.setEntity(postState.asMultipart().build())
             return post
         }
 
-        static final HttpGet getProjectAnalyses(String userToken, String owner, String projectName, String hostPrefix) {
+        static final HttpGet getProjectAnalyses(AuthToken userToken, String owner, String projectName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName).getProjectAnalysesEndpoint()
         }
 
-        static final HttpGet getProjectInputs(String userToken, String owner, String projectName, String hostPrefix) {
+        static final HttpGet getProjectInputs(AuthToken userToken, String owner, String projectName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName).getProjectInputsEndpoint()
         }
     }
 
     static final class Snapshots {
 
-        static final HttpGet listSnapshots(String userToken, String owner, String projectName, String hostPrefix) {
+        static final HttpGet listSnapshots(AuthToken userToken, String owner, String projectName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName).listSnapshotsEndpoint()
         }
 
-        static final HttpGet getSnapshot(String userToken, String owner, String projectName, String snapshotName, String hostPrefix) {
+        static final HttpGet getSnapshot(AuthToken userToken, String owner, String projectName, String snapshotName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).getSnapshotEndpoint()
         }
 
-        static final HttpGet getSymbol(String userToken, String owner, String projectName, String snapshotName, String symbolId, String hostPrefix) {
+        static final HttpGet getSymbol(AuthToken userToken, String owner, String projectName, String snapshotName, String symbolId, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).getSymbolEndpoint(symbolId)
         }
 
-        static final HttpGet getFile(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getFile(AuthToken userToken, String owner, String projectName, String snapshotName,
                                      String artifact, String file, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).getFileEndpoint(artifact, file)
         }
 
-        static final HttpGet getFiles(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getFiles(AuthToken userToken, String owner, String projectName, String snapshotName,
                                       String artifact, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).getFilesEndpoint(artifact)
         }
 
-        static final HttpGet getCodeFile(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getCodeFile(AuthToken userToken, String owner, String projectName, String snapshotName,
                                          String codeFile, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).getCodeFileEndpoint(codeFile)
         }
 
-        static final HttpGet getCodeFileHints(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getCodeFileHints(AuthToken userToken, String owner, String projectName, String snapshotName,
                                               String config, String codeFile, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getCodeFileHintsEndpoint(codeFile)
         }
 
-        static final HttpGet getAnalysisOutputFile(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getAnalysisOutputFile(AuthToken userToken, String owner, String projectName, String snapshotName,
                                                    String config, String analysisId, String codeFile, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getAnalysisOutputFileEndpoint(analysisId, codeFile)
         }
 
-        static final HttpPost createSnapshot(String userToken, String owner, String projectName,
+        static final HttpPost createSnapshot(AuthToken userToken, String owner, String projectName,
                                              PostState postState, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName).postSnapshotEndpoint()
             post.setEntity(postState.asMultipart().build())
             return post
         }
 
-//        static final HttpPost createSnapshot(String userToken, String owner, String projectName, List<SnapshotInput> inputs,
+//        static final HttpPost createSnapshot(AuthToken userToken, String owner, String projectName, List<SnapshotInput> inputs,
 //                                             String snapshotResolvableByServer, String hostPrefix) {
 //            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
 //            entityBuilder.addPart(InputConstants.INPUTS, new StringBody(snapshotResolvableByServer))
@@ -189,27 +191,27 @@ class LowLevelAPI {
 //        }
 //
 
-        static final HttpDelete deleteSnapshot(String userToken, String owner, String projectName, String snapshotName, String hostPrefix) {
+        static final HttpDelete deleteSnapshot(AuthToken userToken, String owner, String projectName, String snapshotName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).deleteSnapshotEndpoint()
         }
 
-        static final HttpGet listConfigurations(String userToken, String owner, String projectName, String snapshotName, String hostPrefix) {
+        static final HttpGet listConfigurations(AuthToken userToken, String owner, String projectName, String snapshotName, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).listConfigurationsEndpoint()
         }
 
-        static final HttpGet getConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
+        static final HttpGet getConfiguration(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getConfigurationEndpoint()
         }
 
-        static final HttpDelete deleteConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
+        static final HttpDelete deleteConfiguration(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).deleteConfigurationEndpoint()
         }
 
-        static final HttpPost cloneConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
+        static final HttpPost cloneConfiguration(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).cloneConfigurationEndpoint()
         }
 
-        static final HttpPost pasteConfigurationRules(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpPost pasteConfigurationRules(AuthToken userToken, String owner, String projectName, String snapshotName,
                                                       String config, String fromConfig, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).pasteConfigurationRulesEndpoint()
             List<NameValuePair> params = new ArrayList<>()
@@ -218,7 +220,7 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPut updateConfiguration(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpPut updateConfiguration(AuthToken userToken, String owner, String projectName, String snapshotName,
                                                  String config, List<Tuple2<String, Object>> settings, String hostPrefix) {
             HttpPut put = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).updateConfigurationEndpoint()
             List<NameValuePair> params = new ArrayList<>()
@@ -239,7 +241,7 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpPut renameConfiguration(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpPut renameConfiguration(AuthToken userToken, String owner, String projectName, String snapshotName,
                                                  String config, String newName, String hostPrefix) {
             HttpPut put = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).renameConfigurationEndpoint()
             List<NameValuePair> params = new ArrayList<>(1)
@@ -248,7 +250,7 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpGet getRules(String userToken, String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count, String hostPrefix) {
+        static final HttpGet getRules(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count, String hostPrefix) {
             Map<String, Object> extraParams = [
                     originType: originType,
                     _start     : start,
@@ -257,7 +259,7 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).getRulesEndpoint()
         }
 
-        static final HttpDeleteWithBody deleteRules(String userToken, String owner, String projectName, String snapshotName, String config, Collection<String> ids, String hostPrefix) {
+        static final HttpDeleteWithBody deleteRules(AuthToken userToken, String owner, String projectName, String snapshotName, String config, Collection<String> ids, String hostPrefix) {
             HttpDeleteWithBody delete = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).deleteRulesEndpoint()
             List<NameValuePair> params = new LinkedList<>()
             ids.forEach { String id -> params.add(new BasicNameValuePair('ids', id)) }
@@ -265,7 +267,7 @@ class LowLevelAPI {
             return delete
         }
 
-        static final HttpPost postRule(String userToken, String owner, String projectName, String snapshotName, String config, String ruleBody, String doopId, String hostPrefix) {
+        static final HttpPost postRule(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String ruleBody, String doopId, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).postRuleEndpoint()
             List<NameValuePair> params = new ArrayList<>(3)
             if (ruleBody)
@@ -277,7 +279,7 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpPut putRule(String userToken, String owner, String projectName, String snapshotName, String config, String ruleId, String ruleBody, String comment, String hostPrefix) {
+        static final HttpPut putRule(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String ruleId, String ruleBody, String comment, String hostPrefix) {
             Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
             HttpPut put = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).putRuleEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
@@ -290,20 +292,20 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpDelete deleteRule(String userToken, String owner, String projectName, String snapshotName, String config, String ruleId, String hostPrefix) {
+        static final HttpDelete deleteRule(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String ruleId, String hostPrefix) {
             Map<String, Object> extraParams = [ruleId: ruleId] as Map<String, Object>
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).deleteRuleEndpoint()
         }
 
-        static final HttpGet exportConfiguration(String userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
+        static final HttpGet exportConfiguration(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).exportConfigurationEndpoint()
         }
 
-        static final HttpGet getRuntime(String userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
+        static final HttpGet getRuntime(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getRuntimeEndpoint()
         }
 
-        static final HttpGet getOutput(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getOutput(AuthToken userToken, String owner, String projectName, String snapshotName,
                                        String config, String analysisId, String output, String start, String count,
                                        String appOnly, String hostPrefix) {
             Map<String, Object> extraParams = [analysis: analysisId, output: output] as Map<String, Object>
@@ -316,7 +318,7 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
-        static final HttpPost analyze(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpPost analyze(AuthToken userToken, String owner, String projectName, String snapshotName,
                                       String config, String profileId, List<String> options, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).analyzeEndpoint(profileId)
             MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
@@ -331,24 +333,24 @@ class LowLevelAPI {
             return post
         }
 
-        static final HttpGet getAnalysis(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getAnalysis(AuthToken userToken, String owner, String projectName, String snapshotName,
                                          String config, String analysisId, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getAnalysisEndpoint(analysisId)
         }
 
-        static final HttpDelete deleteAnalysis(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpDelete deleteAnalysis(AuthToken userToken, String owner, String projectName, String snapshotName,
                                                String config, String analysisId, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).deleteAnalysisEndpoint(analysisId)
         }
 
-        static final HttpPut executeAnalysisAction(String userToken, String owner, String projectName,
+        static final HttpPut executeAnalysisAction(AuthToken userToken, String owner, String projectName,
                                                    String snapshotName, String config, String action,
                                                    String analysisId, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config)
                     .executeAnalysisActionEndpoint(action, analysisId)
         }
 
-        static final HttpGet getAnalysisRuntime(String userToken, String owner, String projectName, String snapshotName,
+        static final HttpGet getAnalysisRuntime(AuthToken userToken, String owner, String projectName, String snapshotName,
                                                 String config, String analysisId, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getAnalysisRuntimeEndpoint(analysisId)
         }
@@ -377,14 +379,14 @@ class LowLevelAPI {
         public static final String HEADER_TOKEN = "x-clue-token"
 
         String hostPrefix
-        String userToken
+        AuthToken userToken
         String username
         String projectName
         String snapshotName
         String config
         Map<String, Object> extraParams
 
-        Endpoints(String hostPrefix, String userToken, String username=null,
+        Endpoints(String hostPrefix, AuthToken userToken, String username=null,
                   String projectName=null, String snapshotName=null, String config=null,
                   Map<String, Object> extraParams=null) {
             this.hostPrefix  = hostPrefix
@@ -607,8 +609,12 @@ class LowLevelAPI {
 
         private <T extends HttpRequestBase> T withTokenHeader(T req) {
             if (userToken) {
-                req.addHeader(HEADER_TOKEN, userToken)
-                req.setHeader(HttpHeaders.AUTHORIZATION, 'Bearer ' + userToken)
+                if (userToken.userName && userToken.value) {
+                    req.setHeader('User', userToken.userName)
+                    req.addHeader(HEADER_TOKEN, userToken.value)
+                    req.setHeader(HttpHeaders.AUTHORIZATION, 'APIKEY ' + userToken.value)
+                } else
+                    println "WARNING: authentication token is invalid: ${userToken}"
             }
             return req
         }
