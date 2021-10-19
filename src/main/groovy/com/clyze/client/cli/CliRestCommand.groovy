@@ -56,6 +56,13 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand DIAGNOSE = new CliRestCommand('diagnose', 'calls the server "diagnose" endpoint') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            return LowLevelAPI.Requests.diagnose(hostPrefix)
+        }
+    }
+
     private static String LOGIN_LAST_USERNAME = null
     static final Tuple2<String, AuthToken> readLogin(OptionAccessor cliOptions) {
         String user = readUserFromConsole(cliOptions)

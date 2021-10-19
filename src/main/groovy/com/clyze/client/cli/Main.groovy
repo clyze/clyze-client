@@ -1,6 +1,5 @@
 package com.clyze.client.cli
 
-
 import groovy.cli.commons.CliBuilder
 import groovy.cli.commons.OptionAccessor
 import groovy.transform.CompileStatic
@@ -22,6 +21,7 @@ import static com.clyze.client.cli.CliRestCommand.DELETE_PROJECT
 import static com.clyze.client.cli.CliRestCommand.DELETE_RULE
 import static com.clyze.client.cli.CliRestCommand.DELETE_RULES
 import static com.clyze.client.cli.CliRestCommand.DELETE_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.DIAGNOSE
 import static com.clyze.client.cli.CliRestCommand.EXECUTE_ANALYSIS_ACTION
 import static com.clyze.client.cli.CliRestCommand.EXPORT_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.GET_ANALYSIS
@@ -57,7 +57,7 @@ import static com.clyze.client.cli.CliRestCommand.REPACKAGE
 import static com.clyze.client.cli.CliRestCommand.RUNTIME
 
 /**
- * A command line client for a remote doop server.
+ * A command line client for a remote analysis server.
  *
  * The client can execute the following commands via the remote server:
  * <ul>
@@ -103,6 +103,7 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>login             - authenticate user
  *     <li>list_users        - list users
  *     <li>ping              - check connection with server
+ *     <li>diagnose          - invoke the "diagnose" endpoint
  *     <li>repackage         - run automated repackaging
  *     <li>runtime           - check the runtime status of an analysis
  *     <li>list              - list the available analyses
@@ -130,7 +131,7 @@ class Main {
             // Analyses
             ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
             // Misc.
-            CLEAN_DEPLOY, PING, LOGIN, LIST_USERS, REPACKAGE, RUNTIME, LIST_STACKS
+            CLEAN_DEPLOY, PING, LOGIN, LIST_USERS, REPACKAGE, RUNTIME, LIST_STACKS, DIAGNOSE
             // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
     ].collectEntries {
         [(it.name):it]
