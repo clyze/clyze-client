@@ -75,10 +75,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     static final CliRestCommand CLEAN_DEPLOY = new CliRestCommand('clean_deploy', 'cleans the server for deployment') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
-            Tuple2<String, AuthToken> login = readLogin(cliOptions)
-            String user = login.v1
-            AuthToken token = login.v2
-            return LowLevelAPI.Requests.cleanDeploy(hostPrefix, user, token)
+            return LowLevelAPI.Requests.cleanDeploy(hostPrefix)
         }
 
         @Override

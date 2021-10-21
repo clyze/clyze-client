@@ -32,8 +32,8 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, null).diagnoseEndpoint()
         }
 
-        static final HttpPost cleanDeploy(String hostPrefix, String username, AuthToken userToken) {
-            return new Endpoints(hostPrefix, userToken, username).cleanDeployEndpoint()
+        static final HttpPost cleanDeploy(String hostPrefix) {
+            return new Endpoints(hostPrefix).cleanDeployEndpoint()
         }
 
         static final HttpPost login(String username, AuthToken authToken, String hostPrefix) {
@@ -386,7 +386,7 @@ class LowLevelAPI {
         String config
         Map<String, Object> extraParams
 
-        Endpoints(String hostPrefix, AuthToken userToken, String username=null,
+        Endpoints(String hostPrefix, AuthToken userToken=null, String username=null,
                   String projectName=null, String snapshotName=null, String config=null,
                   Map<String, Object> extraParams=null) {
             this.hostPrefix  = hostPrefix
@@ -407,7 +407,7 @@ class LowLevelAPI {
         }
 
         HttpPost cleanDeployEndpoint() {
-            withTokenHeader(new HttpPost(createUrl(hostPrefix, '', '/clean/deploy')))
+            new HttpPost(createUrl(hostPrefix, '', '/clean/deploy'))
         }
 
         HttpPost loginEndpoint() {
