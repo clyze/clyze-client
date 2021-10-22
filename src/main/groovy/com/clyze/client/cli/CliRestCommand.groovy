@@ -65,8 +65,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     private static String LOGIN_LAST_USERNAME = null
     static final Tuple2<String, AuthToken> readLogin(OptionAccessor cliOptions) {
-        String user = readUserFromConsole(cliOptions)
-        String tokenValue = readTokenFromConsole(cliOptions)
+        String user = readAuthUserFromConsole(cliOptions)
+        String tokenValue = readAuthTokenFromConsole(cliOptions)
         LOGIN_LAST_USERNAME = user
         return new Tuple2<>(user, new AuthToken(user, tokenValue))
     }
@@ -101,12 +101,35 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand CREATE_USER = new CliRestCommand('create_user', 'create a user') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
+            String newUserId = readOptionFromConsole(cliOptions, 'user-id', 'New user id', null)
+            String newUserName = readOptionFromConsole(cliOptions, 'user', 'New user name', null)
+            String newUserPassword = readOptionFromConsole(cliOptions, 'user-pass', 'New user password', null)
+            return LowLevelAPI.Users.createUser(token, newUserId, newUserName, newUserPassword, hostPrefix)
+        }
+    }
+
     static final CliRestCommand LIST_USERS = new CliRestCommand('list_users', 'list the users') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {
             String user = getUserName(cliOptions, false, hostPrefix)
             AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
-            return LowLevelAPI.Requests.listUsers(token, user, hostPrefix)
+            return LowLevelAPI.Users.listUsers(token, user, hostPrefix)
+        }
+    }
+
+    static final CliRestCommand DELETE_USER = new CliRestCommand('delete_user', 'delete user') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            String user = getUserName(cliOptions, false, hostPrefix)
+            AuthToken token = getUserToken(user, cliOptions, true, hostPrefix)
+            String userToDelete = readOptionFromConsole(cliOptions, 'user', 'User to delete (name)', null)
+            String userIdToDelete = readOptionFromConsole(cliOptions, 'user-id', 'User to delete (id)', null)
+            return LowLevelAPI.Users.deleteUser(token, userIdToDelete, userToDelete, hostPrefix)
         }
     }
 
@@ -763,12 +786,12 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return readOptionFromConsole(cliOptions, 'count', 'Count', '10')
     }
 
-    protected static String readUserFromConsole(OptionAccessor cliOptions) {
-        return readOptionFromConsole(cliOptions, 'user', 'User', 'user')
+    protected static String readAuthUserFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'auth-user', 'User', 'user')
     }
 
-    protected static String readTokenFromConsole(OptionAccessor cliOptions) {
-        return readOptionFromConsole(cliOptions, 'token', 'Authentication token', '')
+    protected static String readAuthTokenFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'auth-token', 'Authentication token', '')
     }
 
     protected static String readAppOnlyFromConsole(OptionAccessor cliOptions) {

@@ -60,23 +60,26 @@ class LowLevelAPI {
                                         String config, String codeFile, String line, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, owner, project, snapshot, config).getSymbolsEndpoint(codeFile, line)
         }        
+    }
 
+    static final class Users {
         static final HttpGet listUsers(AuthToken userToken, String username, String hostPrefix) {
             return new Endpoints(hostPrefix, userToken, username).listUsersEndpoint()
         }
 
-        static final HttpPost createUser(AuthToken userToken, String username, String password,
-                                         String hostPrefix) {
+        static final HttpPost createUser(AuthToken userToken, String userId, String username,
+                                         String password, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, userToken).postUserEndpoint()
-            List<NameValuePair> params = new ArrayList<>(2)
+            List<NameValuePair> params = new ArrayList<>(3)
+            params.add(new BasicNameValuePair("userId", userId))
             params.add(new BasicNameValuePair("username", username))
             params.add(new BasicNameValuePair("password", password))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
         }
 
-        static final HttpDelete deleteUser(AuthToken userToken, String username, String hostPrefix) {
-            new Endpoints(hostPrefix, userToken).deleteUserEndpoint()
+        static final HttpDelete deleteUser(AuthToken userToken, String userId, String user, String hostPrefix) {
+            new Endpoints(hostPrefix, userToken, user).deleteUserEndpoint(userId)
         }
     }
 
@@ -422,8 +425,8 @@ class LowLevelAPI {
             withTokenHeader(new HttpPost(createUrl(hostPrefix, API_PATH, usersPrefix())))
         }
 
-        HttpDelete deleteUserEndpoint() {
-            withTokenHeader(new HttpDelete(createUrl(hostPrefix, API_PATH, userPrefix())))
+        HttpDelete deleteUserEndpoint(String userId) {
+            withTokenHeader(new HttpDelete(createUrl(hostPrefix, API_PATH, userPrefix() + '?userId=' + encodeValue(userId))))
         }
 
         HttpGet listProjectsEndpoint() {

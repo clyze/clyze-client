@@ -15,12 +15,14 @@ import static com.clyze.client.cli.CliRestCommand.ANALYZE
 import static com.clyze.client.cli.CliRestCommand.CLEAN_DEPLOY
 import static com.clyze.client.cli.CliRestCommand.CLONE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.CREATE_PROJECT
+import static com.clyze.client.cli.CliRestCommand.CREATE_USER
 import static com.clyze.client.cli.CliRestCommand.DELETE_ANALYSIS
 import static com.clyze.client.cli.CliRestCommand.DELETE_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.DELETE_PROJECT
 import static com.clyze.client.cli.CliRestCommand.DELETE_RULE
 import static com.clyze.client.cli.CliRestCommand.DELETE_RULES
 import static com.clyze.client.cli.CliRestCommand.DELETE_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.DELETE_USER
 import static com.clyze.client.cli.CliRestCommand.DIAGNOSE
 import static com.clyze.client.cli.CliRestCommand.EXECUTE_ANALYSIS_ACTION
 import static com.clyze.client.cli.CliRestCommand.EXPORT_CONFIGURATION
@@ -99,9 +101,12 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>delete_analysis   - delete a snapshot analysis
  *     <li>execute_action    - execute a snapshot analysis action
  *
+ *     <li>create_user       - create a new user
+ *     <li>list_users        - list users
+ *     <li>delete_user       - delete an existing user
+ *
  *     <li>clean_deploy      - clean a server for deployment
  *     <li>login             - authenticate user
- *     <li>list_users        - list users
  *     <li>ping              - check connection with server
  *     <li>diagnose          - invoke the "diagnose" endpoint
  *     <li>repackage         - run automated repackaging
@@ -130,8 +135,10 @@ class Main {
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Analyses
             ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
+            // User management (depending on server configuration)
+            CREATE_USER, DELETE_USER, LIST_USERS,
             // Misc.
-            CLEAN_DEPLOY, PING, LOGIN, LIST_USERS, REPACKAGE, RUNTIME, LIST_STACKS, DIAGNOSE
+            CLEAN_DEPLOY, PING, LOGIN, REPACKAGE, RUNTIME, LIST_STACKS, DIAGNOSE
             // LIST, GET, STOP, POST_PROCESS, RESET, RESTART, DELETE, QUICKSTART
     ].collectEntries {
         [(it.name):it]
@@ -237,8 +244,11 @@ class Main {
         opts.addOption(Option.builder().longOpt('start').numberOfArgs(1).argName('N').desc('Set start position when reading data.').build())
         opts.addOption(Option.builder().longOpt('count').numberOfArgs(1).argName('N').desc('Set element count when reading data.').build())
         opts.addOption(Option.builder().longOpt('option').numberOfArgs(1).argName('OPT').desc('Set analysis option in the form "id=value".').build())
-        opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name.').build())
-        opts.addOption(Option.builder().longOpt('token').numberOfArgs(1).argName('TOKEN').desc('Set authentication token.').build())
+        opts.addOption(Option.builder().longOpt('auth-user').numberOfArgs(1).argName('USER').desc('Set (authenticated) user name.').build())
+        opts.addOption(Option.builder().longOpt('auth-token').numberOfArgs(1).argName('TOKEN').desc('Set authentication token.').build())
+        opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name (that may not be the same as the user performing the action).').build())
+        opts.addOption(Option.builder().longOpt('user-id').numberOfArgs(1).argName('ID').desc('Set user id (that may not be the same as the user id performing the action).').build())
+        opts.addOption(Option.builder().longOpt('user-pass').numberOfArgs(1).argName('PASS').desc('Set user password (when creating new users).').build())
         opts.addOption(Option.builder().longOpt('appOnly').numberOfArgs(1).argName('FLAG').desc('Set "appOnly" filter (true/false).').build())
         opts.addOption(Option.builder().longOpt('line').numberOfArgs(1).argName('LINE').desc('Set code line number.').build())
         cli.setOptions(opts)

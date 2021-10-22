@@ -395,23 +395,25 @@ class Remote {
 	Map<String, Object> listUsers() throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.listUsers(token, username, hostPrefix)
+				return LowLevelAPI.Users.listUsers(token, username, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}
 
-	Map<String, Object> createUser(String newUsername, String newPassword) {
+	@SuppressWarnings('unused')
+	Map<String, Object> createUser(String newUserId, String newUsername, String newPassword) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.createUser(token, newUsername, newPassword, hostPrefix)
+				return LowLevelAPI.Users.createUser(token, newUserId, newUsername, newPassword, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}
 
-	Map<String, Object> deleteUser(String username) {
+	@SuppressWarnings('unused')
+	Map<String, Object> deleteUser(String userId, String username) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.deleteUser(token, username, hostPrefix)
+				return LowLevelAPI.Users.deleteUser(token, userId, username, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}
