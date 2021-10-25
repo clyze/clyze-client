@@ -3,6 +3,7 @@ package com.clyze.client;
 /**
  * A simple console-based implementation of the Printer interface.
  */
+@SuppressWarnings("unused")
 public class ConsolePrinter implements Printer {
     private final boolean debug;
 
