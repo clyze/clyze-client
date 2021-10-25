@@ -459,7 +459,6 @@ class Remote {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override
 			HttpUriRequest buildRequest(String hostPrefix) {
-				println "getProjectInputs.owner=${owner}/token=${token}"
 				return LowLevelAPI.Projects.getProjectInputs(token, owner, name, hostPrefix)
 			}
 		}.execute(hostPrefix)
