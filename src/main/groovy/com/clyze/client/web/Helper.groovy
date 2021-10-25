@@ -185,7 +185,7 @@ class Helper {
     static Map<String, Object> postSnapshot(String hostPrefix, String username, AuthToken authToken,
                                             String projectName, PostState ps, Printer printer, boolean debug)
     throws HttpHostConnectException, ClientProtocolException {
-        Remote remote = connect(hostPrefix, username, authToken, false, printer)
+        Remote remote = connect(hostPrefix, username, authToken, true, printer)
 
         ensureProjectExists(remote, projectName, ps.stacks, printer, ps.makePublic, debug)
 
