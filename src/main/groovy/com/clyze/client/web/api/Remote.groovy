@@ -90,7 +90,7 @@ class Remote {
 	Map<String, Object> login(String username, AuthToken token) throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Requests.login(username, token, hostPrefix)
+				return LowLevelAPI.Requests.login(token, hostPrefix)
 			}
 
 			@Override Map<String, Object> onSuccess(HttpEntity entity) {
@@ -395,7 +395,7 @@ class Remote {
 	Map<String, Object> listUsers() throws ClientProtocolException {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Users.listUsers(token, username, hostPrefix)
+				return LowLevelAPI.Users.listUsers(token, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}

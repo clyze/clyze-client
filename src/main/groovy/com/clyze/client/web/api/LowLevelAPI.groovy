@@ -36,10 +36,10 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix).cleanDeployEndpoint()
         }
 
-        static final HttpPost login(String username, AuthToken authToken, String hostPrefix) {
+        static final HttpPost login(AuthToken authToken, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, null).loginEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
-            params.add(new BasicNameValuePair("username", username))
+            params.add(new BasicNameValuePair("username", authToken.userName))
             params.add(new BasicNameValuePair("password", authToken.value))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
@@ -63,8 +63,8 @@ class LowLevelAPI {
     }
 
     static final class Users {
-        static final HttpGet listUsers(AuthToken userToken, String username, String hostPrefix) {
-            return new Endpoints(hostPrefix, userToken, username).listUsersEndpoint()
+        static final HttpGet listUsers(AuthToken userToken, String hostPrefix) {
+            return new Endpoints(hostPrefix, userToken).listUsersEndpoint()
         }
 
         static final HttpPost createUser(AuthToken userToken, String userId, String username,
