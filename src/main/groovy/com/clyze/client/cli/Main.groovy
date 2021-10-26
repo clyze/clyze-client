@@ -57,6 +57,7 @@ import static com.clyze.client.cli.CliRestCommand.PUT_RULE
 import static com.clyze.client.cli.CliRestCommand.RENAME_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.REPACKAGE
 import static com.clyze.client.cli.CliRestCommand.RUNTIME
+import static com.clyze.client.cli.CliRestCommand.SEARCH_SYMBOL
 
 /**
  * A command line client for a remote analysis server.
@@ -76,13 +77,15 @@ import static com.clyze.client.cli.CliRestCommand.RUNTIME
  *     <li>get_snapshot      - get a snapshot
  *     <li>post_snapshot     - create a new snapshot
  *     <li>delete_snapshot   - delete a snapshot
- *     <li>get_symbol        - get a symbol from the snapshot
- *     <li>get_symbols       - get the symbols of a given line
  *     <li>get_files         - read the snapshot (artifact) files
  *     <li>get_file          - read a snapshot (artifact) file
  *     <li>get_code_file     - read a snapshot (code) file
  *     <li>get_code_hints    - read the hints for a snapshot (code) file
  *     <li>get_output_file   - read an analysis output file
+ *
+ *     <li>get_symbol        - get a symbol from the snapshot
+ *     <li>get_symbols       - get the symbols of a given line
+ *     <li>search_symbol     - search for a symbol
  *
  *     <li>list_configurations - list the available configurations
  *     <li>get_config        - get a configuration
@@ -128,9 +131,10 @@ class Main {
             LIST_PUBLIC_PROJECTS, LIST_PROJECTS, CREATE_PROJECT, GET_PROJECT, DELETE_PROJECT,
             GET_PROJECT_ANALYSES, GET_PROJECT_INPUTS,
             // Snapshots
-            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT, GET_SYMBOLS,
-            GET_SYMBOL, GET_FILE, GET_FILES, GET_CODE_FILE, GET_OUTPUT_FILE, GET_OUTPUT,
-            GET_CODE_HINTS,
+            LIST_SNAPSHOTS, POST_SNAPSHOT, GET_SNAPSHOT, DELETE_SNAPSHOT, GET_FILE, GET_FILES,
+            GET_CODE_FILE, GET_OUTPUT_FILE, GET_OUTPUT, GET_CODE_HINTS,
+            // Code symbols
+            GET_SYMBOLS, GET_SYMBOL, SEARCH_SYMBOL,
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Analyses
@@ -251,6 +255,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('user-pass').numberOfArgs(1).argName('PASS').desc('Set user password (when creating new users).').build())
         opts.addOption(Option.builder().longOpt('appOnly').numberOfArgs(1).argName('FLAG').desc('Set "appOnly" filter (true/false).').build())
         opts.addOption(Option.builder().longOpt('line').numberOfArgs(1).argName('LINE').desc('Set code line number.').build())
+        opts.addOption(Option.builder().longOpt('prefix').numberOfArgs(1).argName('FLAG').desc('Set "prefix" filter (true/false).').build())
         cli.setOptions(opts)
 
         return cli

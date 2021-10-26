@@ -285,7 +285,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String owner = readOwnerFromConsole(cliOptions, hostPrefix)
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
-            String symbol = readSymbolFromConsole(cliOptions)
+            String symbol = readSymbolFromConsole(cliOptions, 'Symbol id')
             return LowLevelAPI.Snapshots.getSymbol(token, owner, project, snapshot, symbol, hostPrefix)
         }
     }
@@ -301,6 +301,19 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String line = readLineFromConsole(cliOptions)
             String file = readFileFromConsole(cliOptions)
             return LowLevelAPI.Requests.getSymbols(token, owner, project, snapshot, config, file, line, hostPrefix)
+        }
+    }
+
+    static final CliRestCommand SEARCH_SYMBOL = new CliRestCommand('search_symbol', 'search a symbol from a snapshot') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            AuthToken token = getUserAuthToken(cliOptions, hostPrefix)
+            String owner = readOwnerFromConsole(cliOptions, hostPrefix)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String symbol = readSymbolFromConsole(cliOptions, 'Symbol token')
+            String prefix = readOptionFromConsole(cliOptions, 'prefix', 'Search by prefix?', 'true')
+            return LowLevelAPI.Snapshots.searchSymbol(token, owner, project, snapshot, symbol, prefix, hostPrefix)
         }
     }
 
@@ -816,8 +829,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return value
     }
 
-    protected static String readSymbolFromConsole(OptionAccessor cliOptions) {
-        return readOptionFromConsole(cliOptions, 'symbol', 'Symbol id')
+    protected static String readSymbolFromConsole(OptionAccessor cliOptions, String description) {
+        return readOptionFromConsole(cliOptions, 'symbol', description)
     }
 
     protected static String readLineFromConsole(OptionAccessor cliOptions) {

@@ -358,6 +358,9 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).getAnalysisRuntimeEndpoint(analysisId)
         }
 
+        static final HttpGet searchSymbol(AuthToken userToken, String owner, String projectName, String snapshotName, String symbol, String prefix, String hostPrefix) {
+            return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName).searchSymbolEndpoint(symbol, prefix)
+        }
     }
 
     static final class Responses {
@@ -478,7 +481,11 @@ class LowLevelAPI {
         }
 
         HttpGet getSymbolEndpoint(String symbolId) {
-            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotPrefix() + '/symbols/byId/' + encodeValue(symbolId))))
+            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotSymbolsPrefix() + '/byId/' + encodeValue(symbolId))))
+        }
+
+        HttpGet searchSymbolEndpoint(String text, String prefix) {
+            withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, snapshotSymbolsPrefix() + '/byText/' + encodeValue(text) + '?prefix=' + encodeValue(prefix))))
         }
 
         String filesPrefix(String artifact) {
@@ -655,6 +662,10 @@ class LowLevelAPI {
 
         String analysesPrefix() {
             return "${projectPrefix()}/analyses"
+        }
+
+        String snapshotSymbolsPrefix() {
+            return "${snapshotPrefix()}/symbols"
         }
 
         String snapshotConfigPrefix() {
