@@ -87,7 +87,7 @@ class Remote {
 		}.execute(hostPrefix)
 	}
 
-	Map<String, Object> login(String username, AuthToken token) throws HttpHostConnectException {
+	Map<String, Object> login(AuthToken token) throws HttpHostConnectException {
 		new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
 				return LowLevelAPI.Requests.login(token, hostPrefix)
@@ -95,7 +95,7 @@ class Remote {
 
 			@Override Map<String, Object> onSuccess(HttpEntity entity) {
 				Map<String, Object> data = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
-				setToken(new AuthToken(username, data.get('token') as String))
+				setToken(token)
 				setUsername(data.get('username') as String)
 				return data
 			}

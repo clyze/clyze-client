@@ -106,7 +106,7 @@ class Helper {
 
         if (remember) {
             printer.always("Logging in as ${username} (with password)")
-            remote.login(username, token)
+            remote.login(token)
         }
 
         return remote
