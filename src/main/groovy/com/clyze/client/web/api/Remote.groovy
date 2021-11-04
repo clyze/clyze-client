@@ -241,10 +241,12 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	Map<String, Object> getRules(String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count) {
+	Map<String, Object> getRules(String owner, String projectName, String snapshotName,
+								 String config, String originType, Integer start,
+								 Integer count, String facets) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
-				return LowLevelAPI.Snapshots.getRules(token, owner, projectName, snapshotName, config, originType, start, count, hostPrefix)
+				return LowLevelAPI.Snapshots.getRules(token, owner, projectName, snapshotName, config, originType, start, count, facets, hostPrefix)
 			}
 		}.execute(hostPrefix)
 	}

@@ -579,14 +579,15 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String originType = System.console().readLine("[Optional] Origin type: ")
+            String originType = readOptionFromConsole(cliOptions, 'origin', 'Origin type', '', true)
             if (originType == '')
                 originType = null
-            String start = System.console().readLine("[Optional] Pagination/start: ")
+            String start = readStartFromConsole(cliOptions)
             Integer _start = start == '' ? null : Integer.valueOf(start)
-            String count = System.console().readLine("[Optional] Pagination/count: ")
+            String count = readCountFromConsole(cliOptions)
             Integer _count = count == '' ? null : Integer.valueOf(count)
-            return LowLevelAPI.Snapshots.getRules(token, owner, project, snapshot, config, originType, _start, _count, hostPrefix)
+            String facets = readOptionFromConsole(cliOptions, 'facets', 'Facets', 'false')
+            return LowLevelAPI.Snapshots.getRules(token, owner, project, snapshot, config, originType, _start, _count, facets, hostPrefix)
         }
     }
 
@@ -812,20 +813,19 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     protected static String readOptionFromConsole(OptionAccessor cliOptions, String name, String description,
-                                                  String DEFAULT_VALUE = null) {
+                                                  String DEFAULT_VALUE = null, boolean optional = false) {
         String value = cliOptions ? (cliOptions[name] ?: null) : null
-        if (value)
-            println "Assuming ${name} = ${value}"
-        else {
+        if (!value && !optional) {
             String prompt = "${description} " + (DEFAULT_VALUE ? "(default: ${DEFAULT_VALUE})": "") + ": "
             value = System.console().readLine(prompt)
+            if ('' == value) {
+                if (DEFAULT_VALUE)
+                    return DEFAULT_VALUE
+                else
+                    throw new RuntimeException("ERROR: no ${name} given.")
+            }
         }
-        if ('' == value) {
-            if (DEFAULT_VALUE)
-                return DEFAULT_VALUE
-            else
-                throw new RuntimeException("ERROR: no ${name} given.")
-        }
+        println "Using ${name} = ${value}"
         return value
     }
 

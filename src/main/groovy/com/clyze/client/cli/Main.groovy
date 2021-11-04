@@ -256,6 +256,8 @@ class Main {
         opts.addOption(Option.builder().longOpt('appOnly').numberOfArgs(1).argName('FLAG').desc('Set "appOnly" filter (true/false).').build())
         opts.addOption(Option.builder().longOpt('line').numberOfArgs(1).argName('LINE').desc('Set code line number.').build())
         opts.addOption(Option.builder().longOpt('prefix').numberOfArgs(1).argName('FLAG').desc('Set "prefix" filter (true/false).').build())
+        opts.addOption(Option.builder().longOpt('origin').numberOfArgs(1).argName('TYPE').desc('Set the origin type.').build())
+        opts.addOption(Option.builder().longOpt('facets').numberOfArgs(1).argName('FLAG').desc('Enable/disable facets (true/false).').build())
         cli.setOptions(opts)
 
         return cli

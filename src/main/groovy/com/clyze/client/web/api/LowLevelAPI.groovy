@@ -253,11 +253,12 @@ class LowLevelAPI {
             return put
         }
 
-        static final HttpGet getRules(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count, String hostPrefix) {
+        static final HttpGet getRules(AuthToken userToken, String owner, String projectName, String snapshotName, String config, String originType, Integer start, Integer count, String facets, String hostPrefix) {
             Map<String, Object> extraParams = [
                     originType: originType,
                     _start     : start,
-                    _count     : count
+                    _count     : count,
+                    _facets    : facets
                     ] as Map<String, Object>
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).getRulesEndpoint()
         }
