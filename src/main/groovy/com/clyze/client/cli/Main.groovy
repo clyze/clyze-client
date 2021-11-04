@@ -233,7 +233,7 @@ class Main {
                 .numberOfArgs(1).argName("command").build())
         opts.addOption(Option.builder('v').longOpt('version').desc('Display version and exit.').build())
         opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Set project name.').build())
-        opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Set project stack (by id).').build())
+        opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Set project stack (by id, option can be repeated).').build())
         opts.addOption(Option.builder().longOpt('public').desc('Make project public.').build())
         opts.addOption(Option.builder().longOpt('snapshot').numberOfArgs(1).argName('ID').desc('set snapshot id.').build())
         opts.addOption(Option.builder().longOpt('input').numberOfArgs(1).argName('INPUT').desc('Set snapshot input (examples: app@path, key=value).').build())
@@ -247,7 +247,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('output').numberOfArgs(1).argName('ID').desc('Set analysis output (such as a dataset).').build())
         opts.addOption(Option.builder().longOpt('start').numberOfArgs(1).argName('N').desc('Set start position when reading data.').build())
         opts.addOption(Option.builder().longOpt('count').numberOfArgs(1).argName('N').desc('Set element count when reading data.').build())
-        opts.addOption(Option.builder().longOpt('option').numberOfArgs(1).argName('OPT').desc('Set analysis option in the form "id=value".').build())
+        opts.addOption(Option.builder().longOpt('option').numberOfArgs(1).argName('OPT').desc('Set analysis option in the form "id=value" (option can be repeated).').build())
         opts.addOption(Option.builder().longOpt('auth-user').numberOfArgs(1).argName('USER').desc('Set (authenticated) user name.').build())
         opts.addOption(Option.builder().longOpt('auth-token').numberOfArgs(1).argName('TOKEN').desc('Set authentication token.').build())
         opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name (that may not be the same as the user performing the action).').build())
@@ -258,6 +258,7 @@ class Main {
         opts.addOption(Option.builder().longOpt('prefix').numberOfArgs(1).argName('FLAG').desc('Set "prefix" filter (true/false).').build())
         opts.addOption(Option.builder().longOpt('origin').numberOfArgs(1).argName('TYPE').desc('Set the origin type.').build())
         opts.addOption(Option.builder().longOpt('facets').numberOfArgs(1).argName('FLAG').desc('Enable/disable facets (true/false).').build())
+        opts.addOption(Option.builder().longOpt('rule-id').numberOfArgs(1).argName('ID').desc('Set rule id (option can be repeated).').build())
         cli.setOptions(opts)
 
         return cli

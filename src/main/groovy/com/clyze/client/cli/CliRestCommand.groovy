@@ -565,8 +565,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String idsLine = System.console().readLine('Rule IDs, separated by comma: ')
-            List<String> ids = idsLine.tokenize(',')
+            List<String> ids = readOptionsFromConsole(cliOptions, 'rule-ids', 'Rule ids', new ArrayList<String>())
             return LowLevelAPI.Snapshots.deleteRules(token, owner, project, snapshot, config, ids, hostPrefix)
         }
     }
@@ -627,7 +626,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String ruleId = System.console().readLine("Rule id: ")
+            String ruleId = readOptionFromConsole(cliOptions, 'rule-id', 'Rule id', null)
             return LowLevelAPI.Snapshots.deleteRule(token, owner, project, snapshot, config, ruleId, hostPrefix)
         }
     }
