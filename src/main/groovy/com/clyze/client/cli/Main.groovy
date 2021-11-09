@@ -220,17 +220,17 @@ class Main {
     private static final CliBuilder createCliBuilder() {
         CliBuilder cli = new CliBuilder(
             parser: new DefaultParser (),
-            usage : "client -r [remote] -c [command].",
+            usage : "client -r REMOTE -c COMMAND [OPTION...]",
             width : 120
         )        
 
         Options opts = new Options()
         opts.addOption(Option.builder('h').longOpt('help')
                 .desc('Display help and exit. Combine it with a command to see the command options.').build())
-        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('[hostname|ip]:[port][/path]').desc('Give remote server.').build())
+        opts.addOption(Option.builder('r').longOpt('remote').numberOfArgs(1).argName('HOST[:PORT][/PATH]').desc('Give remote server.').build())
         opts.addOption(Option.builder('c').longOpt('command')
                 .desc("The command to execute via the remote server. Available commands: ${availableCommands}.")
-                .numberOfArgs(1).argName("command").build())
+                .numberOfArgs(1).argName("COMMAND").build())
         opts.addOption(Option.builder('v').longOpt('version').desc('Display version and exit.').build())
         opts.addOption(Option.builder().longOpt('project').numberOfArgs(1).argName('NAME').desc('Set project name.').build())
         opts.addOption(Option.builder().longOpt('stack').numberOfArgs(1).argName('ID').desc('Set project stack (by id, option can be repeated).').build())
@@ -250,8 +250,8 @@ class Main {
         opts.addOption(Option.builder().longOpt('option').numberOfArgs(1).argName('OPT').desc('Set analysis option in the form "id=value" (option can be repeated).').build())
         opts.addOption(Option.builder().longOpt('auth-user').numberOfArgs(1).argName('USER').desc('Set (authenticated) user name.').build())
         opts.addOption(Option.builder().longOpt('auth-token').numberOfArgs(1).argName('TOKEN').desc('Set authentication token.').build())
-        opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name (that may not be the same as the user performing the action).').build())
-        opts.addOption(Option.builder().longOpt('user-id').numberOfArgs(1).argName('ID').desc('Set user id (that may not be the same as the user id performing the action).').build())
+        opts.addOption(Option.builder().longOpt('user').numberOfArgs(1).argName('USER').desc('Set user name (may not be the same as the authenticated user).').build())
+        opts.addOption(Option.builder().longOpt('user-id').numberOfArgs(1).argName('ID').desc('Set user id (may not be the same as the authenticated user id).').build())
         opts.addOption(Option.builder().longOpt('user-pass').numberOfArgs(1).argName('PASS').desc('Set user password (when creating new users).').build())
         opts.addOption(Option.builder().longOpt('appOnly').numberOfArgs(1).argName('FLAG').desc('Set "appOnly" filter (true/false).').build())
         opts.addOption(Option.builder().longOpt('line').numberOfArgs(1).argName('LINE').desc('Set code line number.').build())
