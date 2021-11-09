@@ -322,10 +322,7 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config, extraParams).getOutputEndpoint()
         }
 
-        static final HttpPost analyze(AuthToken userToken, String owner, String projectName, String snapshotName,
-                                      String config, String profileId, List<String> options, String hostPrefix) {
-            HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).analyzeEndpoint(profileId)
-            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+        static void updateEntityFromOptions(MultipartEntityBuilder entityBuilder, List<String> options) {
             for (String option : options) {
                 int eqIdx = option.indexOf('=')
                 if (eqIdx > 0)
@@ -333,8 +330,24 @@ class LowLevelAPI {
                 else
                     System.err.println "WARNING: ignoring bad option ${option}"
             }
+        }
+
+        static final HttpPost analyze(AuthToken userToken, String owner, String projectName, String snapshotName,
+                                      String config, String profileId, List<String> options, String hostPrefix) {
+            HttpPost post = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).analyzeEndpoint(profileId)
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+            updateEntityFromOptions(entityBuilder, options)
             post.setEntity(entityBuilder.build())
             return post
+        }
+
+        static final HttpPut putAnalysis(AuthToken userToken, String owner, String projectName, String snapshotName,
+                                         String config, String analysisId, List<String> options, String hostPrefix) {
+            HttpPut put = new Endpoints(hostPrefix, userToken, owner, projectName, snapshotName, config).putAnalysisEndpoint(analysisId)
+            MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create()
+            updateEntityFromOptions(entityBuilder, options)
+            put.setEntity(entityBuilder.build())
+            return put
         }
 
         static final HttpGet getAnalysis(AuthToken userToken, String owner, String projectName, String snapshotName,
@@ -596,6 +609,10 @@ class LowLevelAPI {
 
         HttpGet getAnalysisEndpoint(String analysisId) {
             withTokenHeader(new HttpGet(createUrl(hostPrefix, API_PATH, analysisPrefix(analysisId))))
+        }
+
+        HttpPut putAnalysisEndpoint(String analysisId) {
+            withTokenHeader(new HttpPut(createUrl(hostPrefix, API_PATH, analysisPrefix(analysisId))))
         }
 
         HttpGet getAnalysisRuntimeEndpoint(String analysisId) {

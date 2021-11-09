@@ -455,6 +455,20 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         }
     }
 
+    static final CliRestCommand PUT_ANALYSIS = new CliRestCommand('put_analysis', 'updates an analysis in a snapshot') {
+        @Override
+        HttpUriRequest buildRequest(String hostPrefix) {
+            AuthToken token = getUserAuthToken(cliOptions, hostPrefix)
+            String owner = readOwnerFromConsole(cliOptions, hostPrefix)
+            String project = readProjectNameFromConsole(cliOptions)
+            String snapshot = readSnapshotNameFromConsole(cliOptions)
+            String config = readConfigFromConsole(cliOptions)
+            String analysisId = readAnalysisIdFromConsole(cliOptions)
+            List<String> options = readOptionsFromConsole(cliOptions)
+            return LowLevelAPI.Snapshots.putAnalysis(token, owner, project, snapshot, config, analysisId, options, hostPrefix)
+        }
+    }
+
     static final CliRestCommand GET_ANALYSIS_RUNTIME = new CliRestCommand('get_analysis_runtime', 'read analysis runtime information') {
         @Override
         HttpUriRequest buildRequest(String hostPrefix) {

@@ -355,6 +355,16 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
+	Map<String, Object> putAnalysis(String owner, String projectName, String snapshotName, String config,
+									String analysisId, List<String> options)  {
+		return new HttpMapClientCommand(httpClientLifeCycle) {
+			@Override HttpUriRequest buildRequest(String hostPrefix) {
+				return LowLevelAPI.Snapshots.putAnalysis(token, owner, projectName, snapshotName, config, analysisId, options, hostPrefix)
+			}
+		}.execute(hostPrefix)
+	}
+
+	@SuppressWarnings('unused')
 	Map<String, Object> getAnalysisRuntime(String owner, String projectName, String snapshotName, String config,
 										   String analysisId)  {
 		return new HttpMapClientCommand(httpClientLifeCycle) {

@@ -53,6 +53,7 @@ import static com.clyze.client.cli.CliRestCommand.PASTE_CONFIGURATION_RULES
 import static com.clyze.client.cli.CliRestCommand.PING
 import static com.clyze.client.cli.CliRestCommand.POST_RULE
 import static com.clyze.client.cli.CliRestCommand.POST_SNAPSHOT
+import static com.clyze.client.cli.CliRestCommand.PUT_ANALYSIS
 import static com.clyze.client.cli.CliRestCommand.PUT_RULE
 import static com.clyze.client.cli.CliRestCommand.RENAME_CONFIGURATION
 import static com.clyze.client.cli.CliRestCommand.REPACKAGE
@@ -100,6 +101,7 @@ import static com.clyze.client.cli.CliRestCommand.SEARCH_SYMBOL
  *
  *     <li>analyze           - create and run an analysis
  *     <li>get_analysis      - read a snapshot analysis
+ *     <li>put_analysis      - update a snapshot analysis
  *     <li>get_analysis_runtime - read snapshot analysis runtime information
  *     <li>delete_analysis   - delete a snapshot analysis
  *     <li>execute_action    - execute a snapshot analysis action
@@ -138,7 +140,7 @@ class Main {
             // Configurations
             LIST_CONFIGURATIONS, GET_CONFIGURATION, CLONE_CONFIGURATION, RENAME_CONFIGURATION, DELETE_CONFIGURATION, EXPORT_CONFIGURATION, GET_RULES, POST_RULE, DELETE_RULES, PUT_RULE, DELETE_RULE, PASTE_CONFIGURATION_RULES,
             // Analyses
-            ANALYZE, GET_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
+            ANALYZE, GET_ANALYSIS, PUT_ANALYSIS, DELETE_ANALYSIS, EXECUTE_ANALYSIS_ACTION, GET_ANALYSIS_RUNTIME,
             // User management (depending on server configuration)
             CREATE_USER, DELETE_USER, LIST_USERS,
             // Misc.
