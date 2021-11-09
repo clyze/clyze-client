@@ -598,7 +598,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String ruleBody = System.console().readLine("Rule body: ")
+            String ruleBody = readRuleBodyFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.postRule(token, owner, project, snapshot, config, ruleBody, null, hostPrefix)
         }
     }
@@ -611,9 +611,9 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String ruleId = System.console().readLine("Rule id: ")
-            String ruleBody = System.console().readLine("Rule body: ")
-            String comment = System.console().readLine("Rule comment: ")
+            String ruleId = readRuleIdFromConsole(cliOptions)
+            String ruleBody = readRuleBodyFromConsole(cliOptions)
+            String comment = readOptionFromConsole(cliOptions, 'rule-comment', 'Rule comment', null)
             return LowLevelAPI.Snapshots.putRule(token, owner, project, snapshot, config, ruleId, ruleBody, comment, hostPrefix)
         }
     }
@@ -626,7 +626,7 @@ abstract class CliRestCommand extends HttpStringClientCommand {
             String project = readProjectNameFromConsole(cliOptions)
             String snapshot = readSnapshotNameFromConsole(cliOptions)
             String config = readConfigFromConsole(cliOptions)
-            String ruleId = readOptionFromConsole(cliOptions, 'rule-id', 'Rule id', null)
+            String ruleId = readRuleIdFromConsole(cliOptions)
             return LowLevelAPI.Snapshots.deleteRule(token, owner, project, snapshot, config, ruleId, hostPrefix)
         }
     }
@@ -846,6 +846,14 @@ abstract class CliRestCommand extends HttpStringClientCommand {
 
     protected static String readConfigFromConsole(OptionAccessor cliOptions, String defaultConfig = 'clyze.json') {
         return readOptionFromConsole(cliOptions, 'config', 'Configuration', defaultConfig)
+    }
+
+    protected static String readRuleIdFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'rule-id', 'Rule id', null)
+    }
+
+    protected static String readRuleBodyFromConsole(OptionAccessor cliOptions) {
+        return readOptionFromConsole(cliOptions, 'rule-body', 'Rule body', null)
     }
 
     protected static List<SnapshotInput> readSnapshotInputsFromConsole(OptionAccessor cliOptions) {

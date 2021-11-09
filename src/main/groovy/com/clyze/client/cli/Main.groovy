@@ -258,7 +258,9 @@ class Main {
         opts.addOption(Option.builder().longOpt('prefix').numberOfArgs(1).argName('FLAG').desc('Set "prefix" filter (true/false).').build())
         opts.addOption(Option.builder().longOpt('origin').numberOfArgs(1).argName('TYPE').desc('Set the origin type.').build())
         opts.addOption(Option.builder().longOpt('facets').numberOfArgs(1).argName('FLAG').desc('Enable/disable facets (true/false).').build())
-        opts.addOption(Option.builder().longOpt('rule-id').numberOfArgs(1).argName('ID').desc('Set rule id (option can be repeated).').build())
+        opts.addOption(Option.builder().longOpt('rule-id').numberOfArgs(1).argName('ID').desc('Set rule id (option may be repeated).').build())
+        opts.addOption(Option.builder().longOpt('rule-body').numberOfArgs(1).argName('BODY').desc('Set rule body.').build())
+        opts.addOption(Option.builder().longOpt('rule-comment').numberOfArgs(1).argName('TEXT').desc('Set rule comment.').build())
         cli.setOptions(opts)
 
         return cli
