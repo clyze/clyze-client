@@ -513,8 +513,8 @@ class Remote {
 
 	@SuppressWarnings('unused')
 	boolean waitForAnalysisStatus(String owner, String projectName, String buildName, String config,
-								  String analysisId, Set<String> statusSet, int totalTries = 60) {
-		println "Build ${buildName}: waiting for analysis ${analysisId} to finish..."
+								  String analysisId, Set<String> statusSet, int totalTries = 60, long sleepTime = 5000) {
+		println "Build ${buildName}: waiting for analysis ${analysisId} to reach status: ${statusSet}"
 		try {
 			for (int tries = 0; tries < totalTries; tries++) {
 				println "Checking analysis state (${tries} of ${totalTries})..."
@@ -522,7 +522,7 @@ class Remote {
 				println "Current state: ${state}"
 				if (statusSet.contains(state))
 					return true
-				Thread.sleep(5000)
+				Thread.sleep(sleepTime)
 			}
 			println "Too many tries, analysis assumed to be stuck."
 		} catch (Exception ex) {
