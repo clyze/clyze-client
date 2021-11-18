@@ -49,6 +49,7 @@ class LowLevelAPI {
             return new Endpoints(hostPrefix, null).getStacksEndpoint()
         }
 
+        @SuppressWarnings('unused')
         static final HttpPut executeAnalysisAction(AuthToken userToken, String owner, String project,
                                                    String snapshot, String config, String analysisId,
                                                    String action, String hostPrefix) {
