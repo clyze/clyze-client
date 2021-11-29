@@ -730,8 +730,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
     }
 
     protected static final AuthToken getUserAuthToken(OptionAccessor cliOptions, String hostPrefix) {
-        String user = readAuthUserFromConsole(cliOptions)
-        String token = readAuthTokenFromConsole(cliOptions)
+        String user = readAuthUserFromConsole(cliOptions, true)
+        String token = readAuthTokenFromConsole(cliOptions, true)
         if (user == null) {
             if (token != null)
                 throw new RuntimeException('ERROR: authentication token given without a user name')
@@ -811,12 +811,12 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return readOptionFromConsole(cliOptions, 'count', 'Count', '10')
     }
 
-    protected static String readAuthUserFromConsole(OptionAccessor cliOptions) {
-        return readOptionFromConsole(cliOptions, 'auth-user', 'User', null)
+    protected static String readAuthUserFromConsole(OptionAccessor cliOptions, boolean optional = false) {
+        return readOptionFromConsole(cliOptions, 'auth-user', 'User', null, optional)
     }
 
-    protected static String readAuthTokenFromConsole(OptionAccessor cliOptions) {
-        return readOptionFromConsole(cliOptions, 'auth-token', 'Authentication token', null)
+    protected static String readAuthTokenFromConsole(OptionAccessor cliOptions, boolean optional = false) {
+        return readOptionFromConsole(cliOptions, 'auth-token', 'Authentication token', null, optional)
     }
 
     protected static String readAppOnlyFromConsole(OptionAccessor cliOptions) {
