@@ -316,12 +316,12 @@ class Remote {
 	}
 
 	@SuppressWarnings('unused')
-	String exportConfiguration(String owner, String projectName, String snapshotName, String config) {
+	Map<String, Object> exportConfiguration(String owner, String projectName, String snapshotName, String config) {
 		return new HttpMapClientCommand(httpClientLifeCycle) {
 			@Override HttpUriRequest buildRequest(String hostPrefix) {
 				return LowLevelAPI.Snapshots.exportConfiguration(token, owner, projectName, snapshotName, config, hostPrefix)
 			}
-		}.execute(hostPrefix) as String
+		}.execute(hostPrefix)
 	}
 
 	@SuppressWarnings('unused')
