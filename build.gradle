@@ -41,8 +41,10 @@ configurations.all {
 }
 
 def groovyVersion='3.0.8'
-dependencies {    
-    api 'org.clyze:clue-common:3.25.2'
+dependencies {
+    api('org.clyze:clue-common:3.25.2') {
+        exclude group: 'org.codehaus.groovy', module: 'groovy-xml'
+    }
     api 'org.clyze:metadata-model:2.3.0'
     api 'commons-cli:commons-cli:1.4'
     api "org.codehaus.groovy:groovy:${groovyVersion}"
