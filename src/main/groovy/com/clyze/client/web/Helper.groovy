@@ -4,6 +4,7 @@ import com.clyze.client.Printer
 import com.clyze.client.web.api.AttachmentHandler
 import com.clyze.client.web.api.Remote
 import groovy.transform.CompileStatic
+import org.apache.http.entity.ContentType
 import java.awt.*
 import java.util.List
 import org.clyze.persistent.metadata.JSONUtil
@@ -36,10 +37,10 @@ class Helper {
         if (!name) throw new RuntimeException("The name option is not specified")
 
         //add the name
-        builder.addPart("name", new StringBody(name))
+        builder.addPart("name", new StringBody(name, ContentType.TEXT_PLAIN))
 
         //add the id
-        if (id) builder.addPart("id", new StringBody(id))
+        if (id) builder.addPart("id", new StringBody(id, ContentType.TEXT_PLAIN))
 
         jarAndOptionProcessor.call()
     }
