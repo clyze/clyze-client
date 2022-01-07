@@ -16,16 +16,17 @@ class SourceProcessor {
 
     /**
      * Arguments:
+     * @param sourcesDir    the sources directory to process
+     * @param convertUTF8   auto-detect charset and convert to UTF-8
      *
-     *   convertUTF8 auto-detect charset and convert to UTF-8
-     *
-     * Returns a map containing the following information:
-     *
-     * List<String> sourceFiles     the source files found
-     * int scalaFilesCount          number of .scala files found
-     * int groovyFilesCount         number of .groovy files found
-     * int lineCount                line count of source files
-     * boolean foundAndroidSource   if Android source was detected (via heuristic)
+     * @return a map containing the following information:
+     * <ul>
+     * <li> {@code List<String> sourceFiles}  : the source files found
+     * <li> {@code int scalaFilesCount}       : number of .scala files found
+     * <li> {@code int groovyFilesCount}      : number of .groovy files found
+     * <li> {@code int lineCount}             : line count of source files
+     * <li> {@code boolean foundAndroidSource}: if Android source was detected (via heuristic)
+     * </ul>
      */
     static Map<String, Object> process(File sourcesDir, boolean convertUTF8) {
         List<String> sourceFiles = []
