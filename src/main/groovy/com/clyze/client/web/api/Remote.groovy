@@ -21,25 +21,19 @@ class Remote {
 	private final HttpClientLifeCycle httpClientLifeCycle
 	private AuthToken token = null
 
-	private Remote(String hostPrefix, HttpClientLifeCycle httpClientLifeCycle) {
+	private Remote(String hostPrefix, AuthToken token, HttpClientLifeCycle httpClientLifeCycle) {
 		this.hostPrefix = hostPrefix
 		this.httpClientLifeCycle = httpClientLifeCycle
+		setToken(token)
 	}
 
 	static Remote at(String hostPrefix, AuthToken token) {
 		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
-		Remote r = new Remote(hostPrefix, new SameInstanceHttpClientLifeCycle(client))
-		r.setUsername(token?.username)
-		r.setToken(token)
-		return r
+		return new Remote(hostPrefix, token, new SameInstanceHttpClientLifeCycle(client))
 	}
 
 	String currentUser() {
 		return token?.username
-	}
-
-	void setUsername(String name) {
-		this.username = name
 	}
 
 	void setToken(AuthToken t) {
@@ -95,7 +89,6 @@ class Remote {
 			@Override Map<String, Object> onSuccess(HttpEntity entity) {
 				Map<String, Object> data = LowLevelAPI.Responses.parseJson(entity) as Map<String, Object>
 				setToken(token)
-				setUsername(data.get('username') as String)
 				return data
 			}
 		}.execute(hostPrefix)
