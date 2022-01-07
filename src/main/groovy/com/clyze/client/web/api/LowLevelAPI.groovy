@@ -39,7 +39,7 @@ class LowLevelAPI {
         static final HttpPost login(AuthToken authToken, String hostPrefix) {
             HttpPost post = new Endpoints(hostPrefix, null).loginEndpoint()
             List<NameValuePair> params = new ArrayList<>(2)
-            params.add(new BasicNameValuePair("username", authToken.userName))
+            params.add(new BasicNameValuePair("username", authToken.username))
             params.add(new BasicNameValuePair("password", authToken.value))
             post.setEntity(new UrlEncodedFormEntity(params))
             return post
@@ -638,8 +638,8 @@ class LowLevelAPI {
 
         private <T extends HttpRequestBase> T withTokenHeader(T req) {
             if (userToken) {
-                if (userToken.userName && userToken.value) {
-                    req.setHeader('User', userToken.userName)
+                if (userToken.username && userToken.value) {
+                    req.setHeader('User', userToken.username)
                     req.addHeader(HEADER_TOKEN, userToken.value)
                     req.setHeader(HttpHeaders.AUTHORIZATION, 'APIKEY ' + userToken.value)
                 } else

@@ -6,24 +6,20 @@ import java.util.List;
  * The options that drive the interaction with the server.
  */
 public class PostOptions {
+    /** The server (such as www.service.com:8080/abc). */
     public String host;
-    public int port;
-    public String basePath;
-    public String username;
+    /** The authentication token. */
     public AuthToken authToken;
+    /** The user that owns the project. */
+    public String owner;
+    /** The project name to use. */
     public String project;
+    /** The technology stacks to use. */
     public List<String> stacks;
+    /** If true, skip last step (actual posting to the server). */
     public boolean dry;
-    /** true if Android should be supported by the server */
+    /** If true, Android should be supported by the server. */
     public boolean android;
-    /** true if automated repackaging should be supported by the server */
+    /** If true, automated repackaging should be supported by the server. */
     public boolean autoRepackaging;
-
-    /**
-     * Return the host prefix of the server.
-     * @return  the host prefix (e.g. www.service.com:8080/abc)
-     */
-    public String getHostPrefix() {
-        return host + ":" + port + basePath;
-    }
 }

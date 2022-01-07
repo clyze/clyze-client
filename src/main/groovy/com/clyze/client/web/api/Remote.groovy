@@ -20,23 +20,22 @@ class Remote {
 	private final String hostPrefix
 	private final HttpClientLifeCycle httpClientLifeCycle
 	private AuthToken token = null
-	private String username = null
 
 	private Remote(String hostPrefix, HttpClientLifeCycle httpClientLifeCycle) {
 		this.hostPrefix = hostPrefix
 		this.httpClientLifeCycle = httpClientLifeCycle
 	}
 
-	static Remote at(String hostPrefix, String user, AuthToken token) {
+	static Remote at(String hostPrefix, AuthToken token) {
 		CloseableHttpClient client = new DefaultHttpClientLifeCycle().createHttpClient()
 		Remote r = new Remote(hostPrefix, new SameInstanceHttpClientLifeCycle(client))
-		r.setUsername(user)
+		r.setUsername(token?.username)
 		r.setToken(token)
 		return r
 	}
 
 	String currentUser() {
-		return username
+		return token?.username
 	}
 
 	void setUsername(String name) {

@@ -754,8 +754,8 @@ abstract class CliRestCommand extends HttpStringClientCommand {
         return postState
     }
 
-    protected static final void printProjectOptions(String hostPrefix, String user, AuthToken token, String project) {
-        Map<String, Object> options = Remote.at(hostPrefix, user, token).getProjectInputs(user, project)
+    protected static final void printProjectOptions(String hostPrefix, String owner, AuthToken token, String project) {
+        Map<String, Object> options = Remote.at(hostPrefix, token).getProjectInputs(owner, project)
         println()
         options.forEach{k, v ->
             println ("* Available options (${k}): " + v.collect {
