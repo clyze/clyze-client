@@ -16,31 +16,36 @@ applicationName = project.name
 mainClassName = 'com.clyze.client.cli.Main'
 
 wrapper {
-    gradleVersion = '6.7'
+    gradleVersion = '7.3.3'
 }
 
 repositories {
     mavenLocal()
     mavenCentral()
-    maven { url "http://centauri.di.uoa.gr:8081/artifactory/plast-public" }
-    // Experimental repositories for custom dependencies.
-    if (project.hasProperty('artifactory_contextUrl')) {
-        maven {
-            credentials {
-                username artifactory_user
-                password artifactory_password
-            }
-
-            url "${artifactory_contextUrl}/plast-private"
-        }
-    }
+    maven { url 'https://clyze.jfrog.io/artifactory/default-maven-local' }
+//    maven {
+//        url "http://centauri.di.uoa.gr:8081/artifactory/plast-public"
+//        allowInsecureProtocol true
+//    }
+//    // Experimental repositories for custom dependencies.
+//    if (project.hasProperty('artifactory_contextUrl')) {
+//        maven {
+//            credentials {
+//                username artifactory_user
+//                password artifactory_password
+//            }
+//
+//            url "${artifactory_contextUrl}/plast-private"
+//            allowInsecureProtocol true
+//        }
+//    }
 }
 
 configurations.all {
     resolutionStrategy.cacheDynamicVersionsFor 0, 'seconds'
 }
 
-def groovyVersion='3.0.8'
+def groovyVersion='3.0.9'
 dependencies {
     api('org.clyze:clue-common:3.25.2') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-xml'
