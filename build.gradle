@@ -51,7 +51,7 @@ dependencies {
         exclude group: 'org.codehaus.groovy', module: 'groovy-xml'
     }
     api 'org.clyze:metadata-model:2.4.1'
-    api 'commons-cli:commons-cli:1.4'
+    api 'commons-cli:commons-cli:1.5.0'
     api "org.codehaus.groovy:groovy:${groovyVersion}"
     api "org.codehaus.groovy:groovy-cli-commons:${groovyVersion}"
     api 'org.apache.httpcomponents:httpclient:4.5.13'   // Used by the Rest client, Apache 2.0
